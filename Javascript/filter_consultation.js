@@ -268,17 +268,12 @@ async function displayCaissesView() {
       caisseDiv.style.marginBottom = "30px";
 
       const header = document.createElement("div");
-      header.style.display = "flex";
-      header.style.justifyContent = "space-between";
-      header.style.alignItems = "center";
-      header.style.padding = "10px 15px";
-      header.style.backgroundColor = "#f0f0f0";
-      header.style.borderRadius = "5px 5px 0 0";
-      header.style.border = "1px solid #ddd";
+      header.className =
+        "flex justify-between items-center p-4 bg-gray-50 rounded-t-lg border border-gray-200 border-b-0";
 
       const nomSpan = document.createElement("strong");
       nomSpan.textContent = caisse.Nom;
-      nomSpan.style.fontSize = "18px";
+      nomSpan.className = "text-lg text-gray-800";
 
       const userSpan = document.createElement("span");
       if (caisse.Prénom && caisse.Nom_utilisateur) {
@@ -286,58 +281,48 @@ async function displayCaissesView() {
       } else {
         userSpan.textContent = "Disponible";
       }
-      userSpan.style.fontStyle = "italic";
-      userSpan.style.color = "#666";
+      userSpan.className = "italic text-gray-500 text-sm";
 
       header.appendChild(nomSpan);
       header.appendChild(userSpan);
 
       const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.borderCollapse = "collapse";
-      table.style.border = "1px solid #ccc";
-      table.style.backgroundColor = "#fff";
-      table.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+      table.className =
+        "w-full border-collapse border border-gray-200 bg-white shadow-sm rounded-b-lg overflow-hidden";
 
       const thead = document.createElement("thead");
       thead.innerHTML = `
-        <tr style="background: linear-gradient(to bottom, #e3f2fd, #bbdefb);">
-          <th style="border: 1px solid #90caf9; padding: 12px 8px; text-align: center; font-weight: 600; color: #1565c0;">Code-barre</th>
-          <th style="border: 1px solid #90caf9; padding: 12px 8px; text-align: center; font-weight: 600; color: #1565c0;">Type</th>
-          <th style="border: 1px solid #90caf9; padding: 12px 8px; text-align: center; font-weight: 600; color: #1565c0;">Nom</th>
-          <th style="border: 1px solid #90caf9; padding: 12px 8px; text-align: center; font-weight: 600; color: #1565c0;">État</th>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="p-3 text-center font-semibold text-gray-700 text-sm">Code-barre</th>
+          <th class="p-3 text-center font-semibold text-gray-700 text-sm">Type</th>
+          <th class="p-3 text-center font-semibold text-gray-700 text-sm">Nom</th>
+          <th class="p-3 text-center font-semibold text-gray-700 text-sm">État</th>
         </tr>
       `;
       table.appendChild(thead);
 
       const tbody = document.createElement("tbody");
       if (objets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999; font-style: italic;">Aucun objet dans cette caisse</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-5 text-gray-400 italic text-sm border-t border-gray-100">Aucun objet dans cette caisse</td></tr>`;
       } else {
         objets.forEach((objet, index) => {
           const tr = document.createElement("tr");
 
-          // Alternance de couleurs
-          const bgColor = index % 2 === 0 ? "#fafafa" : "#ffffff";
-
           // Couleurs pour états
-          let etatStyle = "color: #4caf50; font-weight: 500;";
+          let etatStyle = "text-green-600 font-medium";
           if (objet.Etat && objet.Etat.toLowerCase() === "réservé") {
-            etatStyle = "color: #ff9800; font-weight: 600;";
+            etatStyle = "text-orange-500 font-semibold";
           } else if (objet.Etat && objet.Etat.toLowerCase() === "emprunté") {
-            etatStyle = "color: #f44336; font-weight: 600;";
+            etatStyle = "text-red-500 font-semibold";
           }
 
-          tr.style.backgroundColor = bgColor;
-          tr.style.transition = "background-color 0.2s";
-          tr.onmouseenter = () => (tr.style.backgroundColor = "#e3f2fd");
-          tr.onmouseleave = () => (tr.style.backgroundColor = bgColor);
-
+          tr.className =
+            "hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0";
           tr.innerHTML = `
-            <td style="border: 1px solid #e0e0e0; padding: 10px 8px; text-align: center;">${objet.Code_bar || "-"}</td>
-            <td style="border: 1px solid #e0e0e0; padding: 10px 8px; text-align: center;">${objet.Type || "-"}</td>
-            <td style="border: 1px solid #e0e0e0; padding: 10px 8px; text-align: center;">${objet.Nom || "-"}</td>
-            <td style="border: 1px solid #e0e0e0; padding: 10px 8px; text-align: center; ${etatStyle}">${objet.Etat || "disponible"}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Code_bar || "-"}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Type || "-"}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100 text-gray-600">${objet.Nom || "-"}</td>
+            <td class="p-3 text-center text-sm ${etatStyle}">${objet.Etat || "disponible"}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -441,22 +426,23 @@ function updateInventoryTable(data) {
     }
 
     // Déterminer la couleur selon l'état
-    let etatColor = "";
-    let etatText = item.Etat;
+    let etatColor = "text-green-600 font-medium";
 
     if (item.Etat.toLowerCase() === "réservé") {
-      etatColor = "color: orange; font-weight: bold;";
+      etatColor = "text-orange-500 font-bold";
     } else if (item.Etat.toLowerCase() === "emprunté") {
-      etatColor = "color: red; font-weight: bold;";
+      etatColor = "text-red-500 font-bold";
     }
 
+    tr.className =
+      "hover:bg-linear-to-r hover:from-custom-brandLight/5 hover:to-custom-brandLight/5 transition-all duration-300 border-l-4 border-transparent hover:border-custom-brandLight hover:translate-x-2 border-b border-custom-border last:border-0 hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)] bg-white";
     tr.innerHTML = `
-      <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.Code_bar}</td>
-      <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.Type}</td>
-      <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.Nom}</td>
-      <td style="border: 1px solid #000; padding: 8px; text-align: center; ${etatColor}">${etatText}</td>
-      <td style="border: 1px solid #000; padding: 8px; text-align: center;">${utilisateur}</td>
-      <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.Nom_caisse || "-"}</td>
+      <td class="p-4.5 text-center text-sm align-middle">${item.Code_bar}</td>
+      <td class="p-4.5 text-center text-sm align-middle">${item.Type}</td>
+      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom}</td>
+      <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${item.Etat}</td>
+      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
+      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom_caisse || "-"}</td>
     `;
     tbody.appendChild(tr);
   });

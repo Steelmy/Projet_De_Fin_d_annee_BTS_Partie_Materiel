@@ -6,351 +6,80 @@
     <title>Gestion du matériel</title>
     <!-- We inline the specific styles from historique_inventaire.php to ensure exact match -->
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      :root {
-        --primary: #6366f1;
-        --primary-dark: #4f46e5;
-        --secondary: #8b5cf6;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --dark: #1f2937;
-        --light: #f9fafb;
-        --border: #e5e7eb;
-        --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
-      }
-
-      body {
-        font-family:
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
-        background: white;
-        min-height: 100vh;
-        padding: 20px;
-        line-height: 1.6;
-      }
-
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 20px;
-        box-shadow: var(--shadow-lg);
-        /* overflow: hidden; Removed to allow autocomplete to show */
-        border: 1px solid var(--border);
-      }
-
-      header {
-        background: linear-gradient(135deg, #b6a071 0%, #9d8a5f 100%);
-        color: white;
-        padding: 40px 30px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-
-      header::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(
-          circle,
-          rgba(255, 255, 255, 0.1) 0%,
-          transparent 70%
-        );
-        animation: pulse 4s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 0.5;
-        }
-        50% {
-          transform: scale(1.1);
-          opacity: 0.8;
-        }
-      }
-
-      header h1 {
-        font-size: 2.8em;
-        margin-bottom: 15px;
-        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-        font-weight: 700;
-        position: relative;
-        z-index: 1;
-        display: inline-block; /* Shrink hitbox */
-      }
-
-      header p {
-        font-size: 1.2em;
-        opacity: 0.9;
-        position: relative;
-        z-index: 1;
-        font-weight: 300;
-      }
-
-      .controls {
-        padding: 30px;
-        background: white;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .search-box {
-        flex: 1;
-        min-width: 250px;
-        position: relative;
-      }
-
-      /* Adapted inputs to match reference */
-      input[type="text"],
-      input[type="number"],
-      input[type="date"],
-      select {
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid var(--border);
-        border-radius: 25px;
-        font-size: 14px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background: white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        font-family:
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
-        color: #333;
-      }
-
-      input:focus,
-      select:focus {
-        outline: none;
-        border-color: #b6a071;
-        box-shadow:
-          0 0 0 4px rgba(182, 160, 113, 0.15),
-          0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-
-      .advanced-filter {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .btn-action,
-      .filter-btn,
-      .btn-secondary,
-      button {
-        padding: 12px 24px;
-        border: 2px solid var(--border);
-        background: white;
-        color: #333;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        font-size: 14px;
-        font-weight: 600;
-        font-family:
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      }
-
-      .btn-action {
-        background: #b6a071 !important;
-        color: white !important;
-        border-color: #b6a071 !important;
-      }
-
-      .btn-action:hover {
-        box-shadow: 0 4px 15px rgba(182, 160, 113, 0.4);
-        transform: translateY(-2px);
-      }
-
-      /* Specific override for the red delete button to match style */
-      .btn-danger {
-        background: linear-gradient(
-          135deg,
-          #ef4444 0%,
-          #dc2626 100%
-        ) !important;
-        border-color: #ef4444 !important;
-        color: white !important;
-      }
-
-      .table-container {
-        padding: 30px;
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-      }
-
-      thead {
-        background: linear-gradient(135deg, #b6a071 0%, #9d8a5f 100%);
-        color: white;
-      }
-
-      th {
-        padding: 18px;
-        font-weight: 600;
-        letter-spacing: 0.8px;
-        text-transform: uppercase;
-        font-size: 13px;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        border-bottom: 2px solid #b6a071;
-        text-align: center;
-      }
-
-      td {
-        padding: 18px;
-        border-bottom: 1px solid var(--border);
-        vertical-align: middle;
-      }
-
-      tbody tr {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-left: 3px solid transparent;
-      }
-
-      tbody tr:hover {
-        background: linear-gradient(
-          90deg,
-          rgba(182, 160, 113, 0.05) 0%,
-          rgba(182, 160, 113, 0.05) 100%
-        );
-        transform: translateX(8px);
-        border-left-color: #b6a071;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-      }
-
-      /* Caisse Grid */
-      .caisse-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-        padding: 20px 30px;
-      }
-
-      .caisse-card {
-        background: white;
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: var(--shadow);
-        transition: all 0.3s;
-      }
-      .caisse-card:hover {
-        transform: translateY(-5px);
-      }
-
-      /* Autocomplete Styles (Essential for functionality) */
+      /* Keep minimal custom styles for complex elements difficult to do purely in inline Tailwind */
+      /* Autocomplete positioning */
       .autocomplete-suggestions {
-        border: 1px solid #e5e7eb;
-        background: white;
         position: absolute;
         max-height: 200px;
         overflow-y: auto;
-        z-index: 9999; /* Increased z-index */
+        z-index: 9999;
         width: 100%;
         border-radius: 0 0 10px 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background: white;
+        border: 1px solid #e5e7eb;
+        margin-top: 5px;
       }
       .autocomplete-suggestion {
-        padding: 10px;
+        padding: 10px 15px;
         cursor: pointer;
+        transition: background 0.2s;
       }
       .autocomplete-suggestion:hover {
         background: #f3f4f6;
-      }
-
-      /* Utilities */
-      .hidden {
-        display: none !important;
-      }
-
-      .btn-top-right {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        padding: 8px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        z-index: 10; /* Ensure on top */
-      }
-
-      .inline-form {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        width: 100%;
-        flex-wrap: wrap;
       }
       .box-input-wrapper {
         position: relative;
         min-width: 150px;
         flex: 1;
-        overflow: visible; /* Ensure content isn't clipped */
+        overflow: visible;
       }
     </style>
-    <link rel="stylesheet" href="CSS/barcode.css" />
+    <link rel="stylesheet" href="CSS/output.css" />
   </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>Gestion du matériel</h1>
-        <p>Administration et inventaire global</p>
-        <button id="btn-open-barcode" class="btn-top-right">
+  <body
+    class="font-sans bg-white min-h-screen p-5 leading-relaxed text-gray-800"
+  >
+    <div
+      class="max-w-[1400px] mx-auto bg-white rounded-2xl shadow-custom-lg border border-custom-border relative"
+    >
+      <header
+        class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white py-10 px-8 text-center relative overflow-hidden"
+      >
+        <!-- Pseudo element simulation for pulse effect using absolute div behind content -->
+        <div
+          class="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.1)_0%,transparent_70%)] animate-pulseSlow pointer-events-none"
+        ></div>
+        <h1
+          class="text-4xl lg:text-5xl font-bold mb-4 drop-shadow-md relative z-10 inline-block"
+        >
+          Gestion du matériel
+        </h1>
+        <p class="text-lg opacity-90 font-light relative z-10">
+          Administration et inventaire global
+        </p>
+        <button
+          id="btn-open-barcode"
+          class="absolute top-5 right-5 bg-white/20 hover:bg-white/30 text-white border border-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm transition-all duration-300 transform hover:-translate-y-0.5 z-20"
+        >
           Générateur Code-barres
         </button>
       </header>
 
       <!-- No stats container here as it's not relevant, but structure mimics reference -->
 
-      <div class="controls">
+      <div
+        class="p-8 bg-white border-b border-custom-border flex flex-wrap gap-5 items-center"
+      >
         <!-- Mode Selector styled like the Filter Select -->
         <div
           id="main_horizontal_wrapper"
-          style="display: flex; align-items: center; width: 100%; gap: 15px"
+          class="flex items-center w-full gap-4"
         >
-          <div style="min-width: 200px">
+          <div class="min-w-[200px]">
             <select
               id="modeSelector"
-              style="font-weight: bold; border-color: #b6a071"
+              class="w-full px-4 py-3 border-2 border-custom-brandLight rounded-full text-sm font-bold text-custom-brandLight transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
             >
               <option value="ajout">➕ Ajouter</option>
               <option value="suppression">🗑️ Supprimer</option>
@@ -360,15 +89,17 @@
           </div>
 
           <!-- Action Forms Container -->
-          <div id="actionForms" style="flex: 1; padding-left: 10px">
+          <div id="actionForms" class="flex-1 pl-3">
             <!-- AJOUT -->
-            <form id="form_ajout" class="inline-form hidden">
-              <div style="display: flex; align-items: center; gap: 5px">
+            <form
+              id="form_ajout"
+              class="flex flex-wrap items-center gap-2.5 w-full hidden"
+            >
+              <div class="flex items-center gap-1.5">
                 <button
                   type="button"
                   id="btn_caisse_ajout"
-                  class="btn-secondary"
-                  style="padding: 10px 15px; border-radius: 8px"
+                  class="px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 >
                   Caisse
                 </button>
@@ -379,6 +110,7 @@
                   id="type_materiel_ajout"
                   placeholder="Type..."
                   autocomplete="off"
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                 />
                 <div
                   id="type_suggestions_ajout"
@@ -391,6 +123,7 @@
                   id="nom_materiel_ajout"
                   placeholder="Nom..."
                   autocomplete="off"
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                 />
                 <div
                   id="nom_suggestions_ajout"
@@ -402,13 +135,18 @@
                 id="nombre_materiel"
                 value="1"
                 min="1"
-                style="width: 80px"
+                class="w-20 px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                 placeholder="Qté"
               />
-              <button type="submit" class="btn-action">Ajouter</button>
+              <button
+                type="submit"
+                class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+              >
+                Ajouter
+              </button>
               <button
                 type="button"
-                class="btn-secondary btn-reset"
+                class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 data-form="form_ajout"
               >
                 Réinitialiser
@@ -416,13 +154,15 @@
             </form>
 
             <!-- SUPPRESSION -->
-            <form id="form_suppression" class="inline-form hidden">
-              <div style="display: flex; align-items: center; gap: 5px">
+            <form
+              id="form_suppression"
+              class="flex flex-wrap items-center gap-2.5 w-full hidden"
+            >
+              <div class="flex items-center gap-1.5">
                 <button
                   type="button"
                   id="btn_caisse_suppression"
-                  class="btn-secondary"
-                  style="padding: 10px 15px; border-radius: 8px"
+                  class="px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 >
                   Caisse
                 </button>
@@ -432,6 +172,7 @@
                   type="text"
                   id="id_materiel_suppr"
                   placeholder="Scan Code-barre..."
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                 />
               </div>
               <div class="box-input-wrapper">
@@ -440,7 +181,7 @@
                   id="type_materiel_suppr"
                   placeholder="Type..."
                   readonly
-                  style="background: #f9fafb"
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-gray-50 shadow-input focus:outline-none"
                 />
               </div>
               <div class="box-input-wrapper">
@@ -449,17 +190,19 @@
                   id="nom_materiel_suppr"
                   placeholder="Nom..."
                   readonly
-                  style="background: #f9fafb"
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-gray-50 shadow-input focus:outline-none"
                 />
               </div>
               <!-- Caisse Suppr Input moved to panel_suppression_caisse -->
-              <button type="submit" class="btn-action btn-danger">
+              <button
+                type="submit"
+                class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-full font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(239,68,68,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+              >
                 Supprimer
               </button>
               <button
                 type="button"
-                class="btn-secondary btn-reset"
-                style="margin-left: 10px"
+                class="btn-reset ml-2.5 px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 data-form="form_suppression"
               >
                 Réinitialiser
@@ -467,13 +210,15 @@
             </form>
 
             <!-- MODIFICATION -->
-            <form id="form_modification" class="inline-form hidden">
-              <div style="display: flex; align-items: center; gap: 5px">
+            <form
+              id="form_modification"
+              class="flex flex-wrap items-center gap-2.5 w-full hidden"
+            >
+              <div class="flex items-center gap-1.5">
                 <button
                   type="button"
                   id="btn_caisse_modification"
-                  class="btn-secondary"
-                  style="padding: 10px 15px; border-radius: 8px"
+                  class="px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 >
                   Caisse
                 </button>
@@ -484,9 +229,14 @@
                   id="id_materiel"
                   placeholder="Scan ID..."
                   required
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                 />
               </div>
-              <select id="etat" style="width: 140px">
+              <select
+                id="etat"
+                class="px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                style="width: 140px"
+              >
                 <option value="disponible">Disponible</option>
                 <option value="réservé">Réservé</option>
                 <option value="emprunté">Emprunté</option>
@@ -497,6 +247,7 @@
                   id="reserveur_emprunteur"
                   placeholder="Utilisateur..."
                   autocomplete="off"
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                 />
                 <div
                   id="autocomplete_suggestions"
@@ -507,10 +258,15 @@
 
               <!-- Hidden fields removed: nom_materiel_modif, type_materiel_modif -->
 
-              <button type="submit" class="btn-action">Enregistrer</button>
+              <button
+                type="submit"
+                class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+              >
+                Enregistrer
+              </button>
               <button
                 type="button"
-                class="btn-secondary btn-reset"
+                class="btn-reset ml-2.5 px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 data-form="form_modification"
               >
                 Réinitialiser
@@ -518,23 +274,20 @@
             </form>
 
             <!-- CONSULTATION -->
-            <div id="filters_consultation" class="inline-form hidden">
+            <div
+              id="filters_consultation"
+              class="flex flex-wrap items-center gap-2.5 w-full hidden"
+            >
               <div
                 id="filter_section"
-                class="inline-form"
-                style="
-                  padding: 0;
-                  box-shadow: none;
-                  border: none;
-                  margin: 0;
-                  width: 100%;
-                "
+                class="flex flex-wrap items-center gap-2.5 w-full"
               >
                 <div class="box-input-wrapper">
                   <input
                     type="text"
                     id="code_barre_consultation"
                     placeholder="Filtre Code-barre..."
+                    class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                   />
                   <div
                     id="barcode_suggestions_consultation"
@@ -546,6 +299,7 @@
                     type="text"
                     id="type_materiel_consultation"
                     placeholder="Filtre Type..."
+                    class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                   />
                   <div
                     id="type_suggestions_consultation"
@@ -557,6 +311,7 @@
                     type="text"
                     id="nom_materiel_consultation"
                     placeholder="Filtre Nom..."
+                    class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                   />
                   <div
                     id="nom_suggestions_consultation"
@@ -566,7 +321,7 @@
                 <button
                   type="button"
                   onclick="resetFiltersConsultation()"
-                  style="background: white; border: 1px solid #ccc"
+                  class="px-6 py-3 border-2 border-[#ccc] bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
                 >
                   Effacer
                 </button>
@@ -583,46 +338,50 @@
         </div>
 
         <!-- Panels for Caisse Details (Moved to Modal) -->
-        <div id="modal_caisse" class="modal">
+        <div
+          id="modal_caisse"
+          class="fixed inset-0 z-1000 hidden items-center justify-center p-4"
+        >
+          <!-- Backdrop -->
           <div
-            class="modal-content"
-            style="
-              max-width: 700px;
-              padding: 30px;
-              border-radius: 12px;
-              position: relative;
-            "
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"
+          ></div>
+
+          <div
+            class="bg-white m-auto p-8 border border-[#888] w-[80%] max-w-[700px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl"
           >
             <span
-              class="close-modal"
+              class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black absolute top-[15px] right-[20px] z-10001"
               id="close_modal_caisse"
-              style="position: absolute; top: 15px; right: 20px; z-index: 10001"
               >&times;</span
             >
-            <div id="modal_caisse_body" style="margin-top: 20px">
-              <div
-                id="panel_ajout_caisse"
-                class="hidden"
-                style="width: 100%; padding-top: 10px"
-              >
-                <form id="form_ajout_caisse" style="width: 100%">
-                  <h4 style="margin-bottom: 10px">Nouvelle Caisse</h4>
-                  <div style="display: flex; gap: 10px; margin-bottom: 10px">
+            <div id="modal_caisse_body" class="mt-5">
+              <div id="panel_ajout_caisse" class="hidden w-full pt-2.5">
+                <form id="form_ajout_caisse" class="w-full">
+                  <h4 class="mb-2.5 text-lg font-semibold">Nouvelle Caisse</h4>
+                  <div class="flex gap-2.5 mb-2.5">
                     <input
                       type="text"
                       id="nom_caisse_ajout"
                       placeholder="Nom de la caisse"
                       required
-                      style="flex: 1"
+                      class="flex-1 px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                     />
-                    <button type="submit" class="btn-action">Créer</button>
+                    <button
+                      type="submit"
+                      class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      Créer
+                    </button>
                   </div>
-                  <div class="box-input-wrapper" style="width: 100%">
+                  <div
+                    class="box-input-wrapper w-full relative min-w-[150px] flex-1 overflow-visible"
+                  >
                     <input
                       type="text"
                       id="search_objets_ajout"
                       placeholder="Scanner objets pour la caisse..."
-                      style="width: 100%"
+                      class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                     />
                     <div
                       id="objets_suggestions_ajout"
@@ -631,103 +390,101 @@
                   </div>
                   <div
                     id="objets_list_ajout"
-                    style="
-                      margin-top: 10px;
-                      padding: 10px;
-                      border: 1px dashed #ccc;
-                      min-height: 40px;
-                    "
+                    class="mt-2.5 p-2.5 border border-dashed border-[#ccc] min-h-[40px] rounded-lg bg-gray-50"
                   ></div>
                 </form>
               </div>
 
-              <div
-                id="panel_suppression_caisse"
-                class="hidden"
-                style="width: 100%; padding-top: 10px"
-              >
-                <form id="form_suppression_caisse" style="width: 100%">
+              <div id="panel_suppression_caisse" class="hidden w-full pt-2.5">
+                <form id="form_suppression_caisse" class="w-full">
                   <!-- Input Caisse moved here -->
                   <div
                     id="caisse_input_group_suppr"
-                    class="box-input-wrapper"
-                    style="margin-bottom: 15px"
+                    class="box-input-wrapper mb-4 relative min-w-[150px] flex-1 overflow-visible"
                   >
                     <input
                       type="text"
                       id="nom_caisse_suppr"
                       placeholder="Nom caisse..."
-                      style="width: 100%"
+                      class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                     />
                     <div class="autocomplete-suggestions"></div>
                   </div>
-                  <p>Sélectionnez la caisse à supprimer ci-dessus.</p>
-                  <div id="caisse_details_suppr"></div>
+                  <p class="text-gray-600 mb-4">
+                    Sélectionnez la caisse à supprimer ci-dessus.
+                  </p>
+                  <div id="caisse_details_suppr" class="mb-4"></div>
                   <button
                     type="submit"
-                    class="btn-action btn-danger"
-                    style="margin-top: 10px"
+                    class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(239,68,68,0.4)] hover:-translate-y-0.5 transition-all duration-300 mt-2.5"
                   >
                     Confirmer Suppression
                   </button>
                 </form>
               </div>
 
-              <div
-                id="panel_modification_caisse"
-                class="hidden"
-                style="width: 100%; padding-top: 10px"
-              >
-                <form id="form_modification_caisse" style="width: 100%">
+              <div id="panel_modification_caisse" class="hidden w-full pt-2.5">
+                <form id="form_modification_caisse" class="w-full">
                   <!-- JS fills this -->
-                  <div class="box-input-wrapper" style="margin-bottom: 10px">
+                  <div
+                    class="box-input-wrapper mb-2.5 relative min-w-[150px] flex-1 overflow-visible"
+                  >
                     <input
                       type="text"
                       id="nom_caisse_modif"
                       placeholder="Rechercher caisse..."
-                      style="width: 100%"
+                      class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                     />
                     <div class="autocomplete-suggestions"></div>
                   </div>
-                  <div id="caisse_details_modif" style="display: none">
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px">
+                  <div id="caisse_details_modif" class="hidden">
+                    <div class="flex gap-2.5 mb-2.5">
                       <input
                         type="text"
                         id="nouveau_nom_caisse"
                         placeholder="Nouveau nom"
+                        class="flex-1 px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                       />
-                      <select id="etat_caisse_modif">
+                      <select
+                        id="etat_caisse_modif"
+                        class="px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                      >
                         <option value="disponible">Disponible</option>
                       </select>
                     </div>
                     <!-- User selection for caisse -->
-                    <div class="box-input-wrapper" style="margin-bottom: 10px">
+                    <div
+                      class="box-input-wrapper mb-2.5 relative min-w-[150px] flex-1 overflow-visible"
+                    >
                       <input
                         type="text"
                         id="utilisateur_caisse_modif"
                         placeholder="Utilisateur..."
+                        class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                       />
                       <input type="hidden" id="utilisateur_caisse_modif_id" />
                     </div>
 
-                    <div class="box-input-wrapper">
+                    <div
+                      class="box-input-wrapper relative min-w-[150px] flex-1 overflow-visible"
+                    >
                       <input
                         type="text"
                         id="search_objets_modif"
                         placeholder="Scanner objets..."
+                        class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                       />
                       <div
                         id="objets_suggestions_modif"
                         class="autocomplete-suggestions"
                       ></div>
                     </div>
-                    <div id="caisse_contenu_modif" style="margin: 10px 0"></div>
+                    <div id="caisse_contenu_modif" class="my-2.5"></div>
                     <div id="objets_table_container_modif"></div>
 
                     <button
                       type="submit"
-                      class="btn-action"
-                      style="margin-top: 10px"
+                      class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300 mt-2.5"
                     >
                       Sauvegarder Caisse
                     </button>
@@ -741,78 +498,83 @@
         </div>
         <!-- End modal_caisse -->
 
-        <div class="table-container" style="width: 100%; margin-top: 20px">
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 5px;
-              margin-bottom: 15px;
-            "
-          >
+        <div class="p-8 overflow-x-auto w-full mt-5">
+          <div class="flex items-center gap-1.5 mb-4">
             <input
               type="checkbox"
               id="toggle_caisse_view"
-              style="width: auto"
+              class="w-auto border-custom-border rounded accent-custom-brandLight"
             />
             <label
               for="toggle_caisse_view"
-              style="cursor: pointer; font-weight: 500"
+              class="cursor-pointer font-medium select-none"
               >Vue Caisses</label
             >
           </div>
           <div id="full_inventory">
-            <table id="inventory_table">
-              <thead>
+            <table id="inventory_table" class="w-full border-collapse bg-white">
+              <thead
+                class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white"
+              >
                 <tr>
-                  <th>Code-barre</th>
-                  <th>Type</th>
-                  <th>Nom</th>
-                  <th>État</th>
-                  <th>Utilisateur</th>
-                  <th>Caisse</th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                  >
+                    Code-barre
+                  </th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                  >
+                    Type
+                  </th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                  >
+                    Nom
+                  </th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                  >
+                    État
+                  </th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                  >
+                    Utilisateur
+                  </th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                  >
+                    Caisse
+                  </th>
                 </tr>
               </thead>
-              <tbody id="inventory_tbody"></tbody>
+              <tbody
+                id="inventory_tbody"
+                class="[&>tr]:transition-all [&>tr]:duration-300 [&>tr]:border-l-4 [&>tr]:border-transparent [&>tr:hover]:bg-linear-to-r [&>tr:hover]:from-custom-brandLight/5 [&>tr:hover]:to-custom-brandLight/5 [&>tr:hover]:translate-x-2 [&>tr:hover]:border-custom-brandLight [&>tr:hover]:shadow-[0_4px_15px_rgba(0,0,0,0.08)] [&>tr>td]:p-4.5 [&>tr>td]:border-b [&>tr>td]:border-custom-border [&>tr>td]:align-middle [&>tr>td]:text-center"
+              ></tbody>
             </table>
-            <div
-              style="
-                padding: 20px;
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                gap: 15px;
-                color: #64748b;
-              "
-            >
+            <div class="p-5 flex justify-end items-center gap-4 text-slate-500">
               <button
                 id="btn_download_pdf"
-                style="
-                  padding: 8px 16px;
-                  background: white;
-                  border: 1px solid #ccc;
-                  border-radius: 8px;
-                  cursor: pointer;
-                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                  font-family: inherit;
-                  font-size: 14px;
-                  color: #333;
-                "
+                class="px-4 py-2 bg-white border border-[#ccc] rounded-lg cursor-pointer shadow-input font-inherit text-sm text-gray-800 hover:bg-gray-50 transition-colors"
               >
                 📄 Télécharger PDF
               </button>
-              <span style="font-size: 1.1em; font-weight: 500">
+              <span class="text-[1.1em] font-medium">
                 Total:
-                <span
-                  id="inventory_total"
-                  style="color: #333; font-weight: bold"
+                <span id="inventory_total" class="text-gray-800 font-bold"
                   >0</span
                 >
               </span>
             </div>
           </div>
 
-          <div id="caisses_view" class="caisse-grid hidden"></div>
+          <!-- Modals are moved by JS, styling placeholder for grid -->
+          <div
+            id="caisses_view"
+            class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 py-5 px-8 hidden"
+          ></div>
 
           <!-- PDF Button Below Table Left -->
         </div>
@@ -825,16 +587,27 @@
       <div id="section_consultation" class="hidden"></div>
 
       <!-- Modal -->
-      <div id="barcode-modal" class="modal">
-        <div class="modal-content">
-          <span class="close-modal" id="close-barcode-modal">&times;</span>
-          <h2>Générateur</h2>
-          <div style="margin: 15px 0">
-            <label for="barcode-qty" style="font-weight: 500"
+      <div
+        id="barcode-modal"
+        class="fixed inset-0 z-1000 hidden items-center justify-center p-4"
+      >
+        <!-- Backdrop -->
+        <div
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"
+        ></div>
+        <div
+          class="bg-white m-auto p-5 border border-[#888] w-[80%] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
+        >
+          <span
+            class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black"
+            id="close-barcode-modal"
+            >&times;</span
+          >
+          <h2 class="text-2xl font-bold mb-4">Générateur</h2>
+          <div class="my-4">
+            <label for="barcode-qty" class="font-medium"
               >Nombre de codes :
-              <span
-                id="qty-val"
-                style="font-weight: bold; color: var(--primary)"
+              <span id="qty-val" class="font-bold text-custom-primary"
                 >1</span
               ></label
             >
@@ -844,10 +617,15 @@
               min="1"
               max="50"
               value="1"
-              style="width: 100%; margin-top: 10px"
+              class="w-full mt-2.5 accent-custom-brandLight"
             />
           </div>
-          <button id="btn-print" class="btn-action">Imprimer</button>
+          <button
+            id="btn-print"
+            class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+          >
+            Imprimer
+          </button>
           <div id="print-zone"></div>
         </div>
       </div>

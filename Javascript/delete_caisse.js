@@ -47,20 +47,22 @@ function displayCaisseDetails(caisse) {
   let contenuHTML = "";
   if (caisse.contenu && caisse.contenu.length > 0) {
     caisse.contenu.forEach((objet) => {
-      contenuHTML += `<div>${objet.Code_bar} - ${objet.Type} (${objet.Nom})</div>`;
+      contenuHTML += `<div class="py-1.5 border-b border-gray-100 last:border-0"><span class="font-mono text-xs text-gray-500">${objet.Code_bar}</span> - <span class="font-medium text-gray-800">${objet.Type}</span> <span class="text-gray-500 text-xs">(${objet.Nom})</span></div>`;
     });
   } else {
-    contenuHTML = "<p>Caisse vide</p>";
+    contenuHTML =
+      "<p class='text-gray-400 italic text-center py-4'>Caisse vide</p>";
   }
 
   detailsDiv.innerHTML = `
-    <h4>Détails de la caisse</h4>
-    <p><strong>Nom:</strong> ${caisse.nom}</p>
-    <p><strong>État:</strong> ${caisse.etat}</p>
-    <p><strong>Nombre d'objets:</strong> ${caisse.nombre_objets}</p>
-    <div style="margin-top: 10px;">
-      <strong>Contenu:</strong>
-      ${contenuHTML}
+    <h4 class="text-lg font-bold text-gray-800 mb-3 border-b pb-2">Détails de la caisse</h4>
+    <div class="space-y-2 text-sm text-gray-700">
+      <p><strong class="font-semibold text-gray-900">Nom:</strong> ${caisse.nom}</p>
+      <p><strong class="font-semibold text-gray-900">État:</strong> <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 border border-gray-200">${caisse.etat}</span></p>
+      <p><strong class="font-semibold text-gray-900">Objets (${caisse.nombre_objets}):</strong></p>
+      <div class="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-[160px] overflow-y-auto shadow-inner">
+        ${contenuHTML}
+      </div>
     </div>
   `;
 

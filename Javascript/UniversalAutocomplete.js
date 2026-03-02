@@ -56,15 +56,6 @@ class UniversalAutocomplete {
     if (!container) {
       container = document.createElement("div");
       container.className = this.containerClass;
-      // Styles de base si CSS manquant
-      container.style.position = "absolute";
-      container.style.zIndex = "1000";
-      container.style.width = "100%";
-      container.style.maxHeight = "200px";
-      container.style.overflowY = "auto";
-      container.style.backgroundColor = "white";
-      container.style.border = "1px solid #ddd";
-      container.style.borderRadius = "4px";
       container.style.display = "none";
       parent.appendChild(container);
     }
@@ -132,18 +123,6 @@ class UniversalAutocomplete {
     items.forEach((item) => {
       const div = document.createElement("div");
       div.className = "autocomplete-suggestion";
-      div.style.padding = "8px";
-      div.style.cursor = "pointer";
-      div.style.borderBottom = "1px solid #eee";
-
-      // Hover effect via JS si CSS manquant pas parfait mais fonctionnel
-      div.onmouseover = () => {
-        div.style.backgroundColor = "#f0f0f0";
-      };
-      div.onmouseout = () => {
-        div.style.backgroundColor = "white";
-      };
-
       div.textContent = item.label;
 
       div.addEventListener("click", (e) => {

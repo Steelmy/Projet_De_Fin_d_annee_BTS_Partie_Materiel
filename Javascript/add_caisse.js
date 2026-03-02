@@ -27,9 +27,8 @@ function initializeObjectSelection() {
   tableContainer.style.marginTop = "15px";
   tableContainer.style.maxHeight = "400px";
   tableContainer.style.overflowY = "auto";
-  tableContainer.style.border = "1px solid #ced4da";
-  tableContainer.style.borderRadius = "4px";
-  tableContainer.style.padding = "10px";
+  tableContainer.className =
+    "rounded-lg border border-custom-border p-2.5 bg-gray-50";
 
   container.appendChild(tableContainer);
 
@@ -134,33 +133,33 @@ async function loadObjectsTable() {
 
     if (data.success && data.objets.length > 0) {
       let html = `
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
+        <table class="w-full border-collapse mt-2.5 bg-white shadow-input rounded-lg overflow-hidden text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">
-                <input type="checkbox" id="select_all_objets" /> Tout sélectionner
+              <th class="p-3 text-left font-semibold text-gray-700">
+                <input type="checkbox" id="select_all_objets" class="mr-2 rounded border-gray-300 text-custom-primary focus:ring-custom-primary" /> Tout sélectionner
               </th>
-              <th style="padding: 8px; border: 1px solid #dee2e6;">Code-barre</th>
-              <th style="padding: 8px; border: 1px solid #dee2e6;">Type</th>
-              <th style="padding: 8px; border: 1px solid #dee2e6;">Nom</th>
+              <th class="p-3 font-semibold text-gray-700 text-center">Code-barre</th>
+              <th class="p-3 font-semibold text-gray-700 text-center">Type</th>
+              <th class="p-3 font-semibold text-gray-700 text-center">Nom</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-gray-100">
       `;
 
       data.objets.forEach((objet) => {
         const isSelected = selectedObjects.some((o) => o.id === objet.id);
         html += `
-          <tr>
-            <td style="padding: 8px; border: 1px solid #dee2e6; text-align: center;">
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="p-3 text-center">
               <input type="checkbox" 
-                     class="objet-checkbox" 
+                     class="objet-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
                      data-objet='${JSON.stringify(objet)}'
                      ${isSelected ? "checked" : ""} />
             </td>
-            <td style="padding: 8px; border: 1px solid #dee2e6;">${objet.Code_bar}</td>
-            <td style="padding: 8px; border: 1px solid #dee2e6;">${objet.Type}</td>
-            <td style="padding: 8px; border: 1px solid #dee2e6;">${objet.Nom}</td>
+            <td class="p-3 text-center">${objet.Code_bar}</td>
+            <td class="p-3 text-center">${objet.Type}</td>
+            <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
           </tr>
         `;
       });
@@ -263,9 +262,9 @@ function updateSelectedObjectsDisplay() {
   let html = "";
   selectedObjects.forEach((objet) => {
     html += `
-      <div class="objet-tag">
-        ${objet.Code_bar} - ${objet.Type} (${objet.Nom})
-        <span class="remove-objet" onclick="removeObject(${objet.id})">×</span>
+      <div class="inline-flex items-center gap-2 bg-custom-brandLight/10 text-custom-brandDark px-3 py-1.5 rounded-full text-sm font-medium mr-2 mb-2 border border-custom-brandLight/20">
+        ${objet.Code_bar} - ${objet.Type} <span class="opacity-70 text-xs">(${objet.Nom})</span>
+        <span class="remove-objet cursor-pointer hover:text-custom-danger transition-colors ml-1 text-lg leading-none" onclick="removeObject(${objet.id})">&times;</span>
       </div>
     `;
   });

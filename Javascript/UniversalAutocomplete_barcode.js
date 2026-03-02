@@ -48,19 +48,7 @@ class UniversalAutocompleteBarcode {
     }
 
     // Force styles & position in BODY (même si existant)
-    container.style.position = "absolute";
-    container.style.zIndex = "10000"; // Très haut
-    container.style.width = "auto";
-    container.style.minWidth = "200px";
-    container.style.maxHeight = "200px";
-    container.style.overflowY = "auto";
-    container.style.backgroundColor = "white";
-    container.style.border = "1px solid #ddd";
-    // Ne pas reset display si on est en train de l'utiliser, mais initContainer est appelé au constructeur
-    // Donc on peut le cacher par précaution
-    if (!container.style.display) container.style.display = "none";
-
-    container.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+    container.style.display = "none";
 
     // S'assurer qu'il est dans le body
     if (container.parentNode !== document.body) {
@@ -150,19 +138,7 @@ class UniversalAutocompleteBarcode {
     items.forEach((item) => {
       const div = document.createElement("div");
       div.className = "autocomplete-suggestion";
-      div.style.padding = "8px";
-      div.style.cursor = "pointer";
-      div.style.borderBottom = "1px solid #eee";
-      div.style.backgroundColor = "white";
-
-      div.onmouseover = () => {
-        div.style.backgroundColor = "#f0f0f0";
-      };
-      div.onmouseout = () => {
-        div.style.backgroundColor = "white";
-      };
-
-      div.innerHTML = `<strong>${item.Code_bar}</strong> <span style='font-size:0.8em; color:#666'>(${item.Type} - ${item.Nom})</span>`;
+      div.innerHTML = `<strong class="font-bold">${item.Code_bar}</strong> <span class="text-[0.8em] text-[#666]">(${item.Type} - ${item.Nom})</span>`;
 
       div.addEventListener("click", (e) => {
         e.stopPropagation();
