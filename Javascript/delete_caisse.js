@@ -44,23 +44,41 @@ function displayCaisseDetails(caisse) {
 
   if (!detailsDiv) return;
 
-  let contenuHTML = "";
+  let contenuHTML = '<div class="flex flex-wrap gap-2 mt-1">';
   if (caisse.contenu && caisse.contenu.length > 0) {
     caisse.contenu.forEach((objet) => {
-      contenuHTML += `<div class="py-1.5 border-b border-gray-100 last:border-0"><span class="font-mono text-xs text-gray-500">${objet.Code_bar}</span> - <span class="font-medium text-gray-800">${objet.Type}</span> <span class="text-gray-500 text-xs">(${objet.Nom})</span></div>`;
+      contenuHTML += `<div class="inline-flex items-center gap-2 bg-custom-brandLight/10 text-custom-brandDark px-3 py-1.5 rounded-full text-sm font-medium border border-custom-brandLight/20">
+        ${objet.Code_bar} - ${objet.Type} <span class="opacity-70 text-xs">(${objet.Nom})</span>
+      </div>`;
     });
   } else {
-    contenuHTML =
-      "<p class='text-gray-400 italic text-center py-4'>Caisse vide</p>";
+    contenuHTML +=
+      "<p class='text-gray-400 italic text-sm py-2 px-1 w-full'>Caisse vide</p>";
   }
+  contenuHTML += "</div>";
 
+  detailsDiv.className =
+    "bg-white border-2 border-custom-border rounded-xl p-5 shadow-sm mb-4 transition-all duration-300";
   detailsDiv.innerHTML = `
-    <h4 class="text-lg font-bold text-gray-800 mb-3 border-b pb-2">Détails de la caisse</h4>
-    <div class="space-y-2 text-sm text-gray-700">
-      <p><strong class="font-semibold text-gray-900">Nom:</strong> ${caisse.nom}</p>
-      <p><strong class="font-semibold text-gray-900">État:</strong> <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 border border-gray-200">${caisse.etat}</span></p>
-      <p><strong class="font-semibold text-gray-900">Objets (${caisse.nombre_objets}):</strong></p>
-      <div class="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-[160px] overflow-y-auto shadow-inner">
+    <h4 class="text-custom-primary font-bold text-lg mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+      <svg class="w-5 h-5 text-custom-brandLight" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+      Informations de la caisse
+    </h4>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 shadow-inner">
+        <span class="text-xs text-gray-500 uppercase tracking-widest font-semibold block mb-1">Nom</span>
+        <span class="font-medium text-gray-900">${caisse.nom}</span>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 shadow-inner">
+        <span class="text-xs text-gray-500 uppercase tracking-widest font-semibold block mb-1">État</span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-custom-brandLight/15 text-custom-brandDark border border-custom-brandLight/30 capitalize shadow-sm">
+          ${caisse.etat}
+        </span>
+      </div>
+    </div>
+    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 shadow-inner">
+      <span class="text-xs text-gray-500 uppercase tracking-widest font-semibold block mb-2">Contenu <span class="text-custom-brandLight ml-1">(${caisse.nombre_objets} objets)</span></span>
+      <div class="max-h-[160px] overflow-y-auto pr-2 custom-scrollbar">
         ${contenuHTML}
       </div>
     </div>

@@ -292,11 +292,11 @@ async function displayCaissesView() {
 
       const thead = document.createElement("thead");
       thead.innerHTML = `
-        <tr class="bg-gray-50 border-b border-gray-200">
-          <th class="p-3 text-center font-semibold text-gray-700 text-sm">Code-barre</th>
-          <th class="p-3 text-center font-semibold text-gray-700 text-sm">Type</th>
-          <th class="p-3 text-center font-semibold text-gray-700 text-sm">Nom</th>
-          <th class="p-3 text-center font-semibold text-gray-700 text-sm">État</th>
+        <tr class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white">
+          <th class="p-3 text-center font-semibold text-sm">Code-barre</th>
+          <th class="p-3 text-center font-semibold text-sm">Type</th>
+          <th class="p-3 text-center font-semibold text-sm">Nom</th>
+          <th class="p-3 text-center font-semibold text-sm">État</th>
         </tr>
       `;
       table.appendChild(thead);

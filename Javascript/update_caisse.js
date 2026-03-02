@@ -322,14 +322,14 @@ async function loadObjectsTableModif() {
     if (data.success && data.objets.length > 0) {
       let html = `
         <table class="w-full border-collapse mt-2.5 bg-white shadow-input rounded-lg overflow-hidden text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white">
             <tr>
-              <th class="p-3 text-left font-semibold text-gray-700">
-                <input type="checkbox" id="select_all_objets_modif" class="mr-2 rounded border-gray-300 text-custom-primary focus:ring-custom-primary" /> Tout sélectionner
+              <th class="p-3 text-left font-semibold">
+                <input type="checkbox" id="select_all_objets_modif" class="mr-2 rounded border-white/40 text-custom-primary focus:ring-white" /> Tout sélectionner
               </th>
-              <th class="p-3 font-semibold text-gray-700 text-center">Code-barre</th>
-              <th class="p-3 font-semibold text-gray-700 text-center">Type</th>
-              <th class="p-3 font-semibold text-gray-700 text-center">Nom</th>
+              <th class="p-3 font-semibold text-center">Code-barre</th>
+              <th class="p-3 font-semibold text-center">Type</th>
+              <th class="p-3 font-semibold text-center">Nom</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
