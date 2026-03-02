@@ -347,11 +347,16 @@ function restoreNormalView() {
   const filterSection = document.getElementById("filters_consultation");
   const inventoryDiv = document.getElementById("full_inventory");
   const caissesView = document.getElementById("caisses_view");
+  const modeSelector = document.getElementById("modeSelector");
 
-  // Afficher filtres et tableau, masquer caisses
-  if (filterSection) filterSection.classList.remove("hidden");
+  // Afficher tableau, masquer caisses
   if (inventoryDiv) inventoryDiv.style.display = "block";
   if (caissesView) caissesView.style.display = "none";
+
+  // Re-afficher les filtres QUE si on est dans l'onglet consultation
+  if (filterSection && modeSelector && modeSelector.value === "consultation") {
+    filterSection.classList.remove("hidden");
+  }
 
   // Recharger les données du tableau
   applyFilters();

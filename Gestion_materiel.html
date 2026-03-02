@@ -351,7 +351,7 @@
           ></div>
 
           <div
-            class="bg-white m-auto p-8 border border-[#888] w-[80%] max-w-[700px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl"
+            class="bg-white p-8 border border-[#888] w-[80%] max-w-[700px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl"
           >
             <span
               class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black absolute top-[15px] right-[20px] z-10001"
@@ -599,7 +599,7 @@
           class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"
         ></div>
         <div
-          class="bg-white m-auto p-5 border border-[#888] w-[80%] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
+          class="bg-white p-5 border border-[#888] w-[80%] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
         >
           <span
             class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black"
@@ -656,7 +656,15 @@
               (p) => p && p.classList.add("hidden"),
             ); // Hide panels on mode switch
 
-            if (forms[mode]) forms[mode].classList.remove("hidden");
+            if (forms[mode]) {
+              const isGridChecked =
+                document.getElementById("toggle_caisse_view")?.checked;
+              if (mode === "consultation" && isGridChecked) {
+                // Do not show consultation filters if grid view is active
+              } else {
+                forms[mode].classList.remove("hidden");
+              }
+            }
           };
 
           modeSelector.addEventListener("change", updateUI);

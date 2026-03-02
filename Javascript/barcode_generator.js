@@ -21,7 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Ouvrir la modale
   btnOpenBarcode.addEventListener("click", () => {
-    modal.style.display = "block";
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
 
     // Reset à l'état initial (1 code-barre) à chaque ouverture
     qtySlider.value = 1;
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (closeModal) {
     closeModal.addEventListener("click", () => {
       modal.style.display = "none";
+      modal.classList.add("hidden");
     });
   }
 
@@ -40,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("click", (event) => {
     if (event.target == modal) {
       modal.style.display = "none";
+      modal.classList.add("hidden");
     }
   });
 
