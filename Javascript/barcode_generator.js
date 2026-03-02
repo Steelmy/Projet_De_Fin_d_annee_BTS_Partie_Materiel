@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Récupération des éléments du DOM
   const btnOpenBarcode = document.getElementById("btn-open-barcode");
   const modal = document.getElementById("barcode-modal");
-  const closeModal = document.querySelector(".close-modal");
+  const closeModal = document.getElementById("close-barcode-modal");
   const qtySlider = document.getElementById("barcode-qty");
   const qtyVal = document.getElementById("qty-val");
   const printZone = document.getElementById("print-zone");
