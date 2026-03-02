@@ -1,0 +1,12 @@
+.DS_Store
+
+Gestion du matériel.pdf
+
+node_modules
+
+playwright-report
+test-results
+tests
+package-lock.json
+package.json
+playwright.config.js
