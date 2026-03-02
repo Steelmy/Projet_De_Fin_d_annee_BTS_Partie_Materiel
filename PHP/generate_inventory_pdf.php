@@ -1,0 +1,81 @@
+<?php
+require('fpdf/fpdf.php');
+
+// Connexion à la base de données via le fichier central
+require_once 'db_connect.php';
+
+try {
+
+    // Récupérer tous les objets
+    $stmt = $conn->prepare("
+        SELECT 
+            o.Code_bar,
+            o.Type,
+            o.Nom,
+            o.Etat,
+            u.Prénom,
+            u.Nom AS Nom_utilisateur
+        FROM Objet o
+        LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
+        ORDER BY o.Type, o.Nom
+    ");
+    $stmt->execute();
+    $materiels = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Créer le PDF
+    $pdf = new FPDF();
+    $pdf->AddPage();
+    $pdf->SetFont('Arial', 'B', 16);
+    
+    // Titre
+    $pdf->Cell(0, 10, utf8_decode('Inventaire du Matériel'), 0, 1, 'C');
+    $pdf->SetFont('Arial', '', 10);
+    $pdf->Cell(0, 10, utf8_decode('Généré le: ' . date('d/m/Y à H:i')), 0, 1, 'C');
+    $pdf->Ln(5);
+
+    // En-têtes du tableau
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetFillColor(200, 220, 255);
+    $pdf->Cell(35, 8, 'Code-barre', 1, 0, 'C', true);
+    $pdf->Cell(40, 8, 'Type', 1, 0, 'C', true);
+    $pdf->Cell(45, 8, utf8_decode('Nom'), 1, 0, 'C', true);
+    $pdf->Cell(25, 8, utf8_decode('État'), 1, 0, 'C', true);
+    $pdf->Cell(45, 8, 'Utilisateur', 1, 1, 'C', true);
+
+    // Données
+    $pdf->SetFont('Arial', '', 8);
+    $fill = false;
+    foreach ($materiels as $materiel) {
+        // Couleur alternée
+        if ($fill) {
+            $pdf->SetFillColor(240, 240, 240);
+        }
+        
+        $utilisateur = '-';
+        if ($materiel['Etat'] !== 'disponible' && $materiel['Prénom']) {
+            $utilisateur = utf8_decode($materiel['Prénom'] . ' ' . $materiel['Nom_utilisateur']);
+        }
+        
+        $pdf->Cell(35, 7, utf8_decode($materiel['Code_bar']), 1, 0, 'L', $fill);
+        $pdf->Cell(40, 7, utf8_decode($materiel['Type']), 1, 0, 'L', $fill);
+        $pdf->Cell(45, 7, utf8_decode($materiel['Nom']), 1, 0, 'L', $fill);
+        $pdf->Cell(25, 7, utf8_decode($materiel['Etat']), 1, 0, 'C', $fill);
+        $pdf->Cell(45, 7, $utilisateur, 1, 1, 'L', $fill);
+        
+        $fill = !$fill;
+    }
+
+    // Pied de page
+    $pdf->Ln(10);
+    $pdf->SetFont('Arial', 'I', 8);
+    $pdf->Cell(0, 5, utf8_decode('Total: ' . count($materiels) . ' matériel(s)'), 0, 1, 'R');
+
+    // Sortie du PDF
+    $pdf->Output('D', 'Inventaire_Materiel_' . date('Y-m-d') . '.pdf');
+
+} catch(PDOException $e) {
+    die('Erreur: ' . $e->getMessage());
+}
+
+$conn = null;
+?>

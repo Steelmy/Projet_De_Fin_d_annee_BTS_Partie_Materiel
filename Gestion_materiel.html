@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion du matériel</title>
+    <!-- We inline the specific styles from historique_inventaire.php to ensure exact match -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --border: #e5e7eb;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background: white;
+        min-height: 100vh;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        /* overflow: hidden; Removed to allow autocomplete to show */
+        border: 1px solid var(--border);
+      }
+
+      header {
+        background: linear-gradient(135deg, #b6a071 0%, #9d8a5f 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        animation: pulse 4s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.5;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 0.8;
+        }
+      }
+
+      header h1 {
+        font-size: 2.8em;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+        display: inline-block; /* Shrink hitbox */
+      }
+
+      header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+        font-weight: 300;
+      }
+
+      .controls {
+        padding: 30px;
+        background: white;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+      }
+
+      /* Adapted inputs to match reference */
+      input[type="text"],
+      input[type="number"],
+      input[type="date"],
+      select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border);
+        border-radius: 25px;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: #333;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #b6a071;
+        box-shadow:
+          0 0 0 4px rgba(182, 160, 113, 0.15),
+          0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .advanced-filter {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn-action,
+      .filter-btn,
+      .btn-secondary,
+      button {
+        padding: 12px 24px;
+        border: 2px solid var(--border);
+        background: white;
+        color: #333;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 14px;
+        font-weight: 600;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .btn-action {
+        background: #b6a071 !important;
+        color: white !important;
+        border-color: #b6a071 !important;
+      }
+
+      .btn-action:hover {
+        box-shadow: 0 4px 15px rgba(182, 160, 113, 0.4);
+        transform: translateY(-2px);
+      }
+
+      /* Specific override for the red delete button to match style */
+      .btn-danger {
+        background: linear-gradient(
+          135deg,
+          #ef4444 0%,
+          #dc2626 100%
+        ) !important;
+        border-color: #ef4444 !important;
+        color: white !important;
+      }
+
+      .table-container {
+        padding: 30px;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+      }
+
+      thead {
+        background: linear-gradient(135deg, #b6a071 0%, #9d8a5f 100%);
+        color: white;
+      }
+
+      th {
+        padding: 18px;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        font-size: 13px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 2px solid #b6a071;
+        text-align: center;
+      }
+
+      td {
+        padding: 18px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+
+      tbody tr {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 3px solid transparent;
+      }
+
+      tbody tr:hover {
+        background: linear-gradient(
+          90deg,
+          rgba(182, 160, 113, 0.05) 0%,
+          rgba(182, 160, 113, 0.05) 100%
+        );
+        transform: translateX(8px);
+        border-left-color: #b6a071;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Caisse Grid */
+      .caisse-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        padding: 20px 30px;
+      }
+
+      .caisse-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        transition: all 0.3s;
+      }
+      .caisse-card:hover {
+        transform: translateY(-5px);
+      }
+
+      /* Autocomplete Styles (Essential for functionality) */
+      .autocomplete-suggestions {
+        border: 1px solid #e5e7eb;
+        background: white;
+        position: absolute;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 9999; /* Increased z-index */
+        width: 100%;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .autocomplete-suggestion {
+        padding: 10px;
+        cursor: pointer;
+      }
+      .autocomplete-suggestion:hover {
+        background: #f3f4f6;
+      }
+
+      /* Utilities */
+      .hidden {
+        display: none !important;
+      }
+
+      .btn-top-right {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        z-index: 10; /* Ensure on top */
+      }
+
+      .inline-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .box-input-wrapper {
+        position: relative;
+        min-width: 150px;
+        flex: 1;
+        overflow: visible; /* Ensure content isn't clipped */
+      }
+    </style>
+    <link rel="stylesheet" href="CSS/barcode.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Gestion du matériel</h1>
+        <p>Administration et inventaire global</p>
+        <button id="btn-open-barcode" class="btn-top-right">
+          Générateur Code-barres
+        </button>
+      </header>
+
+      <!-- No stats container here as it's not relevant, but structure mimics reference -->
+
+      <div class="controls">
+        <!-- Mode Selector styled like the Filter Select -->
+        <div
+          id="main_horizontal_wrapper"
+          style="display: flex; align-items: center; width: 100%; gap: 15px"
+        >
+          <div style="min-width: 200px">
+            <select
+              id="modeSelector"
+              style="font-weight: bold; border-color: #b6a071"
+            >
+              <option value="ajout">➕ Ajouter</option>
+              <option value="suppression">🗑️ Supprimer</option>
+              <option value="modification">✏️ Modifier</option>
+              <option value="consultation" selected>🔍 Consulter</option>
+            </select>
+          </div>
+
+          <!-- Action Forms Container -->
+          <div id="actionForms" style="flex: 1; padding-left: 10px">
+            <!-- AJOUT -->
+            <form id="form_ajout" class="inline-form hidden">
+              <div style="display: flex; align-items: center; gap: 5px">
+                <button
+                  type="button"
+                  id="btn_caisse_ajout"
+                  class="btn-secondary"
+                  style="padding: 10px 15px; border-radius: 8px"
+                >
+                  Caisse
+                </button>
+              </div>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="type_materiel_ajout"
+                  placeholder="Type..."
+                  autocomplete="off"
+                />
+                <div
+                  id="type_suggestions_ajout"
+                  class="autocomplete-suggestions"
+                ></div>
+              </div>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="nom_materiel_ajout"
+                  placeholder="Nom..."
+                  autocomplete="off"
+                />
+                <div
+                  id="nom_suggestions_ajout"
+                  class="autocomplete-suggestions"
+                ></div>
+              </div>
+              <input
+                type="number"
+                id="nombre_materiel"
+                value="1"
+                min="1"
+                style="width: 80px"
+                placeholder="Qté"
+              />
+              <button type="submit" class="btn-action">Ajouter</button>
+              <button
+                type="button"
+                class="btn-secondary btn-reset"
+                data-form="form_ajout"
+              >
+                Réinitialiser
+              </button>
+            </form>
+
+            <!-- SUPPRESSION -->
+            <form id="form_suppression" class="inline-form hidden">
+              <div style="display: flex; align-items: center; gap: 5px">
+                <button
+                  type="button"
+                  id="btn_caisse_suppression"
+                  class="btn-secondary"
+                  style="padding: 10px 15px; border-radius: 8px"
+                >
+                  Caisse
+                </button>
+              </div>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="id_materiel_suppr"
+                  placeholder="Scan Code-barre..."
+                />
+              </div>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="type_materiel_suppr"
+                  placeholder="Type..."
+                  readonly
+                  style="background: #f9fafb"
+                />
+              </div>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="nom_materiel_suppr"
+                  placeholder="Nom..."
+                  readonly
+                  style="background: #f9fafb"
+                />
+              </div>
+              <!-- Caisse Suppr Input moved to panel_suppression_caisse -->
+              <button type="submit" class="btn-action btn-danger">
+                Supprimer
+              </button>
+              <button
+                type="button"
+                class="btn-secondary btn-reset"
+                style="margin-left: 10px"
+                data-form="form_suppression"
+              >
+                Réinitialiser
+              </button>
+            </form>
+
+            <!-- MODIFICATION -->
+            <form id="form_modification" class="inline-form hidden">
+              <div style="display: flex; align-items: center; gap: 5px">
+                <button
+                  type="button"
+                  id="btn_caisse_modification"
+                  class="btn-secondary"
+                  style="padding: 10px 15px; border-radius: 8px"
+                >
+                  Caisse
+                </button>
+              </div>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="id_materiel"
+                  placeholder="Scan ID..."
+                  required
+                />
+              </div>
+              <select id="etat" style="width: 140px">
+                <option value="disponible">Disponible</option>
+                <option value="réservé">Réservé</option>
+                <option value="emprunté">Emprunté</option>
+              </select>
+              <div class="box-input-wrapper">
+                <input
+                  type="text"
+                  id="reserveur_emprunteur"
+                  placeholder="Utilisateur..."
+                  autocomplete="off"
+                />
+                <div
+                  id="autocomplete_suggestions"
+                  class="autocomplete-suggestions"
+                ></div>
+                <input type="hidden" id="reserveur_emprunteur_id" />
+              </div>
+
+              <!-- Hidden fields removed: nom_materiel_modif, type_materiel_modif -->
+
+              <button type="submit" class="btn-action">Enregistrer</button>
+              <button
+                type="button"
+                class="btn-secondary btn-reset"
+                data-form="form_modification"
+              >
+                Réinitialiser
+              </button>
+            </form>
+
+            <!-- CONSULTATION -->
+            <div id="filters_consultation" class="inline-form hidden">
+              <div
+                id="filter_section"
+                class="inline-form"
+                style="
+                  padding: 0;
+                  box-shadow: none;
+                  border: none;
+                  margin: 0;
+                  width: 100%;
+                "
+              >
+                <div class="box-input-wrapper">
+                  <input
+                    type="text"
+                    id="code_barre_consultation"
+                    placeholder="Filtre Code-barre..."
+                  />
+                  <div
+                    id="barcode_suggestions_consultation"
+                    class="autocomplete-suggestions"
+                  ></div>
+                </div>
+                <div class="box-input-wrapper">
+                  <input
+                    type="text"
+                    id="type_materiel_consultation"
+                    placeholder="Filtre Type..."
+                  />
+                  <div
+                    id="type_suggestions_consultation"
+                    class="autocomplete-suggestions"
+                  ></div>
+                </div>
+                <div class="box-input-wrapper">
+                  <input
+                    type="text"
+                    id="nom_materiel_consultation"
+                    placeholder="Filtre Nom..."
+                  />
+                  <div
+                    id="nom_suggestions_consultation"
+                    class="autocomplete-suggestions"
+                  ></div>
+                </div>
+                <button
+                  type="button"
+                  onclick="resetFiltersConsultation()"
+                  style="background: white; border: 1px solid #ccc"
+                >
+                  Effacer
+                </button>
+                <input
+                  type="checkbox"
+                  id="toggle_caisse_consultation"
+                  class="hidden"
+                />
+              </div>
+            </div>
+
+            <!-- Checkbox moved -->
+          </div>
+        </div>
+
+        <!-- Panels for Caisse Details (Moved to Modal) -->
+        <div id="modal_caisse" class="modal">
+          <div
+            class="modal-content"
+            style="
+              max-width: 700px;
+              padding: 30px;
+              border-radius: 12px;
+              position: relative;
+            "
+          >
+            <span
+              class="close-modal"
+              id="close_modal_caisse"
+              style="position: absolute; top: 15px; right: 20px; z-index: 10001"
+              >&times;</span
+            >
+            <div id="modal_caisse_body" style="margin-top: 20px">
+              <div
+                id="panel_ajout_caisse"
+                class="hidden"
+                style="width: 100%; padding-top: 10px"
+              >
+                <form id="form_ajout_caisse" style="width: 100%">
+                  <h4 style="margin-bottom: 10px">Nouvelle Caisse</h4>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px">
+                    <input
+                      type="text"
+                      id="nom_caisse_ajout"
+                      placeholder="Nom de la caisse"
+                      required
+                      style="flex: 1"
+                    />
+                    <button type="submit" class="btn-action">Créer</button>
+                  </div>
+                  <div class="box-input-wrapper" style="width: 100%">
+                    <input
+                      type="text"
+                      id="search_objets_ajout"
+                      placeholder="Scanner objets pour la caisse..."
+                      style="width: 100%"
+                    />
+                    <div
+                      id="objets_suggestions_ajout"
+                      class="autocomplete-suggestions"
+                    ></div>
+                  </div>
+                  <div
+                    id="objets_list_ajout"
+                    style="
+                      margin-top: 10px;
+                      padding: 10px;
+                      border: 1px dashed #ccc;
+                      min-height: 40px;
+                    "
+                  ></div>
+                </form>
+              </div>
+
+              <div
+                id="panel_suppression_caisse"
+                class="hidden"
+                style="width: 100%; padding-top: 10px"
+              >
+                <form id="form_suppression_caisse" style="width: 100%">
+                  <!-- Input Caisse moved here -->
+                  <div
+                    id="caisse_input_group_suppr"
+                    class="box-input-wrapper"
+                    style="margin-bottom: 15px"
+                  >
+                    <input
+                      type="text"
+                      id="nom_caisse_suppr"
+                      placeholder="Nom caisse..."
+                      style="width: 100%"
+                    />
+                    <div class="autocomplete-suggestions"></div>
+                  </div>
+                  <p>Sélectionnez la caisse à supprimer ci-dessus.</p>
+                  <div id="caisse_details_suppr"></div>
+                  <button
+                    type="submit"
+                    class="btn-action btn-danger"
+                    style="margin-top: 10px"
+                  >
+                    Confirmer Suppression
+                  </button>
+                </form>
+              </div>
+
+              <div
+                id="panel_modification_caisse"
+                class="hidden"
+                style="width: 100%; padding-top: 10px"
+              >
+                <form id="form_modification_caisse" style="width: 100%">
+                  <!-- JS fills this -->
+                  <div class="box-input-wrapper" style="margin-bottom: 10px">
+                    <input
+                      type="text"
+                      id="nom_caisse_modif"
+                      placeholder="Rechercher caisse..."
+                      style="width: 100%"
+                    />
+                    <div class="autocomplete-suggestions"></div>
+                  </div>
+                  <div id="caisse_details_modif" style="display: none">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px">
+                      <input
+                        type="text"
+                        id="nouveau_nom_caisse"
+                        placeholder="Nouveau nom"
+                      />
+                      <select id="etat_caisse_modif">
+                        <option value="disponible">Disponible</option>
+                      </select>
+                    </div>
+                    <!-- User selection for caisse -->
+                    <div class="box-input-wrapper" style="margin-bottom: 10px">
+                      <input
+                        type="text"
+                        id="utilisateur_caisse_modif"
+                        placeholder="Utilisateur..."
+                      />
+                      <input type="hidden" id="utilisateur_caisse_modif_id" />
+                    </div>
+
+                    <div class="box-input-wrapper">
+                      <input
+                        type="text"
+                        id="search_objets_modif"
+                        placeholder="Scanner objets..."
+                      />
+                      <div
+                        id="objets_suggestions_modif"
+                        class="autocomplete-suggestions"
+                      ></div>
+                    </div>
+                    <div id="caisse_contenu_modif" style="margin: 10px 0"></div>
+                    <div id="objets_table_container_modif"></div>
+
+                    <button
+                      type="submit"
+                      class="btn-action"
+                      style="margin-top: 10px"
+                    >
+                      Sauvegarder Caisse
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <!-- End modal_caisse_body -->
+          </div>
+          <!-- End modal-content -->
+        </div>
+        <!-- End modal_caisse -->
+
+        <div class="table-container" style="width: 100%; margin-top: 20px">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 5px;
+              margin-bottom: 15px;
+            "
+          >
+            <input
+              type="checkbox"
+              id="toggle_caisse_view"
+              style="width: auto"
+            />
+            <label
+              for="toggle_caisse_view"
+              style="cursor: pointer; font-weight: 500"
+              >Vue Caisses</label
+            >
+          </div>
+          <div id="full_inventory">
+            <table id="inventory_table">
+              <thead>
+                <tr>
+                  <th>Code-barre</th>
+                  <th>Type</th>
+                  <th>Nom</th>
+                  <th>État</th>
+                  <th>Utilisateur</th>
+                  <th>Caisse</th>
+                </tr>
+              </thead>
+              <tbody id="inventory_tbody"></tbody>
+            </table>
+            <div
+              style="
+                padding: 20px;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 15px;
+                color: #64748b;
+              "
+            >
+              <button
+                id="btn_download_pdf"
+                style="
+                  padding: 8px 16px;
+                  background: white;
+                  border: 1px solid #ccc;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  font-family: inherit;
+                  font-size: 14px;
+                  color: #333;
+                "
+              >
+                📄 Télécharger PDF
+              </button>
+              <span style="font-size: 1.1em; font-weight: 500">
+                Total:
+                <span
+                  id="inventory_total"
+                  style="color: #333; font-weight: bold"
+                  >0</span
+                >
+              </span>
+            </div>
+          </div>
+
+          <div id="caisses_view" class="caisse-grid hidden"></div>
+
+          <!-- PDF Button Below Table Left -->
+        </div>
+      </div>
+
+      <!-- Hidden Legacy Containers -->
+      <div id="section_ajout" class="hidden"></div>
+      <div id="section_suppression" class="hidden"></div>
+      <div id="section_modification" class="hidden"></div>
+      <div id="section_consultation" class="hidden"></div>
+
+      <!-- Modal -->
+      <div id="barcode-modal" class="modal">
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <h2>Générateur</h2>
+          <div style="margin: 15px 0">
+            <label for="barcode-qty" style="font-weight: 500"
+              >Nombre de codes :
+              <span
+                id="qty-val"
+                style="font-weight: bold; color: var(--primary)"
+                >1</span
+              ></label
+            >
+            <input
+              type="range"
+              id="barcode-qty"
+              min="1"
+              max="50"
+              value="1"
+              style="width: 100%; margin-top: 10px"
+            />
+          </div>
+          <button id="btn-print" class="btn-action">Imprimer</button>
+          <div id="print-zone"></div>
+        </div>
+      </div>
+
+      <script>
+        // Simple logic for UI switching (No external dependency needed for basic toggle)
+        document.addEventListener("DOMContentLoaded", () => {
+          const modeSelector = document.getElementById("modeSelector");
+          const forms = {
+            ajout: document.getElementById("form_ajout"),
+            suppression: document.getElementById("form_suppression"),
+            modification: document.getElementById("form_modification"),
+            consultation: document.getElementById("filters_consultation"),
+          };
+          const panels = {
+            ajout: document.getElementById("panel_ajout_caisse"),
+            suppression: document.getElementById("panel_suppression_caisse"),
+            modification: document.getElementById("panel_modification_caisse"),
+          };
+
+          const updateUI = () => {
+            const mode = modeSelector.value;
+            Object.values(forms).forEach((f) => f && f.classList.add("hidden"));
+            Object.values(panels).forEach(
+              (p) => p && p.classList.add("hidden"),
+            ); // Hide panels on mode switch
+
+            if (forms[mode]) forms[mode].classList.remove("hidden");
+          };
+
+          modeSelector.addEventListener("change", updateUI);
+          updateUI();
+
+          // View Toggle
+          document
+            .getElementById("toggle_caisse_view")
+            .addEventListener("change", (e) => {
+              const isGrid = e.target.checked;
+              document
+                .getElementById("full_inventory")
+                .classList.toggle("hidden", isGrid);
+              document
+                .getElementById("caisses_view")
+                .classList.toggle("hidden", !isGrid);
+
+              // Sync
+              const leg = document.getElementById("toggle_caisse_consultation");
+              if (leg) {
+                leg.checked = isGrid;
+                leg.dispatchEvent(new Event("change"));
+              }
+            });
+
+          // Panel Toggles
+          const bindPanel = (chkId, pnlId) => {
+            const chk = document.getElementById(chkId);
+            if (chk)
+              chk.addEventListener("change", (e) => {
+                const p = document.getElementById(pnlId);
+                if (p) {
+                  if (e.target.checked) p.classList.remove("hidden");
+                  else p.classList.add("hidden");
+                }
+                // Handle suppr special case to show/hide specific inputs
+                if (chkId === "toggle_caisse_suppression") {
+                  const grp = document.getElementById(
+                    "caisse_input_group_suppr",
+                  );
+                  if (grp) {
+                    if (e.target.checked) grp.classList.remove("hidden");
+                    else grp.classList.add("hidden");
+                  }
+                }
+              });
+          };
+          bindPanel("toggle_caisse_ajout", "panel_ajout_caisse");
+          bindPanel("toggle_caisse_suppression", "panel_suppression_caisse");
+          bindPanel("toggle_caisse_modification", "panel_modification_caisse");
+        });
+
+        // Legacy global
+        window.switchTab = (t) => {
+          const s = document.getElementById("modeSelector");
+          if (s) {
+            s.value = t;
+            s.dispatchEvent(new Event("change"));
+          }
+        };
+      </script>
+
+      <!-- Script Includes -->
+      <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+      <script src="Javascript/barcode_generator.js?v=3"></script>
+      <script src="Javascript/UniversalAutocomplete.js?v=2"></script>
+      <script src="Javascript/UniversalAutocomplete_barcode.js?v=5"></script>
+      <script src="Javascript/init_autocompletes.js?v=2"></script>
+      <script src="Javascript/add_caisse.js?v=2"></script>
+      <script src="Javascript/delete_caisse.js"></script>
+      <script src="Javascript/update_caisse.js?v=2"></script>
+      <script src="Javascript/textFieldLoader.js?v=2"></script>
+      <script src="Javascript/delete_materiel.js"></script>
+      <script src="Javascript/update_materiel.js?v=2"></script>
+      <script src="Javascript/filter_consultation.js"></script>
+      <script src="Javascript/download_pdf.js"></script>
+      <script src="Javascript/add_materiel.js?v=3"></script>
+      <script src="Javascript/form_actions.js?v=2"></script>
+      <script src="Javascript/caisse_form_toggle.js?v=1"></script>
+    </div>
+  </body>
+</html>
