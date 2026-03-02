@@ -245,7 +245,6 @@ async function displayCaissesView() {
     const inventoryDiv = document.getElementById("full_inventory");
     const caissesView = document.getElementById("caisses_view");
 
-    if (filterSection) filterSection.classList.add("hidden");
     if (inventoryDiv) inventoryDiv.style.display = "none";
     if (!caissesView) {
       console.error("❌ Conteneur caisses_view non trouvé");
@@ -352,11 +351,6 @@ function restoreNormalView() {
   // Afficher tableau, masquer caisses
   if (inventoryDiv) inventoryDiv.style.display = "block";
   if (caissesView) caissesView.style.display = "none";
-
-  // Re-afficher les filtres QUE si on est dans l'onglet consultation
-  if (filterSection && modeSelector && modeSelector.value === "consultation") {
-    filterSection.classList.remove("hidden");
-  }
 
   // Recharger les données du tableau
   applyFilters();
