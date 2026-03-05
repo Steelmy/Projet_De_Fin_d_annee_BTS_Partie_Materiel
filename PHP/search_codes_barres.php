@@ -36,6 +36,13 @@ try {
         $conditions[] = "Etat = :etat";
         $params[':etat'] = $etat;
     }
+
+    // Filtre "disponible uniquement" : objets disponibles ET pas dans une caisse
+    $disponibleOnly = isset($_GET['disponible_only']) ? trim($_GET['disponible_only']) : '';
+    if ($disponibleOnly === '1') {
+        $conditions[] = "Etat = 'disponible'";
+        $conditions[] = "Caisse_id IS NULL";
+    }
     
     if (count($conditions) > 0) {
         $sql .= " WHERE " . implode(' AND ', $conditions);

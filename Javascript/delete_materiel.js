@@ -69,6 +69,22 @@ formSuppression.addEventListener("submit", async (e) => {
 
     const mat = detailsData.materiel;
 
+    // Vérifier que l'objet n'est pas dans une caisse
+    if (mat.caisse_id) {
+      alert(
+        `Cet objet est actuellement dans la caisse "${mat.caisse_nom || "inconnue"}". Veuillez d'abord le retirer de la caisse avant de pouvoir le supprimer.`,
+      );
+      return;
+    }
+
+    // Vérifier que l'objet n'est pas réservé/emprunté
+    if (mat.etat !== "disponible") {
+      alert(
+        `Cet objet est actuellement "${mat.etat}". Veuillez d'abord le remettre en état "disponible" avant de pouvoir le supprimer.`,
+      );
+      return;
+    }
+
     // 2. Demander confirmation avec les vraies infos
     if (
       !confirm(

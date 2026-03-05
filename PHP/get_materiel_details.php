@@ -26,12 +26,15 @@ try {
             o.Nom,
             o.Etat,
             o.Emprunteur_id,
+            o.Caisse_id,
             o.created_at,
             o.updated_at,
             u.Nom as user_nom,
-            u.Prénom as user_prenom
+            u.Prénom as user_prenom,
+            c.Nom as caisse_nom
         FROM Objet o
         LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
+        LEFT JOIN Caisse c ON o.Caisse_id = c.id
         WHERE o.Code_bar = :code_barre
     ");
     
@@ -55,6 +58,8 @@ try {
             'type_materiel' => $objet['Type'],
             'nom_materiel' => $objet['Nom'],
             'etat' => $objet['Etat'],
+            'caisse_id' => $objet['Caisse_id'],
+            'caisse_nom' => $objet['caisse_nom'],
             'created_at' => $objet['created_at'],
             'updated_at' => $objet['updated_at']
         ]

@@ -19,7 +19,7 @@ try {
     }
     
     // Vérifier que l'objet existe
-    $checkStmt = $conn->prepare("SELECT id, Type, Nom, Code_bar FROM Objet WHERE Code_bar = :code_barre");
+    $checkStmt = $conn->prepare("SELECT id, Type, Nom, Code_bar, Etat, Caisse_id FROM Objet WHERE Code_bar = :code_barre");
     $checkStmt->execute([':code_barre' => $code_barre]);
     $objet = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -27,6 +27,24 @@ try {
         echo json_encode([
             'success' => false,
             'message' => 'Objet non trouvé'
+        ]);
+        exit;
+    }
+
+    // Vérifier que l'objet n'est pas dans une caisse
+    if (!empty($objet['Caisse_id'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Cet objet est actuellement dans une caisse. Veuillez d\'abord le retirer de la caisse avant de pouvoir le supprimer.'
+        ]);
+        exit;
+    }
+
+    // Vérifier que l'objet est disponible (pas réservé ni emprunté)
+    if ($objet['Etat'] !== 'disponible') {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Cet objet est actuellement ' . $objet['Etat'] . '. Veuillez d\'abord le remettre en état "disponible" avant de pouvoir le supprimer.'
         ]);
         exit;
     }

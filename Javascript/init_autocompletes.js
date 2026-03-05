@@ -126,6 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item.Nom)
           document.getElementById("nom_materiel_suppr").value = item.Nom;
       },
+      null, // etatFilter
+      true, // disponibleOnly
     );
   }
 
@@ -147,6 +149,8 @@ document.addEventListener("DOMContentLoaded", () => {
           console.warn("remplirFormulaireModification non trouvée");
         }
       },
+      null, // etatFilter
+      true, // disponibleOnly
     );
   }
 
