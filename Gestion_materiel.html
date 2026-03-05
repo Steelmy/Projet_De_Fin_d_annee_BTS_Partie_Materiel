@@ -544,38 +544,68 @@
           <div id="full_inventory">
             <table id="inventory_table" class="w-full border-collapse bg-white">
               <thead
-                class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white"
+                class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white select-none"
               >
                 <tr>
                   <th
-                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Code_bar')"
                   >
                     Code-barre
+                    <span
+                      id="sort_icon_Code_bar"
+                      class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
                   </th>
                   <th
-                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Type')"
                   >
                     Type
+                    <span id="sort_icon_Type" class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
                   </th>
                   <th
-                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Nom')"
                   >
                     Nom
+                    <span id="sort_icon_Nom" class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
                   </th>
                   <th
-                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Etat')"
                   >
                     État
+                    <span id="sort_icon_Etat" class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
                   </th>
                   <th
-                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Utilisateur')"
                   >
                     Utilisateur
+                    <span
+                      id="sort_icon_Utilisateur"
+                      class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
                   </th>
                   <th
-                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center"
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Nom_caisse')"
                   >
                     Caisse
+                    <span
+                      id="sort_icon_Nom_caisse"
+                      class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
                   </th>
                 </tr>
               </thead>
@@ -584,13 +614,37 @@
                 class="[&>tr]:transition-all [&>tr]:duration-300 [&>tr]:border-l-4 [&>tr]:border-transparent [&>tr:hover]:bg-linear-to-r [&>tr:hover]:from-custom-brandLight/5 [&>tr:hover]:to-custom-brandLight/5 [&>tr:hover]:translate-x-2 [&>tr:hover]:border-custom-brandLight [&>tr:hover]:shadow-[0_4px_15px_rgba(0,0,0,0.08)] [&>tr>td]:p-4.5 [&>tr>td]:border-b [&>tr>td]:border-custom-border [&>tr>td]:align-middle [&>tr>td]:text-center"
               ></tbody>
             </table>
-            <div class="p-5 flex justify-end items-center gap-4 text-slate-500">
+            <div
+              class="p-5 flex justify-between items-center text-slate-500 flex-wrap gap-4"
+            >
               <button
                 id="btn_download_pdf"
                 class="px-4 py-2 bg-white border border-[#ccc] rounded-lg cursor-pointer shadow-input font-inherit text-sm text-gray-800 hover:bg-gray-50 transition-colors"
               >
                 📄 Télécharger PDF
               </button>
+
+              <!-- Pagination Controls -->
+              <div class="flex items-center gap-3">
+                <button
+                  id="btn_prev_page"
+                  class="px-3 py-1.5 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onclick="window.changePage(-1)"
+                >
+                  &larr; Précédent
+                </button>
+                <span id="page_info" class="text-sm font-medium"
+                  >Page 1 / 1</span
+                >
+                <button
+                  id="btn_next_page"
+                  class="px-3 py-1.5 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onclick="window.changePage(1)"
+                >
+                  Suivant &rarr;
+                </button>
+              </div>
+
               <span class="text-[1.1em] font-medium">
                 Total:
                 <span id="inventory_total" class="text-gray-800 font-bold"

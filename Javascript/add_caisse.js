@@ -124,6 +124,13 @@ function displayObjectSuggestions(objets, suggestionsDiv) {
   });
 }
 
+// Pagination et Tri pour Ajout Caisse
+let availableObjectsForAdd = [];
+let addCaisseCurrentPage = 1;
+const addCaisseItemsPerPage = 10;
+let addCaisseSortColumn = null;
+let addCaisseSortDirection = "asc";
+
 // Charger le tableau d'objets disponibles
 async function loadObjectsTable() {
   const container = document.getElementById("objets_table_container");
@@ -132,57 +139,9 @@ async function loadObjectsTable() {
     const response = await fetch("PHP/get_available_objects.php");
     const data = await response.json();
 
-    if (data.success && data.objets.length > 0) {
-      let html = `
-        <table class="w-full border-collapse mt-2.5 bg-white shadow-input rounded-lg overflow-hidden text-sm">
-          <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white">
-            <tr>
-              <th class="p-3 text-left font-semibold">
-                <input type="checkbox" id="select_all_objets" class="mr-2 rounded border-white/40 text-custom-primary focus:ring-white" /> Tout sélectionner
-              </th>
-              <th class="p-3 font-semibold text-center">Code-barre</th>
-              <th class="p-3 font-semibold text-center">Type</th>
-              <th class="p-3 font-semibold text-center">Nom</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-      `;
-
-      data.objets.forEach((objet) => {
-        const isSelected = selectedObjects.some((o) => o.id === objet.id);
-        html += `
-          <tr class="hover:bg-gray-50 transition-colors">
-            <td class="p-3 text-center">
-              <input type="checkbox" 
-                     class="objet-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
-                     data-objet='${JSON.stringify(objet)}'
-                     ${isSelected ? "checked" : ""} />
-            </td>
-            <td class="p-3 text-center">${objet.Code_bar}</td>
-            <td class="p-3 text-center">${objet.Type}</td>
-            <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
-          </tr>
-        `;
-      });
-
-      html += `</tbody></table>`;
-      container.innerHTML = html;
-
-      // Gérer le "Tout sélectionner"
-      const selectAll = document.getElementById("select_all_objets");
-      if (selectAll) {
-        selectAll.addEventListener("change", (e) => {
-          document.querySelectorAll(".objet-checkbox").forEach((cb) => {
-            cb.checked = e.target.checked;
-            handleCheckboxChange({ target: cb });
-          });
-        });
-      }
-
-      // Gérer les checkboxes individuelles
-      document.querySelectorAll(".objet-checkbox").forEach((checkbox) => {
-        checkbox.addEventListener("change", handleCheckboxChange);
-      });
+    if (data.success && data.objets) {
+      availableObjectsForAdd = data.objets;
+      renderAddCaisseTable();
     } else {
       container.innerHTML = "<p>Aucun objet disponible</p>";
     }
@@ -191,6 +150,144 @@ async function loadObjectsTable() {
     container.innerHTML = "<p>Erreur lors du chargement</p>";
   }
 }
+
+// Trier et afficher le tableau
+function renderAddCaisseTable() {
+  const container = document.getElementById("objets_table_container");
+  if (!container || availableObjectsForAdd.length === 0) return;
+
+  let filtered = [...availableObjectsForAdd];
+
+  // TRI
+  if (addCaisseSortColumn) {
+    filtered.sort((a, b) => {
+      let valA = a[addCaisseSortColumn]
+        ? String(a[addCaisseSortColumn]).toLowerCase()
+        : "";
+      let valB = b[addCaisseSortColumn]
+        ? String(b[addCaisseSortColumn]).toLowerCase()
+        : "";
+
+      if (valA < valB) return addCaisseSortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return addCaisseSortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // PAGINATION
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / addCaisseItemsPerPage) || 1;
+
+  if (addCaisseCurrentPage > totalPages) addCaisseCurrentPage = totalPages;
+  if (addCaisseCurrentPage < 1) addCaisseCurrentPage = 1;
+
+  const startIndex = (addCaisseCurrentPage - 1) * addCaisseItemsPerPage;
+  const endIndex = startIndex + addCaisseItemsPerPage;
+  const paginatedItems = filtered.slice(startIndex, endIndex);
+
+  // Helper pour l'icône de tri
+  const getSortIcon = (col) => {
+    if (addCaisseSortColumn === col) {
+      return addCaisseSortDirection === "asc" ? "↑" : "↓";
+    }
+    return '<span class="opacity-50">↕</span>';
+  };
+
+  let html = `
+    <table class="w-full border-collapse mt-2.5 bg-white shadow-input rounded-lg overflow-hidden text-sm">
+      <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white select-none">
+        <tr>
+          <th class="p-3 text-left font-semibold w-12">
+            <input type="checkbox" id="select_all_objets" class="rounded border-white/40 text-custom-primary focus:ring-white" />
+          </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Code_bar')">
+            Code-barre ${getSortIcon("Code_bar")}
+          </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Type')">
+            Type ${getSortIcon("Type")}
+          </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Nom')">
+            Nom ${getSortIcon("Nom")}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+  `;
+
+  if (paginatedItems.length === 0) {
+    html += `<tr><td colspan="4" class="p-3 text-center text-gray-400 italic">Aucun objet sur cette page</td></tr>`;
+  } else {
+    paginatedItems.forEach((objet) => {
+      const isSelected = selectedObjects.some((o) => o.id === objet.id);
+      html += `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="p-3 text-center">
+            <input type="checkbox" 
+                   class="objet-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
+                   data-objet='${JSON.stringify(objet)}'
+                   ${isSelected ? "checked" : ""} />
+          </td>
+          <td class="p-3 text-center">${objet.Code_bar}</td>
+          <td class="p-3 text-center">${objet.Type}</td>
+          <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
+        </tr>
+      `;
+    });
+  }
+
+  html += `</tbody></table>`;
+
+  // Contrôles de pagination
+  html += `
+    <div class="p-3 flex justify-between items-center text-slate-500 text-sm border-t border-gray-200 mt-2">
+      <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+              onclick="window.changeAddCaissePage(-1)" ${addCaisseCurrentPage === 1 ? "disabled" : ""}>
+        &larr; Précédent
+      </button>
+      <span class="font-medium">Page ${addCaisseCurrentPage} / ${totalPages}</span>
+      <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+              onclick="window.changeAddCaissePage(1)" ${addCaisseCurrentPage === totalPages ? "disabled" : ""}>
+        Suivant &rarr;
+      </button>
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  // Gérer le "Tout sélectionner" de la page courante
+  const selectAll = document.getElementById("select_all_objets");
+  if (selectAll) {
+    selectAll.addEventListener("change", (e) => {
+      document.querySelectorAll(".objet-checkbox").forEach((cb) => {
+        cb.checked = e.target.checked;
+        handleCheckboxChange({ target: cb });
+      });
+    });
+  }
+
+  // Gérer les checkboxes individuelles
+  document.querySelectorAll(".objet-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("change", handleCheckboxChange);
+  });
+}
+
+// Changer de page (+1 ou -1)
+window.changeAddCaissePage = function (delta) {
+  addCaisseCurrentPage += delta;
+  renderAddCaisseTable();
+};
+
+// Trier l'inventaire au clic sur l'en-tête
+window.sortAddCaisse = function (column) {
+  if (addCaisseSortColumn === column) {
+    addCaisseSortDirection = addCaisseSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    addCaisseSortColumn = column;
+    addCaisseSortDirection = "asc";
+  }
+  addCaisseCurrentPage = 1; // Retour page 1 au tri
+  renderAddCaisseTable();
+};
 
 // Gérer le changement de checkbox
 function handleCheckboxChange(e) {

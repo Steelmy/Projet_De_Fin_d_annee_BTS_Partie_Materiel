@@ -29,12 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (panelToShow) panelToShow.classList.remove("hidden");
     modalCaisse.classList.remove("hidden");
     modalCaisse.style.display = "flex";
+    document.body.style.overflow = "hidden";
   }
 
   function closeCaisseModal() {
     if (modalCaisse) {
       modalCaisse.style.display = "none";
       modalCaisse.classList.add("hidden");
+      document.body.style.overflow = "";
     }
   }
 

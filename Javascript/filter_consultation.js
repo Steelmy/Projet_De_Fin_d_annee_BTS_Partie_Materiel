@@ -276,7 +276,11 @@ async function displayCaissesView() {
 
       const userSpan = document.createElement("span");
       if (caisse.Prénom && caisse.Nom_utilisateur) {
-        userSpan.textContent = `Réservé par : ${caisse.Prénom} ${caisse.Nom_utilisateur}`;
+        let actionTexte = "Réservé par";
+        if (caisse.Etat && caisse.Etat.toLowerCase() === "emprunté") {
+          actionTexte = "Emprunté par";
+        }
+        userSpan.textContent = `${actionTexte} : ${caisse.Prénom} ${caisse.Nom_utilisateur}`;
       } else {
         userSpan.textContent = "Disponible";
       }
@@ -356,6 +360,12 @@ function restoreNormalView() {
   applyFilters();
 }
 
+// Pagination & Tri globaux pour l'inventaire complet
+let currentPage = 1;
+const itemsPerPage = 15;
+let currentSortColumn = null;
+let currentSortDirection = "asc";
+
 // FONCTION PRINCIPALE : Appliquer les filtres
 function applyFilters() {
   const typeValue = typeConsultation.value.trim();
@@ -381,14 +391,105 @@ function applyFilters() {
     filtered = filtered.filter((item) => item.Nom === nomValue);
   }
 
-  console.log("✅ Résultats:", filtered.length);
+  // TRI
+  if (currentSortColumn) {
+    filtered.sort((a, b) => {
+      let valA = a[currentSortColumn]
+        ? String(a[currentSortColumn]).toLowerCase()
+        : "";
+      let valB = b[currentSortColumn]
+        ? String(b[currentSortColumn]).toLowerCase()
+        : "";
 
-  // Mettre à jour le tableau
-  updateInventoryTable(filtered);
+      // Special sort criteria for "Utilisateur" handling Prénom and Nom combined
+      if (currentSortColumn === "Utilisateur") {
+        valA =
+          (a.Prénom ? a.Prénom : "") +
+          (a.Nom_utilisateur ? " " + a.Nom_utilisateur : "");
+        valB =
+          (b.Prénom ? b.Prénom : "") +
+          (b.Nom_utilisateur ? " " + b.Nom_utilisateur : "");
+        valA = valA.trim().toLowerCase();
+        valB = valB.trim().toLowerCase();
+      }
 
-  // Mettre à jour le compteur
+      if (valA < valB) return currentSortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return currentSortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // Update icons
+  const sortColumns = [
+    "Code_bar",
+    "Type",
+    "Nom",
+    "Etat",
+    "Utilisateur",
+    "Nom_caisse",
+  ];
+  sortColumns.forEach((col) => {
+    const iconSpan = document.getElementById(`sort_icon_${col}`);
+    if (iconSpan) {
+      if (col === currentSortColumn) {
+        iconSpan.textContent = currentSortDirection === "asc" ? "↑" : "↓";
+        iconSpan.classList.remove("opacity-50");
+      } else {
+        iconSpan.textContent = "↕";
+        iconSpan.classList.add("opacity-50");
+      }
+    }
+  });
+
+  console.log("✅ Résultats filtrés:", filtered.length);
+
+  // PAGINATION
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedItems = filtered.slice(startIndex, endIndex);
+
+  // Mettre à jour le tableau avec la page courante
+  updateInventoryTable(paginatedItems);
+
+  // Mettre à jour la pagination
+  const btnPrev = document.getElementById("btn_prev_page");
+  const btnNext = document.getElementById("btn_next_page");
+  const pageInfo = document.getElementById("page_info");
+
+  if (btnPrev && btnNext && pageInfo) {
+    pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+    btnPrev.disabled = currentPage === 1;
+    btnNext.disabled = currentPage === totalPages;
+  }
+
+  // Mettre à jour le compteur global
   updateResultsCounter(filtered.length, allInventory.length);
 }
+
+// Changer de page (+1 ou -1)
+window.changePage = function (delta) {
+  currentPage += delta;
+  applyFilters();
+};
+
+// Trier l'inventaire au clic sur l'en-tête
+window.sortInventory = function (column) {
+  if (currentSortColumn === column) {
+    currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    currentSortColumn = column;
+    currentSortDirection = "asc";
+  }
+  currentPage = 1; // Retour page 1 au tri
+  applyFilters();
+};
 
 // Mettre à jour le tableau d'inventaire
 function updateInventoryTable(data) {

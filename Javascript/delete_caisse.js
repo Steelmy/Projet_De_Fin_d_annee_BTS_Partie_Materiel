@@ -98,7 +98,11 @@ async function handleDeleteCaisse(e) {
     return;
   }
 
-  if (!confirm(`Êtes-vous sûr de vouloir supprimer la caisse "${nom}" ?`)) {
+  if (
+    !confirm(
+      `Êtes-vous sûr de vouloir supprimer la caisse "${nom}" ?\n(Cela ne supprimera pas les objets qu'elle contient)`,
+    )
+  ) {
     return;
   }
 

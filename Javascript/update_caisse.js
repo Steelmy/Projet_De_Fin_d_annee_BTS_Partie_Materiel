@@ -263,8 +263,13 @@ window.removeFromModif = function (objetId) {
   modifSelectedObjects = modifSelectedObjects.filter((o) => o.id !== objetId);
   updateModifObjectsDisplay();
 
-  // Recharger le tableau pour mettre à jour les checkboxes
-  loadObjectsTableModif();
+  // Mettre à jour la checkbox si le tableau est affiché, sans recharger tout
+  const checkbox = document.querySelector(
+    `.objet-checkbox-modif[data-objet*='"id":${objetId}']`,
+  );
+  if (checkbox) {
+    checkbox.checked = false;
+  }
 };
 
 // Ajouter un objet à la caisse en modification
@@ -314,6 +319,13 @@ async function addObjectToModif(codeBarre) {
   }
 }
 
+// Pagination et Tri pour Modification Caisse
+let availableObjectsForModif = [];
+let modifCaisseCurrentPage = 1;
+const modifCaisseItemsPerPage = 10;
+let modifCaisseSortColumn = null;
+let modifCaisseSortDirection = "asc";
+
 // Charger le tableau d'objets pour la modification
 async function loadObjectsTableModif() {
   const container = document.getElementById("objets_table_container_modif");
@@ -324,57 +336,9 @@ async function loadObjectsTableModif() {
     const response = await fetch("PHP/get_available_objects.php");
     const data = await response.json();
 
-    if (data.success && data.objets.length > 0) {
-      let html = `
-        <table class="w-full border-collapse mt-2.5 bg-white shadow-input rounded-lg overflow-hidden text-sm">
-          <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white">
-            <tr>
-              <th class="p-3 text-left font-semibold">
-                <input type="checkbox" id="select_all_objets_modif" class="mr-2 rounded border-white/40 text-custom-primary focus:ring-white" /> Tout sélectionner
-              </th>
-              <th class="p-3 font-semibold text-center">Code-barre</th>
-              <th class="p-3 font-semibold text-center">Type</th>
-              <th class="p-3 font-semibold text-center">Nom</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-      `;
-
-      data.objets.forEach((objet) => {
-        const isSelected = modifSelectedObjects.some((o) => o.id === objet.id);
-        html += `
-          <tr class="hover:bg-gray-50 transition-colors">
-            <td class="p-3 text-center">
-              <input type="checkbox" 
-                     class="objet-checkbox-modif rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
-                     data-objet='${JSON.stringify(objet)}'
-                     ${isSelected ? "checked" : ""} />
-            </td>
-            <td class="p-3 text-center">${objet.Code_bar}</td>
-            <td class="p-3 text-center">${objet.Type}</td>
-            <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
-          </tr>
-        `;
-      });
-
-      html += `</tbody></table>`;
-      container.innerHTML = html;
-
-      // Gérer le "Tout sélectionner"
-      const selectAll = document.getElementById("select_all_objets_modif");
-      if (selectAll) {
-        selectAll.addEventListener("change", (e) => {
-          document.querySelectorAll(".objet-checkbox-modif").forEach((cb) => {
-            cb.checked = e.target.checked;
-            handleCheckboxChangeModif({ target: cb });
-          });
-        });
-      }
-
-      // Gérer les checkboxes individuelles
-      document.querySelectorAll(".objet-checkbox-modif").forEach((checkbox) => {
-        checkbox.addEventListener("change", handleCheckboxChangeModif);
-      });
+    if (data.success && data.objets) {
+      availableObjectsForModif = data.objets;
+      renderModifCaisseTable();
     } else {
       container.innerHTML = "<p>Aucun objet disponible</p>";
     }
@@ -383,6 +347,162 @@ async function loadObjectsTableModif() {
     container.innerHTML = "<p>Erreur lors du chargement</p>";
   }
 }
+
+// Trier et afficher le tableau
+function renderModifCaisseTable() {
+  const container = document.getElementById("objets_table_container_modif");
+  if (!container) return;
+
+  // Le tableau doit montrer les objets disponibles + les objets ACTUELLEMENT dans la caisse
+  // pour qu'on puisse les décocher/recocher
+  let allTableObjects = [...availableObjectsForModif];
+
+  if (currentCaisse && currentCaisse.contenu) {
+    currentCaisse.contenu.forEach((obj) => {
+      if (!allTableObjects.some((o) => o.id === obj.id)) {
+        allTableObjects.push(obj);
+      }
+    });
+  }
+
+  if (allTableObjects.length === 0) {
+    container.innerHTML = "<p>Aucun objet disponible ou dans la caisse</p>";
+    return;
+  }
+
+  let filtered = [...allTableObjects];
+
+  // TRI
+  if (modifCaisseSortColumn) {
+    filtered.sort((a, b) => {
+      let valA = a[modifCaisseSortColumn]
+        ? String(a[modifCaisseSortColumn]).toLowerCase()
+        : "";
+      let valB = b[modifCaisseSortColumn]
+        ? String(b[modifCaisseSortColumn]).toLowerCase()
+        : "";
+
+      if (valA < valB) return modifCaisseSortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return modifCaisseSortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // PAGINATION
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / modifCaisseItemsPerPage) || 1;
+
+  if (modifCaisseCurrentPage > totalPages) modifCaisseCurrentPage = totalPages;
+  if (modifCaisseCurrentPage < 1) modifCaisseCurrentPage = 1;
+
+  const startIndex = (modifCaisseCurrentPage - 1) * modifCaisseItemsPerPage;
+  const endIndex = startIndex + modifCaisseItemsPerPage;
+  const paginatedItems = filtered.slice(startIndex, endIndex);
+
+  // Helper pour l'icône de tri
+  const getSortIcon = (col) => {
+    if (modifCaisseSortColumn === col) {
+      return modifCaisseSortDirection === "asc" ? "↑" : "↓";
+    }
+    return '<span class="opacity-50">↕</span>';
+  };
+
+  let html = `
+    <table class="w-full border-collapse mt-2.5 bg-white shadow-input rounded-lg overflow-hidden text-sm">
+      <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white select-none">
+        <tr>
+          <th class="p-3 text-left font-semibold w-12">
+            <input type="checkbox" id="select_all_objets_modif" class="rounded border-white/40 text-custom-primary focus:ring-white" />
+          </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Code_bar')">
+            Code-barre ${getSortIcon("Code_bar")}
+          </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Type')">
+            Type ${getSortIcon("Type")}
+          </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Nom')">
+            Nom ${getSortIcon("Nom")}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+  `;
+
+  if (paginatedItems.length === 0) {
+    html += `<tr><td colspan="4" class="p-3 text-center text-gray-400 italic">Aucun objet sur cette page</td></tr>`;
+  } else {
+    paginatedItems.forEach((objet) => {
+      const isSelected = modifSelectedObjects.some((o) => o.id === objet.id);
+      html += `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="p-3 text-center">
+            <input type="checkbox" 
+                   class="objet-checkbox-modif rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
+                   data-objet='${JSON.stringify(objet)}'
+                   ${isSelected ? "checked" : ""} />
+          </td>
+          <td class="p-3 text-center">${objet.Code_bar}</td>
+          <td class="p-3 text-center">${objet.Type}</td>
+          <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
+        </tr>
+      `;
+    });
+  }
+
+  html += `</tbody></table>`;
+
+  // Contrôles de pagination
+  html += `
+    <div class="p-3 flex justify-between items-center text-slate-500 text-sm border-t border-gray-200 mt-2">
+      <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+              onclick="window.changeModifCaissePage(-1)" ${modifCaisseCurrentPage === 1 ? "disabled" : ""}>
+        &larr; Précédent
+      </button>
+      <span class="font-medium">Page ${modifCaisseCurrentPage} / ${totalPages}</span>
+      <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+              onclick="window.changeModifCaissePage(1)" ${modifCaisseCurrentPage === totalPages ? "disabled" : ""}>
+        Suivant &rarr;
+      </button>
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  // Gérer le "Tout sélectionner" de la page courante
+  const selectAll = document.getElementById("select_all_objets_modif");
+  if (selectAll) {
+    selectAll.addEventListener("change", (e) => {
+      document.querySelectorAll(".objet-checkbox-modif").forEach((cb) => {
+        cb.checked = e.target.checked;
+        handleCheckboxChangeModif({ target: cb });
+      });
+    });
+  }
+
+  // Gérer les checkboxes individuelles
+  document.querySelectorAll(".objet-checkbox-modif").forEach((checkbox) => {
+    checkbox.addEventListener("change", handleCheckboxChangeModif);
+  });
+}
+
+// Changer de page (+1 ou -1)
+window.changeModifCaissePage = function (delta) {
+  modifCaisseCurrentPage += delta;
+  renderModifCaisseTable();
+};
+
+// Trier l'inventaire au clic sur l'en-tête
+window.sortModifCaisse = function (column) {
+  if (modifCaisseSortColumn === column) {
+    modifCaisseSortDirection =
+      modifCaisseSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    modifCaisseSortColumn = column;
+    modifCaisseSortDirection = "asc";
+  }
+  modifCaisseCurrentPage = 1;
+  renderModifCaisseTable();
+};
 
 // Gérer le changement de checkbox dans la modification
 function handleCheckboxChangeModif(e) {

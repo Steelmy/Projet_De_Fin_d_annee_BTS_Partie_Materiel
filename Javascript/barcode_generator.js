@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   btnOpenBarcode.addEventListener("click", () => {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
 
     // Reset à l'état initial (1 code-barre) à chaque ouverture
     qtySlider.value = 1;
@@ -35,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal.addEventListener("click", () => {
       modal.style.display = "none";
       modal.classList.add("hidden");
+      document.body.style.overflow = "";
     });
   }
 
@@ -43,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.target == modal) {
       modal.style.display = "none";
       modal.classList.add("hidden");
+      document.body.style.overflow = "";
     }
   });
 
