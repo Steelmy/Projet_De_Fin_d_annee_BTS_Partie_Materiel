@@ -168,9 +168,13 @@ function renderAddCaisseTable() {
         ? String(b[addCaisseSortColumn]).toLowerCase()
         : "";
 
-      if (valA < valB) return addCaisseSortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return addCaisseSortDirection === "asc" ? 1 : -1;
-      return 0;
+      if (valA === "" && valB !== "")
+        return addCaisseSortDirection === "asc" ? 1 : -1;
+      if (valB === "" && valA !== "")
+        return addCaisseSortDirection === "asc" ? -1 : 1;
+
+      const comparison = valA.localeCompare(valB, "fr");
+      return addCaisseSortDirection === "asc" ? comparison : -comparison;
     });
   }
 
@@ -200,8 +204,8 @@ function renderAddCaisseTable() {
           <th class="p-3 text-left font-semibold w-12">
             <input type="checkbox" id="select_all_objets" class="rounded border-white/40 text-custom-primary focus:ring-white" />
           </th>
-          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Code_bar')">
-            Code-barre ${getSortIcon("Code_bar")}
+          <th class="p-3 font-semibold text-center">
+            Code-barre
           </th>
           <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Type')">
             Type ${getSortIcon("Type")}

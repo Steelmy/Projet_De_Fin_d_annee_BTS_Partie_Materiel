@@ -413,21 +413,18 @@ function applyFilters() {
         valB = valB.trim().toLowerCase();
       }
 
-      if (valA < valB) return currentSortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return currentSortDirection === "asc" ? 1 : -1;
-      return 0;
+      if (valA === "" && valB !== "")
+        return currentSortDirection === "asc" ? 1 : -1;
+      if (valB === "" && valA !== "")
+        return currentSortDirection === "asc" ? -1 : 1;
+
+      const comparison = valA.localeCompare(valB, "fr");
+      return currentSortDirection === "asc" ? comparison : -comparison;
     });
   }
 
   // Update icons
-  const sortColumns = [
-    "Code_bar",
-    "Type",
-    "Nom",
-    "Etat",
-    "Utilisateur",
-    "Nom_caisse",
-  ];
+  const sortColumns = ["Type", "Nom", "Etat", "Utilisateur", "Nom_caisse"];
   sortColumns.forEach((col) => {
     const iconSpan = document.getElementById(`sort_icon_${col}`);
     if (iconSpan) {

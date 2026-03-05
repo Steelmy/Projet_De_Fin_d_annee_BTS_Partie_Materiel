@@ -382,9 +382,13 @@ function renderModifCaisseTable() {
         ? String(b[modifCaisseSortColumn]).toLowerCase()
         : "";
 
-      if (valA < valB) return modifCaisseSortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return modifCaisseSortDirection === "asc" ? 1 : -1;
-      return 0;
+      if (valA === "" && valB !== "")
+        return modifCaisseSortDirection === "asc" ? 1 : -1;
+      if (valB === "" && valA !== "")
+        return modifCaisseSortDirection === "asc" ? -1 : 1;
+
+      const comparison = valA.localeCompare(valB, "fr");
+      return modifCaisseSortDirection === "asc" ? comparison : -comparison;
     });
   }
 
@@ -414,8 +418,8 @@ function renderModifCaisseTable() {
           <th class="p-3 text-left font-semibold w-12">
             <input type="checkbox" id="select_all_objets_modif" class="rounded border-white/40 text-custom-primary focus:ring-white" />
           </th>
-          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Code_bar')">
-            Code-barre ${getSortIcon("Code_bar")}
+          <th class="p-3 font-semibold text-center">
+            Code-barre
           </th>
           <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Type')">
             Type ${getSortIcon("Type")}
