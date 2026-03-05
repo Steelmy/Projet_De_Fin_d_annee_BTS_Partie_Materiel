@@ -1207,6 +1207,35 @@
     overflow: visible;
   }
 }
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-zone, #print-zone * {
+    visibility: visible;
+  }
+  #print-zone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    justify-items: center;
+    align-items: center;
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .barcode-item {
+    margin: 0;
+    padding: 10px;
+    page-break-inside: avoid;
+  }
+}
 @property --tw-rotate-x {
   syntax: "*";
   inherits: false;

@@ -65,6 +65,72 @@ try {
         $fill = !$fill;
     }
 
+    // --- TABLEAUX DE CAISSE ---
+    $stmtCaisses = $conn->prepare("
+        SELECT 
+            c.id,
+            c.Nom,
+            c.Etat,
+            u.Prénom,
+            u.Nom AS Nom_utilisateur
+        FROM Caisse c
+        LEFT JOIN utilisateurs u ON c.Emprunteur_id = u.id
+        ORDER BY c.Nom
+    ");
+    $stmtCaisses->execute();
+    $caisses = $stmtCaisses->fetchAll(PDO::FETCH_ASSOC);
+
+    if (count($caisses) > 0) {
+        $stmtObjetsCaisse = $conn->prepare("
+            SELECT Code_bar, Type, Nom, Etat
+            FROM Objet
+            WHERE Caisse_id = ?
+            ORDER BY Type, Nom
+        ");
+
+        foreach ($caisses as $caisse) {
+            $pdf->Ln(10);
+            
+            // Titre de la caisse
+            $pdf->SetFont('Arial', 'B', 12);
+            $caisseTitle = 'Caisse : ' . $caisse['Nom'] . ' (' . $caisse['Etat'] . ')';
+            if ($caisse['Etat'] !== 'disponible' && !empty($caisse['Prénom'])) {
+                $caisseTitle .= ' - Utilisateur : ' . $caisse['Prénom'] . ' ' . $caisse['Nom_utilisateur'];
+            }
+            $pdf->Cell(0, 10, utf8_decode($caisseTitle), 0, 1, 'L');
+
+            // Récupérer les objets de la caisse
+            $stmtObjetsCaisse->execute([$caisse['id']]);
+            $objets = $stmtObjetsCaisse->fetchAll(PDO::FETCH_ASSOC);
+
+            if (count($objets) > 0) {
+                // En-têtes du tableau de la caisse
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->SetFillColor(255, 235, 200); // Couleur distincte
+                $pdf->Cell(45, 8, 'Code-barre', 1, 0, 'C', true);
+                $pdf->Cell(50, 8, 'Type', 1, 0, 'C', true);
+                $pdf->Cell(65, 8, utf8_decode('Nom'), 1, 0, 'C', true);
+                $pdf->Cell(30, 8, utf8_decode('État'), 1, 1, 'C', true);
+
+                $pdf->SetFont('Arial', '', 8);
+                $fillCaisse = false;
+                foreach ($objets as $objet) {
+                    if ($fillCaisse) {
+                        $pdf->SetFillColor(250, 245, 240);
+                    }
+                    $pdf->Cell(45, 7, utf8_decode($objet['Code_bar']), 1, 0, 'L', $fillCaisse);
+                    $pdf->Cell(50, 7, utf8_decode($objet['Type']), 1, 0, 'L', $fillCaisse);
+                    $pdf->Cell(65, 7, utf8_decode($objet['Nom']), 1, 0, 'L', $fillCaisse);
+                    $pdf->Cell(30, 7, utf8_decode($objet['Etat']), 1, 1, 'C', $fillCaisse);
+                    $fillCaisse = !$fillCaisse;
+                }
+            } else {
+                $pdf->SetFont('Arial', 'I', 9);
+                $pdf->Cell(0, 8, utf8_decode('Aucun objet dans cette caisse.'), 0, 1, 'L');
+            }
+        }
+    }
+
     // Pied de page
     $pdf->Ln(10);
     $pdf->SetFont('Arial', 'I', 8);

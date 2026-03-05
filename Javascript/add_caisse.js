@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (formAjoutCaisse) {
     formAjoutCaisse.addEventListener("submit", handleSubmitCaisse);
     initializeObjectSelection();
+    updateSelectedObjectsDisplay();
   }
 });
 
@@ -238,6 +239,14 @@ async function addObjectByBarcode(codeBarre) {
 
       selectedObjects.push(objet);
       updateSelectedObjectsDisplay();
+
+      // Mettre à jour la checkbox correspondante dans le tableau
+      const checkbox = document.querySelector(
+        `.objet-checkbox[data-objet*='"id":${objet.id}']`,
+      );
+      if (checkbox) {
+        checkbox.checked = true;
+      }
     } else {
       alert("Objet non trouvé ou non disponible");
     }

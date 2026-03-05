@@ -54,9 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function generateBarcodes(number) {
+    const num = parseInt(number, 10);
+    const minVal = 1;
+    const maxVal = 52;
+
+    if (isNaN(num) || num < minVal || num > maxVal) {
+      console.warn(
+        `Quantité non autorisée : ${number}. Les valeurs doivent être comprises entre ${minVal} et ${maxVal}.`,
+      );
+      return;
+    }
+
     printZone.innerHTML = ""; // On vide la zone
 
-    for (let i = 1; i <= number; i++) {
+    for (let i = 1; i <= num; i++) {
       // Création d'un conteneur pour chaque code
       let container = document.createElement("div");
       container.className = "barcode-item";
@@ -84,8 +95,72 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Lancer l'impression
+  // Lancer l'impression propre
   btnPrint.addEventListener("click", () => {
-    window.print();
+    // Récupérer le contenu HTML des codes-barres
+    const printContent = printZone.innerHTML;
+
+    // S'il n'y a rien à imprimer
+    if (!printContent.trim()) {
+      console.warn("Rien à imprimer");
+      return;
+    }
+
+    // Créer une fenêtre d'impression invisible (iframe)
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "absolute";
+    printFrame.style.width = "0";
+    printFrame.style.height = "0";
+    printFrame.style.border = "none";
+    document.body.appendChild(printFrame);
+
+    const doc = printFrame.contentWindow.document;
+
+    // Injecter le contenu et les styles spécifiques pour l'impression 4 par ligne
+    doc.write(`
+      <html>
+        <head>
+          <title>Codes-barres</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 20px;
+              font-family: Arial, sans-serif;
+            }
+            .grid-container {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 20px;
+              justify-items: center;
+              align-items: center;
+            }
+            .barcode-item {
+              page-break-inside: avoid;
+              text-align: center;
+            }
+            svg {
+              max-width: 100%;
+              height: auto;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="grid-container">
+            ${printContent}
+          </div>
+        </body>
+      </html>
+    `);
+
+    doc.close();
+
+    // Attendre que tout soit chargé, puis lancer l'impression
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+
+    // Nettoyer l'iframe après un léger délai pour s'assurer que l'impression est partie
+    setTimeout(() => {
+      document.body.removeChild(printFrame);
+    }, 1000);
   });
 });

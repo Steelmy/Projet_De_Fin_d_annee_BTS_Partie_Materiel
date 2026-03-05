@@ -298,8 +298,13 @@ async function addObjectToModif(codeBarre) {
       modifSelectedObjects.push(objet);
       updateModifObjectsDisplay();
 
-      // Recharger le tableau
-      loadObjectsTableModif();
+      // Mettre à jour la checkbox correspondante dans le tableau
+      const checkbox = document.querySelector(
+        `.objet-checkbox-modif[data-objet*='"id":${objet.id}']`,
+      );
+      if (checkbox) {
+        checkbox.checked = true;
+      }
     } else {
       alert("Objet non trouvé ou non disponible");
     }

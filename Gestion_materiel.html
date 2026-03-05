@@ -376,6 +376,13 @@
                     >
                       Créer
                     </button>
+                    <button
+                      type="button"
+                      class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+                      data-form="form_ajout_caisse"
+                    >
+                      Réinitialiser
+                    </button>
                   </div>
                   <div
                     class="box-input-wrapper w-full relative min-w-[150px] flex-1 overflow-visible"
@@ -417,12 +424,21 @@
                     Sélectionnez la caisse à supprimer ci-dessus.
                   </p>
                   <div id="caisse_details_suppr" class="mb-4"></div>
-                  <button
-                    type="submit"
-                    class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(239,68,68,0.4)] hover:-translate-y-0.5 transition-all duration-300 mt-2.5"
-                  >
-                    Confirmer Suppression
-                  </button>
+                  <div class="flex gap-2.5 mt-2.5">
+                    <button
+                      type="submit"
+                      class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(239,68,68,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      Confirmer Suppression
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+                      data-form="form_suppression_caisse"
+                    >
+                      Réinitialiser
+                    </button>
+                  </div>
                 </form>
               </div>
 
@@ -453,6 +469,8 @@
                         class="px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
                       >
                         <option value="disponible">Disponible</option>
+                        <option value="réservé">Réservé</option>
+                        <option value="emprunté">Emprunté</option>
                       </select>
                     </div>
                     <!-- User selection for caisse -->
@@ -485,12 +503,21 @@
                     <div id="caisse_contenu_modif" class="my-2.5"></div>
                     <div id="objets_table_container_modif"></div>
 
-                    <button
-                      type="submit"
-                      class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300 mt-2.5"
-                    >
-                      Sauvegarder Caisse
-                    </button>
+                    <div class="flex gap-2.5 mt-2.5">
+                      <button
+                        type="submit"
+                        class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+                      >
+                        Sauvegarder Caisse
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+                        data-form="form_modification_caisse"
+                      >
+                        Réinitialiser
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -618,7 +645,7 @@
               type="range"
               id="barcode-qty"
               min="1"
-              max="50"
+              max="52"
               value="1"
               class="w-full mt-2.5 accent-custom-brandLight"
             />

@@ -45,7 +45,61 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleCaisse.dispatchEvent(new Event("change"));
     }
 
-    // 4. Si c'est une caisse, reset aussi le formulaire de caisse correspondant
+    // 4. Custom logic based on the specific form being reset
+    if (
+      form.id === "form_ajout_caisse" ||
+      (wasChecked && form.id === "form_ajout")
+    ) {
+      if (typeof window.resetFormAjoutCaisse === "function") {
+        window.resetFormAjoutCaisse();
+      } else {
+        const listAjout = document.getElementById("objets_list_ajout");
+        if (listAjout) listAjout.innerHTML = "";
+      }
+    }
+
+    if (
+      form.id === "form_suppression_caisse" ||
+      (wasChecked && form.id === "form_suppression")
+    ) {
+      if (typeof window.resetFormSuppressionCaisse === "function") {
+        window.resetFormSuppressionCaisse();
+      } else {
+        const detailsSuppr = document.getElementById("caisse_details_suppr");
+        if (detailsSuppr) {
+          detailsSuppr.innerHTML = "";
+          detailsSuppr.classList.add("hidden");
+        }
+      }
+    }
+
+    if (
+      form.id === "form_modification_caisse" ||
+      (wasChecked && form.id === "form_modification")
+    ) {
+      if (typeof window.resetFormModificationCaisse === "function") {
+        window.resetFormModificationCaisse();
+      } else {
+        const contenuModif = document.getElementById("caisse_contenu_modif");
+        if (contenuModif) {
+          contenuModif.innerHTML = "";
+          contenuModif.classList.add("hidden");
+        }
+
+        const objetsTableModif = document.getElementById(
+          "objets_table_container_modif",
+        );
+        if (objetsTableModif) {
+          objetsTableModif.innerHTML = "";
+          objetsTableModif.classList.add("hidden");
+        }
+
+        const detailsModif = document.getElementById("caisse_details_modif");
+        if (detailsModif) detailsModif.classList.add("hidden");
+      }
+    }
+
+    // 4.5 Si c'est un formulaire principal ET une caisse était cochée, on reset le formulaire caisse aussi
     if (wasChecked) {
       let crateFormId = null;
       if (form.id === "form_ajout") crateFormId = "form_ajout_caisse";
@@ -63,15 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "input[type='hidden']",
           );
           crateHidden.forEach((i) => (i.value = ""));
-          // Clear custom lists
-          const listAjout = document.getElementById("objets_list_ajout");
-          if (listAjout) listAjout.innerHTML = "";
-
-          const detailsSuppr = document.getElementById("caisse_details_suppr");
-          if (detailsSuppr) detailsSuppr.innerHTML = "";
-
-          const contenuModif = document.getElementById("caisse_contenu_modif");
-          if (contenuModif) contenuModif.innerHTML = "";
         }
       }
     }
