@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json');
+// Endpoint : Recherche de codes-barres
 require_once 'db_connect.php';
 
 try {
@@ -9,9 +9,6 @@ try {
     
     $conditions = [];
     $params = [];
-
-    // Prioriser les résultats qui COMMENCENT par le terme
-    // Mais on veut aussi pouvoir filtrer
     
     $sql = "SELECT Code_bar, Type, Nom FROM Objet";
     
@@ -30,14 +27,14 @@ try {
         $params[':nom'] = $nom;
     }
 
-    // Nouveau filtre sur l'état (ex: disponible)
+    // Filtre par état
     $etat = isset($_GET['etat']) ? trim($_GET['etat']) : '';
     if (!empty($etat)) {
         $conditions[] = "Etat = :etat";
         $params[':etat'] = $etat;
     }
 
-    // Filtre "disponible uniquement" : objets disponibles ET pas dans une caisse
+    // Filtre "disponible uniquement"
     $disponibleOnly = isset($_GET['disponible_only']) ? trim($_GET['disponible_only']) : '';
     if ($disponibleOnly === '1') {
         $conditions[] = "Etat = 'disponible'";
@@ -46,17 +43,9 @@ try {
     
     if (count($conditions) > 0) {
         $sql .= " WHERE " . implode(' AND ', $conditions);
-        // Si on a une recherche précise (query), on trie par code barre
-        // Si on a juste des filtres (Type/Nom) sans query, on peut trier par code barre ou random
-        if (!empty($query)) {
-             $orderBy = "Code_bar";
-        } else {
-             // Pas de query : propositions "au hasard" ou par défaut
-             $orderBy = "RAND()";
-        }
+        $orderBy = "Code_bar";
     } else {
-        // Aucune condition (tout vide) : Random
-        $orderBy = "RAND()";
+        $orderBy = "Code_bar";
     }
     
     $sql .= " ORDER BY $orderBy LIMIT 10";
@@ -65,15 +54,8 @@ try {
     $stmt->execute($params);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    echo json_encode([
-        'success' => true,
-        'results' => $results
-    ]);
+    ApiResponse::success(['results' => $results]);
 
-} catch(PDOException $e) {
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+} catch (PDOException $e) {
+    ApiResponse::exception($e);
 }
-?>

@@ -1,11 +1,11 @@
 <?php
-header('Content-Type: application/json');
+// Endpoint : Recherche universelle (types, noms, utilisateurs, caisses, codes)
 require_once 'db_connect.php';
 
 try {
     $type = isset($_GET['type']) ? $_GET['type'] : '';
     $query = isset($_GET['query']) ? trim($_GET['query']) : '';
-    $filter = isset($_GET['filter']) ? trim($_GET['filter']) : ''; // Nouveau paramètre de filtrage
+    $filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
     $limit = 10;
 
     $results = [];
@@ -15,18 +15,17 @@ try {
     $where = '';
     $params = [];
 
-    // Configuration selon le type
+    // Configuration selon le type (KISS : switch simple)
     switch ($type) {
         case 'user':
             $table = 'utilisateurs';
             $fields = 'id, Nom, Prénom';
-            // Recherche sur Nom ou Prénom
             if (!empty($query)) {
                 $where = "(Nom LIKE :q_start OR Prénom LIKE :q_start)";
                 $orderBy = "Nom, Prénom";
                 $params[':q_start'] = $query . '%';
             } else {
-                $orderBy = "RAND()";
+                $orderBy = "Nom, Prénom";
             }
             break;
 
@@ -38,7 +37,7 @@ try {
                 $orderBy = "Nom";
                 $params[':q_start'] = $query . '%';
             } else {
-                $orderBy = "RAND()";
+                $orderBy = "Nom";
             }
             break;
 
@@ -50,49 +49,40 @@ try {
                 $orderBy = "Type";
                 $params[':q_start'] = $query . '%';
             } else {
-                $orderBy = "RAND()";
+                $orderBy = "Type";
             }
             break;
 
         case 'materiel_nom':
-             $table = 'Objet';
-             $fields = 'DISTINCT Nom';
-             $conditions = [];
-
-             if (!empty($query)) {
-                 $conditions[] = "Nom LIKE :q_start";
-                 $params[':q_start'] = $query . '%';
-             }
-             
-             // Filtrage par TYPE si fourni
-             if (!empty($filter)) {
-                 $conditions[] = "Type = :filter";
-                 $params[':filter'] = $filter;
-             }
-
-             if (count($conditions) > 0) {
-                 $where = implode(' AND ', $conditions);
-                 $orderBy = "Nom";
-             } else {
-                 $orderBy = "RAND()";
-             }
-             break;
+            $table = 'Objet';
+            $fields = 'DISTINCT Nom';
+            $conditions = [];
+            if (!empty($query)) {
+                $conditions[] = "Nom LIKE :q_start";
+                $params[':q_start'] = $query . '%';
+            }
+            if (!empty($filter)) {
+                $conditions[] = "Type = :filter";
+                $params[':filter'] = $filter;
+            }
+            if (count($conditions) > 0) {
+                $where = implode(' AND ', $conditions);
+                $orderBy = "Nom";
+            } else {
+                $orderBy = "Nom";
+            }
+            break;
         
         case 'materiel_code':
             $table = 'Objet';
             $fields = 'id, Code_bar, Nom, Type';
             $conditions = [];
-
-            // 1. Filtrage par Query (chiffres seulement)
             if (!empty($query)) {
                 $conditions[] = "Code_bar LIKE :q_start";
                 $params[':q_start'] = $query . '%';
             }
-
-            // 2. Filtrage Contextuel (Type et Nom)
             $filterType = isset($_GET['filter_type']) ? trim($_GET['filter_type']) : '';
             $filterNom = isset($_GET['filter_nom']) ? trim($_GET['filter_nom']) : '';
-
             if (!empty($filterType)) {
                 $conditions[] = "Type = :f_type";
                 $params[':f_type'] = $filterType;
@@ -101,23 +91,19 @@ try {
                 $conditions[] = "Nom = :f_nom";
                 $params[':f_nom'] = $filterNom;
             }
-
-            // 3. Construction du WHERE et ORDER BY
             if (count($conditions) > 0) {
                 $where = implode(' AND ', $conditions);
-                // Si on a une query, on trie par pertinence code-barre, sinon random ou ID
-                $orderBy = !empty($query) ? "Code_bar" : "RAND()";
+                $orderBy = "Code_bar";
             } else {
-                $orderBy = "RAND()";
+                $orderBy = "Code_bar";
             }
-             break;
+            break;
 
         default:
-            echo json_encode(['success' => false, 'error' => 'Type invalide']);
-            exit;
+            ApiResponse::error('Type invalide');
     }
 
-    // Construction de la requête
+    // Construction de la requête (DRY : un seul endroit)
     $sql = "SELECT $fields FROM $table";
     if (!empty($where)) {
         $sql .= " WHERE $where";
@@ -128,59 +114,26 @@ try {
     $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Formatage des données pour le frontend
+    // Formatage selon le type (KISS : mapping simple)
     foreach ($rows as $row) {
         $item = [];
         
         if ($type === 'user') {
-            $item = [
-                'id' => $row['id'],
-                'label' => $row['Prénom'] . ' ' . $row['Nom'],
-                'value' => $row['Prénom'] . ' ' . $row['Nom'], 
-                'meta' => $row
-            ];
+            $item = ['id' => $row['id'], 'label' => $row['Prénom'] . ' ' . $row['Nom'], 'value' => $row['Prénom'] . ' ' . $row['Nom'], 'meta' => $row];
         } elseif ($type === 'caisse') {
-            $item = [
-                'id' => $row['id'],
-                'label' => $row['Nom'],
-                'value' => $row['Nom'],
-                'meta' => $row
-            ];
+            $item = ['id' => $row['id'], 'label' => $row['Nom'], 'value' => $row['Nom'], 'meta' => $row];
         } elseif ($type === 'materiel_type') {
-            $item = [
-                'id' => $row['Type'],
-                'label' => $row['Type'],
-                'value' => $row['Type'],
-                'meta' => []
-            ];
+            $item = ['id' => $row['Type'], 'label' => $row['Type'], 'value' => $row['Type'], 'meta' => []];
         } elseif ($type === 'materiel_nom') {
-             $item = [
-                 'id' => $row['Nom'],
-                 'label' => $row['Nom'],
-                 'value' => $row['Nom'],
-                 'meta' => []
-             ];
-         } elseif ($type === 'materiel_code') {
-            $item = [
-                'id' => $row['id'],
-                'label' => $row['Code_bar'] . ' - ' . $row['Nom'],
-                'value' => $row['Code_bar'],
-                'meta' => $row
-            ];
+            $item = ['id' => $row['Nom'], 'label' => $row['Nom'], 'value' => $row['Nom'], 'meta' => []];
+        } elseif ($type === 'materiel_code') {
+            $item = ['id' => $row['id'], 'label' => $row['Code_bar'] . ' - ' . $row['Nom'], 'value' => $row['Code_bar'], 'meta' => $row];
         }
-
         $results[] = $item;
     }
 
-    echo json_encode([
-        'success' => true,
-        'data' => $results
-    ]);
+    ApiResponse::success(['data' => $results]);
 
-} catch(PDOException $e) {
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+} catch (PDOException $e) {
+    ApiResponse::exception($e);
 }
-?>

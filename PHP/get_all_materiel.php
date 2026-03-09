@@ -1,18 +1,12 @@
 <?php
-header('Content-Type: application/json');
+// Endpoint : Récupérer tous les matériels
 require_once 'db_connect.php';
 
 try {
-    // Récupérer tous les objets avec infos utilisateur ET caisse (via JOIN)
     $stmt = $conn->prepare("
         SELECT 
-            o.id,
-            o.Code_bar,
-            o.Type,
-            o.Nom,
-            o.Etat,
-            u.Prénom,
-            u.Nom AS Nom_utilisateur,
+            o.id, o.Code_bar, o.Type, o.Nom, o.Etat,
+            u.Prénom, u.Nom AS Nom_utilisateur,
             c.Nom AS Nom_caisse
         FROM Objet o
         LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
@@ -22,19 +16,11 @@ try {
     $stmt->execute();
     $materiels = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    echo json_encode([
-        'success' => true,
+    ApiResponse::success([
         'data' => $materiels,
         'total' => count($materiels)
     ]);
     
-} catch(PDOException $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+} catch (PDOException $e) {
+    ApiResponse::exception($e);
 }
-
-$conn = null;
-?>

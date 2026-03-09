@@ -1,21 +1,14 @@
 <?php
-// PHP/db_connect.php
-
-$host = 'localhost';
-$dbname = 'gestion_materiel_db';
-$username = 'root';
-$password = '';
-
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'error' => 'Erreur de connexion : ' . $e->getMessage()
-    ]);
-    exit;
-}
-?>
+/**
+ * db_connect.php — Wrapper rétrocompatible
+ * 
+ * Ce fichier est conservé pour compatibilité avec les endpoints existants.
+ * Il délègue au bootstrap.php qui gère :
+ *   - Chargement des variables d'environnement (.env)
+ *   - Initialisation du logger
+ *   - Connexion PDO via Database::getConnection()
+ *   - Headers JSON
+ * 
+ * Les credentials ne sont plus en dur ici (voir .env).
+ */
+require_once __DIR__ . '/core/bootstrap.php';

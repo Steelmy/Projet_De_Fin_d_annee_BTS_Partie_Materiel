@@ -1,12 +1,8 @@
 <?php
-header('Content-Type: application/json');
-
-// Connexion à la base de données via le fichier central
+// Endpoint : Récupérer tous les utilisateurs
 require_once 'db_connect.php';
 
 try {
-
-    // Récupérer tous les utilisateurs
     $stmt = $conn->prepare("SELECT id, Nom, Prénom FROM utilisateurs ORDER BY Nom, Prénom");
     $stmt->execute();
     
@@ -20,17 +16,8 @@ try {
         ];
     }
 
-    echo json_encode([
-        'success' => true,
-        'utilisateurs' => $utilisateurs
-    ]);
+    ApiResponse::success(['utilisateurs' => $utilisateurs]);
 
-} catch(PDOException $e) {
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+} catch (PDOException $e) {
+    ApiResponse::exception($e);
 }
-
-$conn = null;
-?>

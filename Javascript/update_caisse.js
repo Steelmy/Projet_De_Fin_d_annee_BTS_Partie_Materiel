@@ -372,24 +372,16 @@ function renderModifCaisseTable() {
 
   let filtered = [...allTableObjects];
 
-  // TRI
+  // TRI (DRY : utilise sort_utils.js)
   if (modifCaisseSortColumn) {
-    filtered.sort((a, b) => {
-      let valA = a[modifCaisseSortColumn]
-        ? String(a[modifCaisseSortColumn]).toLowerCase()
-        : "";
-      let valB = b[modifCaisseSortColumn]
-        ? String(b[modifCaisseSortColumn]).toLowerCase()
-        : "";
-
-      if (valA === "" && valB !== "")
-        return modifCaisseSortDirection === "asc" ? 1 : -1;
-      if (valB === "" && valA !== "")
-        return modifCaisseSortDirection === "asc" ? -1 : 1;
-
-      const comparison = valA.localeCompare(valB, "fr");
-      return modifCaisseSortDirection === "asc" ? comparison : -comparison;
-    });
+    filtered.sort((a, b) =>
+      window.localeSortComparator(
+        a,
+        b,
+        modifCaisseSortColumn,
+        modifCaisseSortDirection,
+      ),
+    );
   }
 
   // PAGINATION

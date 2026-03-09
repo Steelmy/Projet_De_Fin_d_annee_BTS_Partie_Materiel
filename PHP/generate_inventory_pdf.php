@@ -1,8 +1,8 @@
 <?php
-require('fpdf/fpdf.php');
-
-// Connexion à la base de données via le fichier central
+// Note: bootstrap.php via db_connect.php set le header JSON, 
+// mais FPDF l'écrase avec application/pdf dans Output()
 require_once 'db_connect.php';
+require('fpdf/fpdf.php');
 
 try {
 

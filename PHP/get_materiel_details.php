@@ -1,57 +1,34 @@
 <?php
-header('Content-Type: application/json');
-
-// Connexion à la base de données via le fichier central
+// Endpoint : Détails d'un matériel
 require_once 'db_connect.php';
 
 try {
-
-    // Récupérer le code-barre
     $codeBarre = isset($_GET['code_barre']) ? trim($_GET['code_barre']) : '';
 
     if (empty($codeBarre)) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Code-barre requis'
-        ]);
-        exit;
+        ApiResponse::error('Code-barre requis');
     }
 
-    // Récupérer les détails de l'objet
     $stmt = $conn->prepare("
         SELECT 
-            o.id,
-            o.Code_bar,
-            o.Type,
-            o.Nom,
-            o.Etat,
-            o.Emprunteur_id,
-            o.Caisse_id,
-            o.created_at,
-            o.updated_at,
-            u.Nom as user_nom,
-            u.Prénom as user_prenom,
+            o.id, o.Code_bar, o.Type, o.Nom, o.Etat,
+            o.Emprunteur_id, o.Caisse_id,
+            o.created_at, o.updated_at,
+            u.Nom as user_nom, u.Prénom as user_prenom,
             c.Nom as caisse_nom
         FROM Objet o
         LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
         LEFT JOIN Caisse c ON o.Caisse_id = c.id
         WHERE o.Code_bar = :code_barre
     ");
-    
     $stmt->execute([':code_barre' => $codeBarre]);
     $objet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$objet) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Objet non trouvé'
-        ]);
-        exit;
+        ApiResponse::error('Objet non trouvé');
     }
 
-    // Formater la réponse
     $response = [
-        'success' => true,
         'materiel' => [
             'id' => $objet['id'],
             'code_barre' => $objet['Code_bar'],
@@ -73,14 +50,8 @@ try {
         ];
     }
 
-    echo json_encode($response);
+    ApiResponse::success($response);
 
-} catch(PDOException $e) {
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+} catch (PDOException $e) {
+    ApiResponse::exception($e);
 }
-
-$conn = null;
-?>

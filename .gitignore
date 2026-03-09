@@ -10,3 +10,7 @@ tests
 package-lock.json
 package.json
 playwright.config.js
+
+# Secrets et logs
+.env
+logs/

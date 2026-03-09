@@ -391,36 +391,16 @@ function applyFilters() {
     filtered = filtered.filter((item) => item.Nom === nomValue);
   }
 
-  // TRI
+  // TRI (DRY : utilise sort_utils.js)
   if (currentSortColumn) {
-    filtered.sort((a, b) => {
-      let valA = a[currentSortColumn]
-        ? String(a[currentSortColumn]).toLowerCase()
-        : "";
-      let valB = b[currentSortColumn]
-        ? String(b[currentSortColumn]).toLowerCase()
-        : "";
-
-      // Special sort criteria for "Utilisateur" handling Prénom and Nom combined
-      if (currentSortColumn === "Utilisateur") {
-        valA =
-          (a.Prénom ? a.Prénom : "") +
-          (a.Nom_utilisateur ? " " + a.Nom_utilisateur : "");
-        valB =
-          (b.Prénom ? b.Prénom : "") +
-          (b.Nom_utilisateur ? " " + b.Nom_utilisateur : "");
-        valA = valA.trim().toLowerCase();
-        valB = valB.trim().toLowerCase();
-      }
-
-      if (valA === "" && valB !== "")
-        return currentSortDirection === "asc" ? 1 : -1;
-      if (valB === "" && valA !== "")
-        return currentSortDirection === "asc" ? -1 : 1;
-
-      const comparison = valA.localeCompare(valB, "fr");
-      return currentSortDirection === "asc" ? comparison : -comparison;
-    });
+    filtered.sort((a, b) =>
+      window.localeSortComparator(
+        a,
+        b,
+        currentSortColumn,
+        currentSortDirection,
+      ),
+    );
   }
 
   // Update icons
