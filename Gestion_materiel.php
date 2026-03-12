@@ -6,6 +6,111 @@
     <title>Gestion du matériel</title>
     <!-- We inline the specific styles from historique_inventaire.php to ensure exact match -->
     <style>
+      :root { 
+          --sidebar-w: 250px; 
+          --primary: #b6a071; 
+          --dark: #1f2937; 
+      }
+      
+      /* Style de base de la sidebar */
+      .sidebar { 
+          width: var(--sidebar-w); 
+          background: var(--dark); 
+          color: white; 
+          position: fixed; 
+          height: 100%; 
+          left: 0; 
+          top: 0;
+          transition: 0.3s; 
+          z-index: 100; 
+      }
+      
+      /* Classe ajoutée via JS pour cacher la sidebar */
+      .sidebar.hidden { 
+          left: calc(-1 * var(--sidebar-w)); 
+      }
+      
+      /* En-tête de la sidebar */
+      .sidebar-header { 
+          padding: 30px 20px; 
+          text-align: center; 
+          background: #111827; 
+          border-bottom: 1px solid #374151; 
+          position: relative;
+      }
+      
+      .close-sidebar-btn {
+          display: none;
+          position: absolute;
+          right: 15px;
+          top: 15px;
+          background: none;
+          border: none;
+          color: #aaa;
+          font-size: 24px;
+          cursor: pointer;
+          transition: 0.3s;
+      }
+      .close-sidebar-btn:hover {
+          color: white;
+      }
+      
+      /* Liste du menu */
+      .sidebar-menu { 
+          list-style: none; 
+          padding: 20px 0; 
+          margin: 0;
+      }
+      
+      .sidebar-menu li { 
+          padding: 15px 25px; 
+          cursor: pointer; 
+          border-left: 4px solid transparent; 
+      }
+      
+      /* Élément actif et survol */
+      .sidebar-menu li.active { 
+          background: #374151; 
+          border-left-color: var(--primary); 
+      }
+      
+      .sidebar-menu a { 
+          color: white; 
+          text-decoration: none; 
+          display: flex; 
+          align-items: center; 
+          gap: 10px; 
+      }
+      
+      /* IMPORTANT : Pour que le contenu à côté de la sidebar s'ajuste bien */
+      .main-content { 
+          margin-left: var(--sidebar-w); 
+          flex: 1; 
+          transition: 0.3s; 
+          width: calc(100% - var(--sidebar-w)); 
+      }
+      
+      /* Ajustement quand la sidebar est cachée */
+      .main-content.full { 
+          margin-left: 0; 
+          width: 100%;
+      }
+      
+      /* RESPONSIVE: écrans 4:3 (<= 1024px) */
+      @media (max-width: 1024px) {
+          .main-content {
+              margin-left: 0 !important;
+              width: 100% !important;
+          }
+          .sidebar {
+              box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+              z-index: 999;
+          }
+          .close-sidebar-btn {
+              display: block;
+          }
+      }
+
       /* Keep minimal custom styles for complex elements difficult to do purely in inline Tailwind */
       /* Autocomplete positioning */
       .autocomplete-suggestions {
@@ -37,22 +142,67 @@
         flex: 1;
         overflow: visible;
       }
+
+      /* Table Footer Responsive Grid */
+      .table-footer {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          gap: 1rem;
+          padding: 1.25rem;
+      }
+      .table-footer-center {
+          justify-self: center;
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+      }
+      .table-footer-right {
+          justify-self: end;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+      }
+      @media (max-width: 768px) {
+          .table-footer {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+          }
+      }
     </style>
     <link rel="stylesheet" href="CSS/output.css" />
   </head>
   <body
-    class="font-sans bg-white min-h-screen p-5 leading-relaxed text-gray-800"
+    class="font-sans bg-white min-h-screen leading-relaxed text-gray-800"
   >
-    <div
-      class="max-w-[1400px] mx-auto bg-white rounded-2xl shadow-custom-lg border border-custom-border relative"
-    >
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="close-sidebar-btn" onclick="toggleSidebar()">&times;</button>
+            <h2 style="color: var(--primary)">INVENTAIRE</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="?page=dash">🏠 Dashboard</a></li>
+            <li><a href="?page=users">👥 Utilisateurs</a></li>
+            <li class="active"><a href="Gestion_materiel.php">📦 Gestion du matériel</a></li>
+            <li onclick="toggleModal(true)" style="color: var(--primary); font-weight: bold; margin-top: 15px;">➕ Nouvel Emprunt</li>
+        </ul>
+    </nav>
+
+    <div id="mainContent" class="main-content p-5">
+      <div
+        class="max-w-[1400px] mx-auto bg-white rounded-2xl shadow-custom-lg border border-custom-border relative"
+      >
       <header
         class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white py-10 px-8 text-center relative overflow-hidden"
       >
-        <!-- Pseudo element simulation for pulse effect using absolute div behind content -->
-        <div
-          class="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.1)_0%,transparent_70%)] animate-pulseSlow pointer-events-none"
-        ></div>
+        <button
+          onclick="toggleSidebar()"
+          class="absolute top-5 bg-white/20 hover:bg-white/30 text-white border border-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm transition-all duration-300 transform hover:-translate-y-0.5 z-50 cursor-pointer"
+          style="left: 1.25rem;"
+        >
+          ☰ Menu
+        </button>
         <h1
           class="text-4xl lg:text-5xl font-bold mb-4 drop-shadow-md relative z-10 inline-block"
         >
@@ -77,7 +227,7 @@
         <!-- Mode Selector styled like the Filter Select -->
         <div
           id="main_horizontal_wrapper"
-          class="flex items-center w-full gap-4"
+          class="flex flex-wrap items-center w-full gap-4"
         >
           <div class="min-w-[200px]">
             <select
@@ -608,20 +758,12 @@
                 class="[&>tr]:transition-all [&>tr]:duration-300 [&>tr]:border-l-4 [&>tr]:border-transparent [&>tr:hover]:bg-linear-to-r [&>tr:hover]:from-custom-brandLight/5 [&>tr:hover]:to-custom-brandLight/5 [&>tr:hover]:translate-x-2 [&>tr:hover]:border-custom-brandLight [&>tr:hover]:shadow-[0_4px_15px_rgba(0,0,0,0.08)] [&>tr>td]:p-4.5 [&>tr>td]:border-b [&>tr>td]:border-custom-border [&>tr>td]:align-middle [&>tr>td]:text-center"
               ></tbody>
             </table>
-            <div
-              class="p-5 flex justify-end items-center text-slate-500 flex-wrap gap-4 text-sm"
-              style="position: relative"
-            >
-              <!-- Pagination Controls -->
-              <div
-                class="flex items-center gap-3"
-                style="
-                  gap: 1.5rem;
-                  position: absolute;
-                  left: 50%;
-                  transform: translateX(-50%);
-                "
-              >
+            <div class="table-footer text-slate-500 text-sm">
+              <!-- Empty space for 1fr balance to keep center mathematically perfect -->
+              <div></div>
+
+              <!-- Pagination Controls (Center) -->
+              <div class="table-footer-center">
                 <button
                   id="btn_prev_page"
                   class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -639,7 +781,8 @@
                 </button>
               </div>
 
-              <div class="flex items-center gap-4">
+              <!-- Total and PDF Download (Right) -->
+              <div class="table-footer-right">
                 <button
                   id="btn_download_pdf"
                   class="px-3 py-1.5 bg-white border border-[#ccc] rounded-lg cursor-pointer shadow-input font-inherit text-gray-800 hover:bg-gray-50 transition-colors"
@@ -720,6 +863,18 @@
       </div>
 
       <script>
+        /* Fonction pour ouvrir/fermer la sidebar */
+        function toggleSidebar() { 
+            // Alterne la classe 'hidden' sur la sidebar
+            document.getElementById('sidebar').classList.toggle('hidden'); 
+            
+            // Alterne la classe 'full' sur le conteneur principal pour prendre toute la largeur
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) {
+                mainContent.classList.toggle('full'); 
+            }
+        }
+
         // Simple logic for UI switching (No external dependency needed for basic toggle)
         document.addEventListener("DOMContentLoaded", () => {
           const modeSelector = document.getElementById("modeSelector");
@@ -831,6 +986,7 @@
       <script src="Javascript/add_materiel.js?v=3"></script>
       <script src="Javascript/form_actions.js?v=2"></script>
       <script src="Javascript/caisse_form_toggle.js?v=1"></script>
+      </div>
     </div>
   </body>
 </html>
