@@ -8,15 +8,15 @@ Application web de gestion d'inventaire matériel. Permet la gestion complète d
 graph TB
     subgraph "Frontend"
         HTML["Gestion_materiel.html"]
-        CSS["CSS/output.css (Tailwind)"]
-        JS_CORE["Javascript/"]
-        JS_CORE --> SORT["sort_utils.js"]
-        JS_CORE --> AC["UniversalAutocomplete.js"]
-        JS_CORE --> ACB["UniversalAutocomplete_barcode.js"]
-        JS_CORE --> INIT["init_autocompletes.js"]
-        JS_CORE --> CRUD_JS["add/delete/update_materiel.js"]
-        JS_CORE --> CAISSE_JS["add/delete/update_caisse.js"]
-        JS_CORE --> FILTER["filter_consultation.js"]
+        CSS["css/output.css (Tailwind)"]
+        JS_CORE["javascript/"]
+        JS_CORE --> SORT["sortUtils.js"]
+        JS_CORE --> AC["universalAutocomplete.js"]
+        JS_CORE --> ACB["universalAutocompleteBarcode.js"]
+        JS_CORE --> INIT["initAutocompletes.js"]
+        JS_CORE --> CRUD_JS["add/delete/updateItem.js"]
+        JS_CORE --> CAISSE_JS["add/delete/updateBox.js"]
+        JS_CORE --> FILTER["filterConsultation.js"]
     end
 
     subgraph "Backend PHP"
@@ -29,8 +29,8 @@ graph TB
         subgraph "Endpoints"
             MATERIEL_API["add/delete/update/get_materiel*.php"]
             CAISSE_API["add/delete/update/get_caisse*.php"]
-            SEARCH_API["search_universal.php / search_codes_barres.php"]
-            UTILS_API["check_barcode.php / get_ids.php / get_utilisateurs.php"]
+            SEARCH_API["searchUniversal.php / searchBarcodes.php"]
+            UTILS_API["checkBarcode.php / getIds.php / getUsers.php"]
             MONITOR["monitor.php"]
         end
     end
@@ -60,52 +60,52 @@ graph TB
 ├── README.md
 ├── Gestion_materiel.html   # Page principale (SPA)
 ├── BDD/                    # Script SQL de création de la BDD
-├── CSS/
+├── css/
 │   ├── input.css           # Source Tailwind
 │   └── output.css          # CSS compilé
-├── Javascript/
-│   ├── sort_utils.js            # Utilitaire de tri centralisé (DRY)
-│   ├── UniversalAutocomplete.js # Autocomplétion texte
-│   ├── UniversalAutocomplete_barcode.js # Autocomplétion code-barre
-│   ├── init_autocompletes.js    # Initialisation des autocomplétions
-│   ├── filter_consultation.js   # Filtres et tri de l'inventaire
-│   ├── add_materiel.js          # Formulaire ajout matériel
-│   ├── delete_materiel.js       # Formulaire suppression matériel
-│   ├── update_materiel.js       # Formulaire modification matériel
-│   ├── add_caisse.js            # Formulaire ajout caisse
-│   ├── delete_caisse.js         # Formulaire suppression caisse
-│   ├── update_caisse.js         # Formulaire modification caisse
-│   ├── barcode_generator.js     # Génération de codes-barres
-│   ├── download_pdf.js          # Export PDF
+├── javascript/
+│   ├── sortUtils.js            # Utilitaire de tri centralisé (DRY)
+│   ├── universalAutocomplete.js # Autocomplétion texte
+│   ├── universalAutocompleteBarcode.js # Autocomplétion code-barre
+│   ├── initAutocompletes.js    # Initialisation des autocomplétions
+│   ├── filterConsultation.js   # Filtres et tri de l'inventaire
+│   ├── addItem.js          # Formulaire ajout matériel
+│   ├── deleteItem.js       # Formulaire suppression matériel
+│   ├── updateItem.js       # Formulaire modification matériel
+│   ├── addBox.js            # Formulaire ajout caisse
+│   ├── deleteBox.js         # Formulaire suppression caisse
+│   ├── updateBox.js         # Formulaire modification caisse
+│   ├── barcodeGenerator.js     # Génération de codes-barres
+│   ├── downloadPdf.js          # Export PDF
 │   ├── textFieldLoader.js       # Chargement dynamique des champs
-│   ├── caisse_form_toggle.js    # Toggle formulaires caisse
-│   └── form_actions.js          # Actions formulaires
-├── PHP/
+│   ├── boxFormToggle.js    # Toggle formulaires caisse
+│   └── formActions.js          # Actions formulaires
+├── php/
 │   ├── core/                    # Infrastructure commune
 │   │   ├── bootstrap.php        # Point d'entrée unique
 │   │   ├── EnvLoader.php        # Chargement .env
 │   │   ├── Logger.php           # Système de logging
 │   │   ├── Database.php         # Connexion PDO
 │   │   └── ApiResponse.php      # Réponses JSON standardisées
-│   ├── db_connect.php           # Wrapper rétrocompatible
+│   ├── dbConnect.php           # Wrapper rétrocompatible
 │   ├── monitor.php              # Health check & monitoring
-│   ├── add_materiel.php         # POST — Ajouter matériel
-│   ├── delete_materiel.php      # POST — Supprimer matériel
-│   ├── update_materiel.php      # POST — Modifier matériel
-│   ├── get_all_materiel.php     # GET — Liste tous les matériels
-│   ├── get_materiel_details.php # GET — Détails d'un matériel
-│   ├── add_caisse.php           # POST — Ajouter caisse
-│   ├── delete_caisse.php        # POST — Supprimer caisse
-│   ├── update_caisse.php        # POST — Modifier caisse
-│   ├── get_all_caisses.php      # GET — Liste toutes les caisses
-│   ├── get_caisse_details.php   # GET — Détails d'une caisse
-│   ├── get_available_objects.php # GET — Objets disponibles
-│   ├── search_codes_barres.php  # GET — Recherche codes-barres
-│   ├── search_universal.php     # GET — Recherche universelle
-│   ├── check_barcode.php        # GET — Vérifier unicité code-barre
-│   ├── get_ids.php              # GET — IDs par type/nom
-│   ├── get_utilisateurs.php     # GET — Liste utilisateurs
-│   └── generate_inventory_pdf.php # GET — Génération PDF
+│   ├── addItem.php         # POST — Ajouter matériel
+│   ├── deleteItem.php      # POST — Supprimer matériel
+│   ├── updateItem.php      # POST — Modifier matériel
+│   ├── getAllItems.php     # GET — Liste tous les matériels
+│   ├── getItemDetails.php # GET — Détails d'un matériel
+│   ├── addBox.php           # POST — Ajouter caisse
+│   ├── deleteBox.php        # POST — Supprimer caisse
+│   ├── updateBox.php        # POST — Modifier caisse
+│   ├── getAllBoxes.php      # GET — Liste toutes les caisses
+│   ├── getBoxDetails.php   # GET — Détails d'une caisse
+│   ├── getAvailableObjects.php # GET — Objets disponibles
+│   ├── searchBarcodes.php  # GET — Recherche codes-barres
+│   ├── searchUniversal.php     # GET — Recherche universelle
+│   ├── checkBarcode.php        # GET — Vérifier unicité code-barre
+│   ├── getIds.php              # GET — IDs par type/nom
+│   ├── getUsers.php     # GET — Liste utilisateurs
+│   └── generateInventoryPdf.php # GET — Génération PDF
 └── logs/                        # Logs applicatifs (gitignored)
     └── app-YYYY-MM-DD.log
 ```
@@ -146,7 +146,7 @@ graph TB
 
 - `bootstrap.php` remplace le boilerplate dupliqué dans 16 endpoints
 - `ApiResponse` centralise le formatage JSON (avant : `json_encode()` dupliqué partout)
-- `sort_utils.js` centralise la logique de tri (avant : dupliquée dans 3 fichiers JS)
+- `sortUtils.js` centralise la logique de tri (avant : dupliquée dans 3 fichiers JS)
 
 ### KISS (Keep It Simple, Stupid)
 
@@ -180,13 +180,13 @@ Les logs sont écrits dans `logs/app-YYYY-MM-DD.log` avec rotation quotidienne.
 **Exemple** :
 
 ```
-[2026-03-05 14:30:00] [INFO] [add_materiel.php] Matériel ajouté {"type":"Casque","nom":"Audio Pro","nombre":3}
-[2026-03-05 14:31:12] [ERROR] [delete_materiel.php] Exception non gérée {"message":"SQLSTATE[...]"}
+[2026-03-05 14:30:00] [INFO] [addItem.php] Matériel ajouté {"type":"Casque","nom":"Audio Pro","nombre":3}
+[2026-03-05 14:31:12] [ERROR] [deleteItem.php] Exception non gérée {"message":"SQLSTATE[...]"}
 ```
 
 ### Monitoring (Health Check)
 
-Endpoint : `PHP/monitor.php`
+Endpoint : `php/monitor.php`
 
 Retourne en JSON :
 
@@ -219,19 +219,19 @@ Cela facilite le **passage à l'échelle** : l'application peut être déployée
 
 | Méthode | Endpoint                                    | Description                 |
 | ------- | ------------------------------------------- | --------------------------- |
-| GET     | `PHP/get_all_materiel.php`                  | Liste tous les matériels    |
-| GET     | `PHP/get_materiel_details.php?code_barre=X` | Détails d'un matériel       |
-| POST    | `PHP/add_materiel.php`                      | Ajouter du matériel         |
-| POST    | `PHP/update_materiel.php`                   | Modifier un matériel        |
-| POST    | `PHP/delete_materiel.php`                   | Supprimer un matériel       |
-| GET     | `PHP/get_all_caisses.php`                   | Liste toutes les caisses    |
-| GET     | `PHP/get_caisse_details.php?nom=X`          | Détails d'une caisse        |
-| POST    | `PHP/add_caisse.php`                        | Ajouter une caisse          |
-| POST    | `PHP/update_caisse.php`                     | Modifier une caisse         |
-| POST    | `PHP/delete_caisse.php`                     | Supprimer une caisse        |
-| GET     | `PHP/search_universal.php?type=X&query=Y`   | Recherche universelle       |
-| GET     | `PHP/search_codes_barres.php?query=X`       | Recherche codes-barres      |
-| GET     | `PHP/get_available_objects.php`             | Objets disponibles          |
-| GET     | `PHP/get_utilisateurs.php`                  | Liste des utilisateurs      |
-| GET     | `PHP/check_barcode.php?code_barre=X`        | Vérifier unicité code-barre |
-| GET     | `PHP/monitor.php`                           | Health check                |
+| GET     | `php/getAllItems.php`                  | Liste tous les matériels    |
+| GET     | `php/getItemDetails.php?code_barre=X` | Détails d'un matériel       |
+| POST    | `php/addItem.php`                      | Ajouter du matériel         |
+| POST    | `php/updateItem.php`                   | Modifier un matériel        |
+| POST    | `php/deleteItem.php`                   | Supprimer un matériel       |
+| GET     | `php/getAllBoxes.php`                   | Liste toutes les caisses    |
+| GET     | `php/getBoxDetails.php?nom=X`          | Détails d'une caisse        |
+| POST    | `php/addBox.php`                        | Ajouter une caisse          |
+| POST    | `php/updateBox.php`                     | Modifier une caisse         |
+| POST    | `php/deleteBox.php`                     | Supprimer une caisse        |
+| GET     | `php/searchUniversal.php?type=X&query=Y`   | Recherche universelle       |
+| GET     | `php/searchBarcodes.php?query=X`       | Recherche codes-barres      |
+| GET     | `php/getAvailableObjects.php`             | Objets disponibles          |
+| GET     | `php/getUsers.php`                  | Liste des utilisateurs      |
+| GET     | `php/checkBarcode.php?code_barre=X`        | Vérifier unicité code-barre |
+| GET     | `php/monitor.php`                           | Health check                |

@@ -8,7 +8,7 @@
  * - Erreurs récentes dans les logs
  * - Dernier timestamp d'activité
  */
-require_once 'db_connect.php';
+require_once 'dbConnect.php';
 
 $health = [
     'status' => 'ok',

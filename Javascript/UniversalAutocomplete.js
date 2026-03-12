@@ -98,7 +98,7 @@ class UniversalAutocomplete {
       }
 
       // Construction de l'URL
-      let url = `PHP/search_universal.php?type=${encodeURIComponent(this.type)}&query=${encodeURIComponent(query)}`;
+      let url = `php/searchUniversal.php?type=${encodeURIComponent(this.type)}&query=${encodeURIComponent(query)}`;
       if (filterVal) {
         url += `&filter=${encodeURIComponent(filterVal)}`;
       }

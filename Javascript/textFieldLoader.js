@@ -9,7 +9,7 @@ async function remplirFormulaireModification(codeBarre) {
 
   try {
     const response = await fetch(
-      `PHP/get_materiel_details.php?code_barre=${encodeURIComponent(codeBarre)}`,
+      `php/getItemDetails.php?code_barre=${encodeURIComponent(codeBarre)}`,
     );
     const data = await response.json();
 

@@ -2,7 +2,7 @@
 /**
  * Bootstrap — Point d'entrée unique pour tous les endpoints PHP
  * 
- * Principe DRY : Remplace le combo header() + require_once 'db_connect.php' 
+ * Principe DRY : Remplace le combo header() + require_once 'dbConnect.php' 
  *                présent dans chaque fichier PHP.
  * Principe KISS : Un seul require_once pour initialiser toute l'infrastructure.
  * Statelessness : Aucun état persistant entre les requêtes HTTP.

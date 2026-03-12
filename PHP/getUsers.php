@@ -1,0 +1,23 @@
+<?php
+// Endpoint : Récupérer tous les utilisateurs
+require_once 'dbConnect.php';
+
+try {
+    $stmt = $conn->prepare("SELECT id, Nom, Prénom FROM utilisateurs ORDER BY Nom, Prénom");
+    $stmt->execute();
+    
+    $utilisateurs = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $utilisateurs[] = [
+            'id' => $row['id'],
+            'nom' => $row['Nom'],
+            'prenom' => $row['Prénom'],
+            'full_name' => $row['Prénom'] . ' ' . $row['Nom']
+        ];
+    }
+
+    ApiResponse::success(['utilisateurs' => $utilisateurs]);
+
+} catch (PDOException $e) {
+    ApiResponse::exception($e);
+}
