@@ -8,7 +8,10 @@ const sousTypeInputSuppr = document.getElementById("sous_type_materiel_suppr");
 const nomInputSuppr = document.getElementById("nom_materiel_suppr");
 
 // Vider le code-barre si l'utilisateur change manuellement les filtres
-const clearBarcodeOnFilterChange = () => {
+const clearBarcodeOnFilterChange = (e) => {
+    // Si le changement est programmé (via le scan par exemple), on ne vide pas le champ
+    if (e && e.isTrusted === false) return;
+    
     idInputSuppr.value = "";
     // L'autocomplete se mettra à jour à la prochaine saisie ou clic sur l'input barcode
     // car il lit dynamiquement typeInputSuppr.value
