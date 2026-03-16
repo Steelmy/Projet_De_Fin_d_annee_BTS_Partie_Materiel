@@ -15,11 +15,11 @@ try {
     
     // Pour chaque caisse, récupérer ses objets
     foreach ($caisses as &$caisse) {
-        $stmt = $conn->prepare("
-            SELECT id, Code_bar, Type, Nom, Etat FROM objets WHERE Caisse_id = ? ORDER BY Type, Nom
+        $stmtItems = $conn->prepare("
+            SELECT id, Code_bar, Type, Sous_type, Nom, Etat FROM objets WHERE Caisse_id = ? ORDER BY Type, Sous_type, Nom
         ");
-        $stmt->execute([$caisse['id']]);
-        $caisse['Contenu'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmtItems->execute([$caisse['id']]);
+        $caisse['Contenu'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
         $caisse['nombre_objets'] = count($caisse['Contenu']);
     }
     

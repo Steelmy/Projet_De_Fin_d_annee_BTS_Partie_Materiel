@@ -3,6 +3,7 @@ class UniversalAutocompleteBarcode {
    * @param {string} inputId - ID du champ code-barre
    * @param {string} containerId - ID du conteneur de suggestions (optionnel)
    * @param {string} typeInputId - ID du champ Type (pour filtre)
+   * @param {string} sousTypeInputId - ID du champ Sous-Type (pour filtre)
    * @param {string} nomInputId - ID du champ Nom (pour filtre)
    * @param {function} onSelectCallback - Fonction appelée après sélection
    */
@@ -10,6 +11,7 @@ class UniversalAutocompleteBarcode {
     inputId,
     containerId,
     typeInputId = null,
+    sousTypeInputId = null,
     nomInputId = null,
     onSelectCallback = null,
     etatFilter = null,
@@ -19,6 +21,7 @@ class UniversalAutocompleteBarcode {
     if (!this.input) return;
 
     this.typeInput = typeInputId ? document.getElementById(typeInputId) : null;
+    this.sousTypeInput = sousTypeInputId ? document.getElementById(sousTypeInputId) : null;
     this.nomInput = nomInputId ? document.getElementById(nomInputId) : null;
     this.onSelectCallback = onSelectCallback;
     this.etatFilter = etatFilter;
@@ -110,11 +113,13 @@ class UniversalAutocompleteBarcode {
   async search(query) {
     // Récupération des filtres
     const typeVal = this.typeInput ? this.typeInput.value.trim() : "";
+    const sousTypeVal = this.sousTypeInput ? this.sousTypeInput.value.trim() : "";
     const nomVal = this.nomInput ? this.nomInput.value.trim() : "";
 
     try {
       let url = `php/searchBarcodes.php?query=${encodeURIComponent(query)}`;
       if (typeVal) url += `&type=${encodeURIComponent(typeVal)}`;
+      if (sousTypeVal) url += `&sous_type=${encodeURIComponent(sousTypeVal)}`;
       if (nomVal) url += `&nom=${encodeURIComponent(nomVal)}`;
       if (this.etatFilter)
         url += `&etat=${encodeURIComponent(this.etatFilter)}`;

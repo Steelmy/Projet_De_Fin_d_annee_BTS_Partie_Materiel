@@ -4,7 +4,19 @@ const idInputSuppr = document.getElementById("id_materiel_suppr");
 
 // Récupération des inputs (au lieu des selects)
 const typeInputSuppr = document.getElementById("type_materiel_suppr");
+const sousTypeInputSuppr = document.getElementById("sous_type_materiel_suppr");
 const nomInputSuppr = document.getElementById("nom_materiel_suppr");
+
+// Vider le code-barre si l'utilisateur change manuellement les filtres
+const clearBarcodeOnFilterChange = () => {
+    idInputSuppr.value = "";
+    // L'autocomplete se mettra à jour à la prochaine saisie ou clic sur l'input barcode
+    // car il lit dynamiquement typeInputSuppr.value
+};
+
+if (typeInputSuppr) typeInputSuppr.addEventListener("change", clearBarcodeOnFilterChange);
+if (sousTypeInputSuppr) sousTypeInputSuppr.addEventListener("change", clearBarcodeOnFilterChange);
+if (nomInputSuppr) nomInputSuppr.addEventListener("change", clearBarcodeOnFilterChange);
 
 // Fonction pour auto-remplir les champs type et nom lors du scan/entré manuelle
 async function updatesupprFields(code) {
@@ -16,13 +28,9 @@ async function updatesupprFields(code) {
     const data = await response.json();
     if (data.success && data.materiel) {
       const mat = data.materiel;
-      // Remplir Type (affichage)
-      if (typeInputSuppr) {
-        typeInputSuppr.value = mat.type_materiel;
-      }
-      // Remplir Nom (affichage)
-      if (nomInputSuppr) {
-        nomInputSuppr.value = mat.nom_materiel;
+      // Remplir Type, Sous-type et Nom via la cascade
+      if (window.setSelectCascadeValues) {
+         window.setSelectCascadeValues('suppr', mat.type_materiel, mat.sous_type_materiel, mat.nom_materiel);
       }
     }
   } catch (e) {

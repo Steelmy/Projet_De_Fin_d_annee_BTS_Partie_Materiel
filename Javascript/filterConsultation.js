@@ -6,13 +6,14 @@ let isCaissesViewActive = false; // État de la vue caisses
 
 // Sélecteurs
 const typeConsultation = document.getElementById("type_materiel_consultation");
+const sousTypeConsultation = document.getElementById("sous_type_materiel_consultation");
 const nomConsultation = document.getElementById("nom_materiel_consultation");
 const codeBarreConsultation = document.getElementById(
   "code_barre_consultation",
 );
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (!typeConsultation || !nomConsultation || !codeBarreConsultation) {
+  if (!typeConsultation || !sousTypeConsultation || !nomConsultation || !codeBarreConsultation) {
     console.error("❌ Éléments de consultation non trouvés");
     return;
   }
@@ -42,127 +43,34 @@ document.addEventListener("DOMContentLoaded", () => {
     applyFilters();
   });
 
+  // Écouter changement de Sous-type → filtrer
+  sousTypeConsultation.addEventListener("change", () => {
+    applyFilters();
+  });
+
   // Écouter changement de Nom → filtrer
   nomConsultation.addEventListener("change", () => {
     applyFilters();
   });
 
-  // Écouter saisie Code-barre → remplir Type+Nom + filtrer
-  codeBarreConsultation.addEventListener("change", () => {
-    updateConsultationFields(codeBarreConsultation.value.trim());
+  // Écouter saisie Code-barre → filtrer
+  codeBarreConsultation.addEventListener("input", () => {
+    applyFilters();
   });
 
   // Gestion Entrée pour scan rapide
   codeBarreConsultation.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      await updateConsultationFields(codeBarreConsultation.value.trim());
-    }
-  });
-
-  // Autocomplétion code-barre filtrée par Type et Nom
-  let debounceTimer;
-  codeBarreConsultation.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    const query = codeBarreConsultation.value.trim();
-
-    if (query.length === 0) {
-      hideBarcodesSuggestions();
       applyFilters();
-      return;
-    }
-
-    debounceTimer = setTimeout(() => {
-      showBarcodesSuggestions(query);
-      applyFilters();
-    }, 300);
-  });
-
-  // Fermer suggestions au clic extérieur
-  document.addEventListener("click", (e) => {
-    const suggestionsDiv = document.getElementById(
-      "barcode_suggestions_consultation",
-    );
-    if (
-      !codeBarreConsultation.contains(e.target) &&
-      !suggestionsDiv.contains(e.target)
-    ) {
-      hideBarcodesSuggestions();
     }
   });
+
 });
 
-// Afficher suggestions de codes-barres filtrées
-function showBarcodesSuggestions(query) {
-  const suggestionsDiv = document.getElementById(
-    "barcode_suggestions_consultation",
-  );
-  const typeValue = typeConsultation.value.trim();
-  const nomValue = nomConsultation.value.trim();
-
-  console.log("🔍 Filtrage codes-barres:");
-  console.log("  - Query:", query);
-  console.log("  - Type sélectionné:", typeValue || "(vide)");
-  console.log("  - Nom sélectionné:", nomValue || "(vide)");
-  console.log("  - Total inventaire:", allInventory.length);
-
-  // Filtrer les codes-barres selon Type, Nom ET query
-  let filtered = allInventory.filter((item) => {
-    const matchesQuery = item.Code_bar.toLowerCase().includes(
-      query.toLowerCase(),
-    );
-    const matchesType = !typeValue || item.Type === typeValue;
-    const matchesNom = !nomValue || item.Nom === nomValue;
-
-    return matchesQuery && matchesType && matchesNom;
-  });
-
-  console.log("✅ Résultats filtrés:", filtered.length);
-  if (filtered.length > 0) {
-    console.log(
-      "  Exemples:",
-      filtered.slice(0, 3).map((i) => `${i.Code_bar} (${i.Type} - ${i.Nom})`),
-    );
-  }
-
-  suggestionsDiv.innerHTML = "";
-
-  if (filtered.length === 0) {
-    suggestionsDiv.classList.remove("show");
-    return;
-  }
-
-  // Limiter à 10 suggestions
-  filtered.slice(0, 10).forEach((item) => {
-    const div = document.createElement("div");
-    div.className = "autocomplete-suggestion";
-    div.innerHTML = `
-      <strong>${item.Code_bar}</strong> - ${item.Type} - ${item.Nom}
-    `;
-
-    div.addEventListener("click", () => {
-      codeBarreConsultation.value = item.Code_bar;
-      updateConsultationFields(item.Code_bar);
-      hideBarcodesSuggestions();
-    });
-
-    suggestionsDiv.appendChild(div);
-  });
-
-  suggestionsDiv.classList.add("show");
-}
-
-// Masquer suggestions code-barre
-function hideBarcodesSuggestions() {
-  const suggestionsDiv = document.getElementById(
-    "barcode_suggestions_consultation",
-  );
-  if (suggestionsDiv) {
-    suggestionsDiv.classList.remove("show");
-  }
-}
-
 // AUTO-REMPLIR type + nom depuis le code-barre (comme dans deleteItem.js)
+// Cette fonction n'est plus appelée directement par les listeners de codeBarreConsultation
+// mais pourrait être utile si un autre mécanisme la déclenche.
 async function updateConsultationFields(code) {
   if (!code) {
     applyFilters();
@@ -295,9 +203,10 @@ async function displayCaissesView() {
 
       const thead = document.createElement("thead");
       thead.innerHTML = `
-        <tr class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white">
-          <th class="p-3 text-center font-semibold text-sm">Code-barre</th>
+        <tr class="bg-gray-100/50 text-gray-600 border-b border-gray-100">
+          <th class="p-3 text-center font-semibold text-sm w-32 border-r border-gray-100">Code-barre</th>
           <th class="p-3 text-center font-semibold text-sm">Type</th>
+          <th class="p-3 text-center font-semibold text-sm">Sous-type</th>
           <th class="p-3 text-center font-semibold text-sm">Nom</th>
           <th class="p-3 text-center font-semibold text-sm">État</th>
         </tr>
@@ -306,7 +215,7 @@ async function displayCaissesView() {
 
       const tbody = document.createElement("tbody");
       if (objets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-5 text-gray-400 italic text-sm border-t border-gray-100">Aucun objet dans cette caisse</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-5 text-gray-400 italic text-sm border-t border-gray-100">Aucun objet dans cette caisse</td></tr>`;
       } else {
         objets.forEach((objet, index) => {
           const tr = document.createElement("tr");
@@ -324,6 +233,7 @@ async function displayCaissesView() {
           tr.innerHTML = `
             <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Code_bar || "-"}</td>
             <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Type || "-"}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Sous_type || "-"}</td>
             <td class="p-3 text-center text-sm border-r border-gray-100 text-gray-600">${objet.Nom || "-"}</td>
             <td class="p-3 text-center text-sm ${etatStyle}">${objet.Etat || "disponible"}</td>
           `;
@@ -369,6 +279,7 @@ let currentSortDirection = "asc";
 // FONCTION PRINCIPALE : Appliquer les filtres
 function applyFilters() {
   const typeValue = typeConsultation.value.trim();
+  const sousTypeValue = sousTypeConsultation.value.trim();
   const nomValue = nomConsultation.value.trim();
   const codeBarreValue = codeBarreConsultation.value.trim();
 
@@ -386,7 +297,12 @@ function applyFilters() {
     filtered = filtered.filter((item) => item.Type === typeValue);
   }
 
-  // Priorité 3 : Nom
+  // Priorité 3 : Sous-type
+  if (sousTypeValue) {
+    filtered = filtered.filter((item) => item.Sous_type === sousTypeValue);
+  }
+
+  // Priorité 4 : Nom
   if (nomValue) {
     filtered = filtered.filter((item) => item.Nom === nomValue);
   }
@@ -481,7 +397,7 @@ function updateInventoryTable(data) {
   if (data.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML =
-      '<td colspan="6" style="text-align: center; padding: 20px;">Aucun résultat trouvé</td>';
+      '<td colspan="7" style="text-align: center; padding: 20px;">Aucun résultat trouvé</td>';
     tbody.appendChild(tr);
     return;
   }
@@ -516,6 +432,7 @@ function updateInventoryTable(data) {
     tr.innerHTML = `
       <td class="p-4.5 text-center text-sm align-middle">${item.Code_bar}</td>
       <td class="p-4.5 text-center text-sm align-middle">${item.Type}</td>
+      <td class="p-4.5 text-center text-sm align-middle">${item.Sous_type || "-"}</td>
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom}</td>
       <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${item.Etat}</td>
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
@@ -541,12 +458,19 @@ function updateResultsCounter(filtered, total) {
 
 // Réinitialiser tous les filtres
 function resetFiltersConsultation() {
-  typeConsultation.value = "";
-  nomConsultation.value = "";
   codeBarreConsultation.value = "";
+  typeConsultation.value = "";
+  sousTypeConsultation.value = "";
+  nomConsultation.value = "";
 
-  // Réafficher tout
-  applyFilters();
+  // Réinitialiser la pagination et le tri
+  currentPage = 1;
+  currentSortColumn = null;
+  currentSortDirection = "asc";
+
+  // Déclencher l'événement 'change' sur le type pour réinitialiser
+  // les options des listes déroulantes sous-type et nom via la cascade
+  typeConsultation.dispatchEvent(new Event("change"));
 }
 
 // Remplir automatiquement le type depuis le nom sélectionné

@@ -88,6 +88,12 @@ formAjout.addEventListener("submit", async (e) => {
   try {
     const formData = new FormData();
     formData.append("type_materiel", type);
+    
+    const sousTypeInput = document.getElementById("sous_type_materiel_ajout");
+    if(sousTypeInput) {
+        formData.append("sous_type_materiel", sousTypeInput.value.trim());
+    }
+
     formData.append("nom_materiel", nom);
     formData.append("nombre", nombre);
     formData.append("codes_barres", JSON.stringify(codesBarres));
@@ -104,6 +110,7 @@ formAjout.addEventListener("submit", async (e) => {
 
       // Réinitialiser le formulaire
       typeInputAjout.value = "";
+      if(sousTypeInput) sousTypeInput.value = "";
       nomInputAjout.value = "";
       document.getElementById("nombre_materiel").value = "1";
 

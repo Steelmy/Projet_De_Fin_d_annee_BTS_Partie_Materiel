@@ -1,9 +1,10 @@
 class UniversalAutocomplete {
   /**
    * @param {string} inputId - ID de l'input HTML
-   * @param {string} type - 'user', 'caisse', 'materiel_type', 'materiel_nom', 'materiel_code'
+   * @param {string} type - 'user', 'caisse', 'materiel_type', 'materiel_sous_type', 'materiel_nom', 'materiel_code'
    * @param {function} onSelectCallback - Fonction appelée lors de la sélection (optionnel)
-   * @param {function} filterCallback - Fonction qui retourne une valeur de filtre dynamique (optionnel)
+   * @param {function} filterCallback - Fonction qui retourne une valeur de filtre dynamique (optionnel, généralement Type)
+   * @param {function} filterSousTypeCallback - Fonction qui retourne le sous-type pour filtre dynamique (optionnel)
    * @param {object} options - Options supplémentaires (ex: { numericOnly: true })
    */
   constructor(
@@ -11,15 +12,18 @@ class UniversalAutocomplete {
     type,
     onSelectCallback = null,
     filterCallback = null,
+    filterSousTypeCallback = null,
     options = {},
   ) {
     this.input = document.getElementById(inputId);
     this.type = type;
     this.onSelectCallback = onSelectCallback;
     this.filterCallback = filterCallback;
+    this.filterSousTypeCallback = filterSousTypeCallback;
     this.options = options;
     this.containerClass = "autocomplete-suggestions";
     this.debounceTimer = null;
+    this.isValidSelection = false; // Track if current value was selected from list
 
     if (this.input) {
       this.init();
@@ -65,6 +69,20 @@ class UniversalAutocomplete {
     // Événements
     this.input.addEventListener("input", () => this.handleInput());
     this.input.addEventListener("focus", () => this.handleFocus());
+    
+    // Strict mode blur verification
+    this.input.addEventListener("blur", () => {
+        if (this.options.strictMode && !this.isValidSelection && this.input.value.trim() !== "") {
+            // Need a tiny timeout to allow click on suggestion to process first
+            setTimeout(() => {
+                if (!this.isValidSelection) {
+                    this.input.value = ""; // Clear invalid input
+                    // Trigger input event to notify listeners it was cleared
+                    this.input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }, 150);
+        }
+    });
 
     // Fermeture au clic dehors
     document.addEventListener("click", (e) => {
@@ -81,6 +99,7 @@ class UniversalAutocomplete {
   }
 
   handleInput() {
+    this.isValidSelection = false; // Reset validity on manual input
     clearTimeout(this.debounceTimer);
     const query = this.input.value.trim();
 
@@ -96,11 +115,19 @@ class UniversalAutocomplete {
       if (this.filterCallback && typeof this.filterCallback === "function") {
         filterVal = this.filterCallback();
       }
+      
+      let filterSousTypeVal = "";
+      if (this.filterSousTypeCallback && typeof this.filterSousTypeCallback === "function") {
+        filterSousTypeVal = this.filterSousTypeCallback();
+      }
 
       // Construction de l'URL
       let url = `php/searchUniversal.php?type=${encodeURIComponent(this.type)}&query=${encodeURIComponent(query)}`;
       if (filterVal) {
         url += `&filter=${encodeURIComponent(filterVal)}`;
+      }
+      if (filterSousTypeVal) {
+        url += `&filter_sous_type=${encodeURIComponent(filterSousTypeVal)}`;
       }
 
       const response = await fetch(url);
@@ -110,6 +137,11 @@ class UniversalAutocomplete {
         this.displayResults(data.data);
       } else {
         this.hide();
+        // Optionnel: Afficher un message "Aucun résultat, veuillez créer via Gestion des Références"
+        if (this.options.strictMode && query !== "") {
+            this.container.innerHTML = "<div class='p-2 text-sm text-gray-500 italic'>Non trouvé. Utilisez 'Gestion des Références'.</div>";
+            this.container.style.display = "block";
+        }
       }
     } catch (error) {
       console.error("Erreur UniversalAutocomplete:", error);
@@ -136,6 +168,7 @@ class UniversalAutocomplete {
 
   select(item) {
     this.input.value = item.value;
+    this.isValidSelection = true;
     this.hide();
 
     // Callback utilisateur

@@ -4,6 +4,7 @@ require_once 'dbConnect.php';
 
 try {
     $type = isset($_POST['type_materiel']) ? trim($_POST['type_materiel']) : '';
+    $sous_type = isset($_POST['sous_type_materiel']) ? trim($_POST['sous_type_materiel']) : '';
     $nom = isset($_POST['nom_materiel']) ? trim($_POST['nom_materiel']) : '';
     $nombre = isset($_POST['nombre']) ? intval($_POST['nombre']) : 0;
     $codesBarres = isset($_POST['codes_barres']) ? json_decode($_POST['codes_barres'], true) : [];
@@ -31,14 +32,19 @@ try {
         
         // Insérer l'objet
         $insertStmt = $conn->prepare("
-            INSERT INTO objets (Type, Nom, Etat, Emprunteur_id, Code_bar)
-            VALUES (:type, :nom, 'disponible', NULL, :code_barre)
+            INSERT INTO objets (Type, Sous_type, Nom, Etat, Emprunteur_id, Code_bar)
+            VALUES (:type, :sous_type, :nom, 'disponible', NULL, :code_barre)
         ");
-        $insertStmt->execute([':type' => $type, ':nom' => $nom, ':code_barre' => $codeBarre]);
+        $insertStmt->execute([
+            ':type' => $type,
+            ':sous_type' => $sous_type,
+            ':nom' => $nom,
+            ':code_barre' => $codeBarre
+        ]);
         $idsAjoutes[] = $conn->lastInsertId();
     }
     
-    $logger->info("Matériel ajouté", ['type' => $type, 'nom' => $nom, 'nombre' => $nombre]);
+    $logger->info("Matériel ajouté", ['type' => $type, 'sous_type' => $sous_type, 'nom' => $nom, 'nombre' => $nombre]);
     ApiResponse::success([
         'ids_ajoutes' => $idsAjoutes
     ], "$nombre matériel(s) ajouté(s) avec succès");

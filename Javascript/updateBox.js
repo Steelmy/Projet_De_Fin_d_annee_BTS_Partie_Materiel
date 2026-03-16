@@ -416,6 +416,9 @@ function renderModifCaisseTable() {
           <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Type')">
             Type ${getSortIcon("Type")}
           </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Sous_type')">
+            Sous-type ${getSortIcon("Sous_type")}
+          </th>
           <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortModifCaisse('Nom')">
             Nom ${getSortIcon("Nom")}
           </th>
@@ -425,7 +428,7 @@ function renderModifCaisseTable() {
   `;
 
   if (paginatedItems.length === 0) {
-    html += `<tr><td colspan="4" class="p-3 text-center text-gray-400 italic">Aucun objet sur cette page</td></tr>`;
+    html += `<tr><td colspan="5" class="p-3 text-center text-gray-400 italic">Aucun objet sur cette page</td></tr>`;
   } else {
     paginatedItems.forEach((objet) => {
       const isSelected = modifSelectedObjects.some((o) => o.id === objet.id);
@@ -439,6 +442,7 @@ function renderModifCaisseTable() {
           </td>
           <td class="p-3 text-center">${objet.Code_bar}</td>
           <td class="p-3 text-center">${objet.Type}</td>
+          <td class="p-3 text-center">${objet.Sous_type || "-"}</td>
           <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
         </tr>
       `;

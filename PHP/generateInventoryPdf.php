@@ -130,6 +130,7 @@ try {
         SELECT 
             o.Code_bar,
             o.Type,
+            o.Sous_type,
             o.Nom,
             o.Etat,
             u.Prénom,
@@ -158,7 +159,7 @@ try {
 
     // --- TABLEAU PRINCIPAL ---
     $pdf->SetFont('Arial', 'B', 9);
-    $headers = ['Code-barre', 'Type', utf8_decode('Nom'), utf8_decode('État'), 'Utilisateur', 'Caisse'];
+    $headers = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État'), 'Utilisateur', 'Caisse'];
     $cols = count($headers);
     $widths = [];
     for ($i = 0; $i < $cols; $i++) {
@@ -177,6 +178,7 @@ try {
         $row = [
             utf8_decode($materiel['Code_bar']),
             utf8_decode($materiel['Type']),
+            utf8_decode($materiel['Sous_type']),
             utf8_decode($materiel['Nom']),
             utf8_decode($materiel['Etat']),
             $utilisateur,
@@ -219,7 +221,7 @@ try {
     // En-têtes du tableau
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetFillColor(200, 220, 255);
-    $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C']);
+    $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C']);
     
     for ($i = 0; $i < $cols; $i++) {
         $pdf->Cell($widths[$i], 8, $headers[$i], 1, 0, 'C', true);
@@ -228,7 +230,7 @@ try {
 
     // Données
     $pdf->SetFont('Arial', '', 8);
-    $pdf->SetAligns(['L', 'L', 'L', 'C', 'L', 'L']);
+    $pdf->SetAligns(['L', 'L', 'L', 'L', 'C', 'L', 'L']);
     $fill = false;
     foreach ($tableData as $row) {
         if ($fill) {
@@ -261,7 +263,7 @@ try {
 
     if (count($caisses) > 0) {
         $stmtObjetsCaisse = $conn->prepare("
-            SELECT Code_bar, Type, Nom, Etat
+            SELECT Code_bar, Type, Sous_type, Nom, Etat
             FROM objets
             WHERE Caisse_id = ?
             ORDER BY Type, Nom
@@ -282,7 +284,7 @@ try {
             if (count($objets) > 0) {
                 // Calculate widths
                 $pdf->SetFont('Arial', 'B', 9);
-                $cHeaders = ['Code-barre', 'Type', utf8_decode('Nom'), utf8_decode('État')];
+                $cHeaders = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État')];
                 $cCols = count($cHeaders);
                 $cWidths = [];
                 for ($i = 0; $i < $cCols; $i++) {
@@ -295,6 +297,7 @@ try {
                     $row = [
                         utf8_decode($objet['Code_bar']),
                         utf8_decode($objet['Type']),
+                        utf8_decode($objet['Sous_type']),
                         utf8_decode($objet['Nom']),
                         utf8_decode($objet['Etat'])
                     ];
@@ -341,7 +344,7 @@ try {
                 // En-têtes
                 $pdf->SetFont('Arial', 'B', 9);
                 $pdf->SetFillColor(255, 235, 200);
-                $pdf->SetAligns(['C', 'C', 'C', 'C']);
+                $pdf->SetAligns(['C', 'C', 'C', 'C', 'C']);
                 
                 for ($i = 0; $i < $cCols; $i++) {
                     $pdf->Cell($cWidths[$i], 8, $cHeaders[$i], 1, 0, 'C', true);
@@ -350,7 +353,7 @@ try {
 
                 // Données
                 $pdf->SetFont('Arial', '', 8);
-                $pdf->SetAligns(['L', 'L', 'L', 'C']);
+                $pdf->SetAligns(['L', 'L', 'L', 'L', 'C']);
                 $fillCaisse = false;
                 foreach ($cTableData as $row) {
                     if ($fillCaisse) {

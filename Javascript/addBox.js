@@ -202,6 +202,9 @@ function renderAddCaisseTable() {
           <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Type')">
             Type ${getSortIcon("Type")}
           </th>
+          <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Sous_type')">
+            Sous-type ${getSortIcon("Sous_type")}
+          </th>
           <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortAddCaisse('Nom')">
             Nom ${getSortIcon("Nom")}
           </th>
@@ -211,7 +214,7 @@ function renderAddCaisseTable() {
   `;
 
   if (paginatedItems.length === 0) {
-    html += `<tr><td colspan="4" class="p-3 text-center text-gray-400 italic">Aucun objet sur cette page</td></tr>`;
+    html += `<tr><td colspan="5" class="p-3 text-center text-gray-400 italic">Aucun objet sur cette page</td></tr>`;
   } else {
     paginatedItems.forEach((objet) => {
       const isSelected = selectedObjects.some((o) => o.id === objet.id);
@@ -225,6 +228,7 @@ function renderAddCaisseTable() {
           </td>
           <td class="p-3 text-center">${objet.Code_bar}</td>
           <td class="p-3 text-center">${objet.Type}</td>
+          <td class="p-3 text-center">${objet.Sous_type || "-"}</td>
           <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
         </tr>
       `;

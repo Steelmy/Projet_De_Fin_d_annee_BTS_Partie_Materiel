@@ -44,6 +44,31 @@ CREATE TABLE IF NOT EXISTS `caisses` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `catalogue_references`
+--
+
+DROP TABLE IF EXISTS `catalogue_references`;
+CREATE TABLE IF NOT EXISTS `catalogue_references` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `Type` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Sous_type` varchar(100) COLLATE utf8mb4_unicode_ci NULL,
+  `Nom` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_type_sous_nom` (`Type`,`Sous_type`,`Nom`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `catalogue_references`
+--
+
+INSERT INTO `catalogue_references` (`Type`, `Sous_type`, `Nom`) VALUES
+('Photo', '', 'Appareil Sony A7'),
+('Mesure', '', 'Oscilloscope Rigol');
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `historique`
 --
 
@@ -86,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `objets` (
   `id` int NOT NULL AUTO_INCREMENT,
   `Code_bar` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `Type` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Sous_type` varchar(100) COLLATE utf8mb4_unicode_ci NULL,
   `Nom` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `Etat` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -102,9 +128,9 @@ CREATE TABLE IF NOT EXISTS `objets` (
 -- Déchargement des données de la table `objets`
 --
 
-INSERT INTO `objets` (`id`, `Code_bar`, `Type`, `Nom`, `Etat`, `created_at`, `updated_at`, `Emprunteur_id`) VALUES
-(10, 'BAR-001', 'Photo', 'Appareil Sony A7', 'emprunté', '2026-03-05 11:52:00', '2026-03-05 11:52:00', NULL),
-(11, 'BAR-002', 'Mesure', 'Oscilloscope Rigol', 'emprunté', '2026-03-05 11:52:00', '2026-03-05 11:52:00', 2);
+INSERT INTO `objets` (`id`, `Code_bar`, `Type`, `Sous_type`, `Nom`, `Etat`, `created_at`, `updated_at`, `Emprunteur_id`) VALUES
+(10, '123456765432', 'Photo', '', 'Appareil Sony A7', 'emprunté', '2026-03-05 11:52:00', '2026-03-05 11:52:00', NULL),
+(11, '854345678865', 'Mesure', '', 'Oscilloscope Rigol', 'emprunté', '2026-03-05 11:52:00', '2026-03-05 11:52:00', 2);
 
 -- --------------------------------------------------------
 

@@ -5,12 +5,13 @@ require_once 'dbConnect.php';
 try {
     $query = isset($_GET['query']) ? trim($_GET['query']) : '';
     $type = isset($_GET['type']) ? trim($_GET['type']) : '';
+    $sous_type = isset($_GET['sous_type']) ? trim($_GET['sous_type']) : '';
     $nom = isset($_GET['nom']) ? trim($_GET['nom']) : '';
     
     $conditions = [];
     $params = [];
     
-    $sql = "SELECT Code_bar, Type, Nom FROM objets";
+    $sql = "SELECT Code_bar, Type, Sous_type, Nom FROM objets";
     
     if (!empty($query)) {
         $conditions[] = "Code_bar LIKE :query";
@@ -20,6 +21,11 @@ try {
     if (!empty($type)) {
         $conditions[] = "Type = :type";
         $params[':type'] = $type;
+    }
+    
+    if (!empty($sous_type)) {
+        $conditions[] = "Sous_type = :sous_type";
+        $params[':sous_type'] = $sous_type;
     }
     
     if (!empty($nom)) {

@@ -38,11 +38,11 @@ try {
     }
     
     // Récupérer les objets de la caisse
-    $stmtObj = $conn->prepare("
-        SELECT id, Code_bar, Type, Nom, Etat FROM objets WHERE Caisse_id = :id ORDER BY Type, Nom
+    $stmtObjects = $conn->prepare("
+        SELECT id, Code_bar, Type, Sous_type, Nom, Etat FROM objets WHERE Caisse_id = :id ORDER BY Type, Sous_type, Nom
     ");
-    $stmtObj->execute([':id' => $caisse['id']]);
-    $contenu = $stmtObj->fetchAll(PDO::FETCH_ASSOC);
+    $stmtObjects->execute([':id' => $caisse['id']]);
+    $contenu = $stmtObjects->fetchAll(PDO::FETCH_ASSOC);
     
     $response = [
         'caisse' => [

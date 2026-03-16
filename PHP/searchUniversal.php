@@ -42,7 +42,7 @@ try {
             break;
 
         case 'materiel_type':
-            $table = 'objets';
+            $table = 'catalogue_references';
             $fields = 'DISTINCT Type';
             if (!empty($query)) {
                 $where = "Type LIKE :q_start";
@@ -53,18 +53,44 @@ try {
             }
             break;
 
-        case 'materiel_nom':
-            $table = 'objets';
-            $fields = 'DISTINCT Nom';
-            $conditions = [];
+        case 'materiel_sous_type':
+            $table = 'catalogue_references';
+            $fields = 'DISTINCT Sous_type';
+            $conditions = ["Sous_type != ''"]; // Don't return empty sous-types
             if (!empty($query)) {
-                $conditions[] = "Nom LIKE :q_start";
+                $conditions[] = "Sous_type LIKE :q_start";
                 $params[':q_start'] = $query . '%';
             }
             if (!empty($filter)) {
                 $conditions[] = "Type = :filter";
                 $params[':filter'] = $filter;
             }
+            if (count($conditions) > 0) {
+                $where = implode(' AND ', $conditions);
+                $orderBy = "Sous_type";
+            } else {
+                $orderBy = "Sous_type";
+            }
+            break;
+
+        case 'materiel_nom':
+            $table = 'catalogue_references';
+            $fields = 'DISTINCT Nom';
+            $conditions = [];
+            if (!empty($query)) {
+                $conditions[] = "Nom LIKE :q_start";
+                $params[':q_start'] = $query . '%';
+            }
+            if (!empty($filter)) { // filter = Type
+                $conditions[] = "Type = :filter";
+                $params[':filter'] = $filter;
+            }
+            $filterSousType = isset($_GET['filter_sous_type']) ? trim($_GET['filter_sous_type']) : '';
+            if (!empty($filterSousType)) {
+                $conditions[] = "Sous_type = :f_sous_type";
+                $params[':f_sous_type'] = $filterSousType;
+            }
+
             if (count($conditions) > 0) {
                 $where = implode(' AND ', $conditions);
                 $orderBy = "Nom";
@@ -75,17 +101,22 @@ try {
         
         case 'materiel_code':
             $table = 'objets';
-            $fields = 'id, Code_bar, Nom, Type';
+            $fields = 'id, Code_bar, Nom, Type, Sous_type';
             $conditions = [];
             if (!empty($query)) {
                 $conditions[] = "Code_bar LIKE :q_start";
                 $params[':q_start'] = $query . '%';
             }
             $filterType = isset($_GET['filter_type']) ? trim($_GET['filter_type']) : '';
+            $filterSousType = isset($_GET['filter_sous_type']) ? trim($_GET['filter_sous_type']) : '';
             $filterNom = isset($_GET['filter_nom']) ? trim($_GET['filter_nom']) : '';
             if (!empty($filterType)) {
                 $conditions[] = "Type = :f_type";
                 $params[':f_type'] = $filterType;
+            }
+            if (!empty($filterSousType)) {
+                $conditions[] = "Sous_type = :f_sous_type";
+                $params[':f_sous_type'] = $filterSousType;
             }
             if (!empty($filterNom)) {
                 $conditions[] = "Nom = :f_nom";
@@ -124,6 +155,8 @@ try {
             $item = ['id' => $row['id'], 'label' => $row['Nom'], 'value' => $row['Nom'], 'meta' => $row];
         } elseif ($type === 'materiel_type') {
             $item = ['id' => $row['Type'], 'label' => $row['Type'], 'value' => $row['Type'], 'meta' => []];
+        } elseif ($type === 'materiel_sous_type') {
+            $item = ['id' => $row['Sous_type'], 'label' => $row['Sous_type'], 'value' => $row['Sous_type'], 'meta' => []];
         } elseif ($type === 'materiel_nom') {
             $item = ['id' => $row['Nom'], 'label' => $row['Nom'], 'value' => $row['Nom'], 'meta' => []];
         } elseif ($type === 'materiel_code') {

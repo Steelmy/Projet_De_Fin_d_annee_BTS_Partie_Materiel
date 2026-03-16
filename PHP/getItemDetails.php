@@ -11,7 +11,7 @@ try {
 
     $stmt = $conn->prepare("
         SELECT 
-            o.id, o.Code_bar, o.Type, o.Nom, o.Etat,
+            o.id, o.Code_bar, o.Type, o.Sous_type, o.Nom, o.Etat,
             o.Emprunteur_id, o.Caisse_id,
             o.created_at, o.updated_at,
             u.Nom as user_nom, u.Prénom as user_prenom,

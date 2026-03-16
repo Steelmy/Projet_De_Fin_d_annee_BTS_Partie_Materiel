@@ -91,31 +91,39 @@
                 </button>
               </div>
               <div class="box-input-wrapper">
-                <input
-                  type="text"
+                <select
                   id="type_materiel_ajout"
-                  placeholder="Type..."
-                  autocomplete="off"
                   class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
-                />
-                <div
-                  id="type_suggestions_ajout"
-                  class="autocomplete-suggestions"
-                ></div>
+                >
+                  <option value="">Sélectionner un type</option>
+                </select>
               </div>
               <div class="box-input-wrapper">
-                <input
-                  type="text"
-                  id="nom_materiel_ajout"
-                  placeholder="Nom..."
-                  autocomplete="off"
-                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
-                />
-                <div
-                  id="nom_suggestions_ajout"
-                  class="autocomplete-suggestions"
-                ></div>
+                <select
+                  id="sous_type_materiel_ajout"
+                  disabled
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  <option value="">Sélectionner un sous-type</option>
+                </select>
               </div>
+              <div class="box-input-wrapper">
+                <select
+                  id="nom_materiel_ajout"
+                  disabled
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  <option value="">Sélectionner un nom</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                onclick="window.toggleReferenceModal(true)"
+                class="px-4 py-3 border-2 border-custom-border bg-white text-gray-700 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 hover:text-custom-brandLight hover:border-custom-brandLight transition-all duration-300 flex items-center gap-2"
+                title="Gérer les Types, Sous-types et Noms"
+              >
+                <i data-lucide="settings" class="w-4 h-4"></i> Réf.
+              </button>
               <input
                 type="number"
                 id="nombre_materiel"
@@ -162,22 +170,30 @@
                 />
               </div>
               <div class="box-input-wrapper">
-                <input
-                  type="text"
+                <select
                   id="type_materiel_suppr"
-                  placeholder="Type..."
-                  readonly
-                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-gray-50 shadow-input focus:outline-none"
-                />
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                >
+                  <option value="">Type...</option>
+                </select>
               </div>
               <div class="box-input-wrapper">
-                <input
-                  type="text"
+                <select
+                  id="sous_type_materiel_suppr"
+                  disabled
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  <option value="">Sous-type...</option>
+                </select>
+              </div>
+              <div class="box-input-wrapper">
+                <select
                   id="nom_materiel_suppr"
-                  placeholder="Nom..."
-                  readonly
-                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-gray-50 shadow-input focus:outline-none"
-                />
+                  disabled
+                  class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  <option value="">Nom...</option>
+                </select>
               </div>
               <!-- Caisse Suppr Input moved to panel_suppression_caisse -->
               <button
@@ -281,28 +297,28 @@
                   ></div>
                 </div>
                 <div class="box-input-wrapper">
-                  <input
-                    type="text"
+                  <select
                     id="type_materiel_consultation"
-                    placeholder="Filtre Type..."
                     class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
-                  />
-                  <div
-                    id="type_suggestions_consultation"
-                    class="autocomplete-suggestions"
-                  ></div>
+                  >
+                    <option value="">Tous les types</option>
+                  </select>
                 </div>
                 <div class="box-input-wrapper">
-                  <input
-                    type="text"
-                    id="nom_materiel_consultation"
-                    placeholder="Filtre Nom..."
+                  <select
+                    id="sous_type_materiel_consultation"
                     class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
-                  />
-                  <div
-                    id="nom_suggestions_consultation"
-                    class="autocomplete-suggestions"
-                  ></div>
+                  >
+                    <option value="">Tous les sous-types</option>
+                  </select>
+                </div>
+                <div class="box-input-wrapper">
+                  <select
+                    id="nom_materiel_consultation"
+                    class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                  >
+                    <option value="">Tous les noms</option>
+                  </select>
                 </div>
                 <button
                   type="button"
@@ -553,6 +569,15 @@
                   </th>
                   <th
                     class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
+                    onclick="window.sortInventory('Sous_type')"
+                  >
+                    Sous-type
+                    <span id="sort_icon_Sous_type" class="text-xs opacity-50 ml-1"
+                      >↕</span
+                    >
+                  </th>
+                  <th
+                    class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
                     onclick="window.sortInventory('Nom')"
                   >
                     Nom
@@ -702,6 +727,53 @@
         </div>
       </div>
 
+      <!-- Reference Management Modal -->
+      <div
+        id="reference-modal"
+        class="fixed inset-0 z-1000 hidden items-center justify-center p-4"
+      >
+        <!-- Backdrop -->
+        <div
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"
+          onclick="toggleReferenceModal(false)"
+        ></div>
+        <div
+          class="bg-white p-8 border border-[#888] w-[90%] max-w-[600px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left"
+        >
+          <span
+            class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black"
+            onclick="toggleReferenceModal(false)"
+            >&times;</span
+          >
+          <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i data-lucide="settings"></i> Gestion des Références</h2>
+          
+          <div class="space-y-6">
+            <p class="text-sm text-gray-600">Ajoutez de nouvelles références au catalogue pour les rendre disponibles lors de l'ajout de matériel.</p>
+            
+            <form id="form_create_reference" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
+                    <input type="text" id="ref_type" required placeholder="Ex: Câble, Ordinateur..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sous-type</label>
+                    <input type="text" id="ref_sous_type" placeholder="Ex: Vidéo, Réseau, Portable..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+                    <p class="text-xs text-gray-500 mt-1">Laissez vide si non applicable.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom (Modèle) <span class="text-red-500">*</span></label>
+                    <input type="text" id="ref_nom" required placeholder="Ex: HDMI 2m, Thinkpad T14..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+                </div>
+                <div class="pt-4 flex justify-end gap-3 border-t border-gray-100">
+                    <button type="button" onclick="toggleReferenceModal(false)" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Annuler</button>
+                    <button type="submit" class="px-6 py-2 bg-custom-brandLight text-white font-semibold rounded-lg shadow-md hover:-translate-y-0.5 transition-all">Enregistrer</button>
+                </div>
+                <div id="ref_message" class="text-sm text-center mt-2 hidden font-medium"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+
       <script>
         /* Fonction pour ouvrir/fermer la sidebar */
         function toggleSidebar() { 
@@ -830,6 +902,8 @@
       <script src="javascript/addItem.js?v=3"></script>
       <script src="javascript/formActions.js?v=2"></script>
       <script src="javascript/boxFormToggle.js?v=1"></script>
+      <script src="javascript/dynamicSelects.js"></script>
+      <script src="javascript/referenceManager.js"></script>
       </div>
     </div>
   </body>
