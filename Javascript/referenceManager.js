@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data.success) {
-                    showMessage(data.data.message || 'Référence ajoutée avec succès !', 'success');
+                    showMessage(data.message || 'Référence ajoutée avec succès !', 'success');
                     
                     // Reset form
                     refForm.reset();
