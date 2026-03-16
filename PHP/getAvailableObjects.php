@@ -1,22 +1,3 @@
 <?php
-// Endpoint : Récupérer les objets disponibles (pour ajout/modification de caisse)
-require_once 'dbConnect.php';
-
-try {
-    $stmt = $conn->prepare("
-        SELECT id, Code_bar, Type, Sous_type, Nom, Etat
-        FROM objets
-        WHERE Etat = 'disponible' AND Caisse_id IS NULL
-        ORDER BY Type, Sous_type, Nom
-    ");
-    $stmt->execute();
-    $objets = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    ApiResponse::success([
-        'objets' => $objets,
-        'total' => count($objets)
-    ]);
-    
-} catch (PDOException $e) {
-    ApiResponse::exception($e);
-}
+require_once __DIR__ . '/core/bootstrap.api.php';
+createController('ItemController')->available();
