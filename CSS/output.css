@@ -31,6 +31,8 @@
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
+    --text-3xl: 1.875rem;
+    --text-3xl--line-height: calc(2.25 / 1.875);
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
     --text-5xl: 3rem;
@@ -463,6 +465,9 @@
   .justify-end {
     justify-content: flex-end;
   }
+  .justify-start {
+    justify-content: flex-start;
+  }
   .gap-1\.5 {
     gap: calc(var(--spacing) * 1.5);
   }
@@ -777,6 +782,10 @@
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
+  }
+  .text-3xl {
+    font-size: var(--text-3xl);
+    line-height: var(--tw-leading, var(--text-3xl--line-height));
   }
   .text-4xl {
     font-size: var(--text-4xl);
@@ -1345,8 +1354,6 @@
     top: 0;
     transition: 0.3s;
     z-index: 100;
-    font-weight: bold;
-    text-align: center;
   }
   .sidebar.hidden {
     left: calc(-1 * var(--sidebar-w));
@@ -1392,7 +1399,6 @@
     text-decoration: none;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 10px;
   }
   .main-content {
@@ -1411,7 +1417,7 @@
       width: 100% !important;
     }
     .sidebar {
-      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
       z-index: 999;
     }
     .close-sidebar-btn {
