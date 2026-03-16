@@ -5,7 +5,7 @@ require_once 'dbConnect.php';
 try {
     $stmt = $conn->prepare("
         SELECT id, Code_bar, Type, Nom, Etat
-        FROM Objet
+        FROM objets
         WHERE Etat = 'disponible' AND Caisse_id IS NULL
         ORDER BY Type, Nom
     ");

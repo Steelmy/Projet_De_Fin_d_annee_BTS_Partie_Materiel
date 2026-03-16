@@ -9,7 +9,7 @@ try {
         ApiResponse::error('Code-barre requis');
     }
 
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Objet WHERE Code_bar = :code_barre");
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM objets WHERE Code_bar = :code_barre");
     $stmt->execute([':code_barre' => $code_barre]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 

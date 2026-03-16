@@ -15,8 +15,8 @@
             <h2 style="color: var(--primary)">INVENTAIRE</h2>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="?page=dash">🏠 Dashboard</a></li>
-            <li><a href="?page=users">👥 Utilisateurs</a></li>
+            <li><a href="../dashboard.php">🏠 Dashboard</a></li>
+            <li><a href="../dashboard?page=users">👥 Utilisateurs</a></li>
             <li class="active"><a href="index.php">📦 Gestion du matériel</a></li>
             <li onclick="toggleModal(true)" style="color: var(--primary); font-weight: bold; margin-top: 15px;">➕ Nouvel Emprunt</li>
         </ul>
@@ -523,6 +523,13 @@
               class="cursor-pointer font-medium select-none"
               >Vue Caisses</label
             >
+            <button
+              onclick="if(window.refreshInventory) window.refreshInventory();"
+              class="ml-auto px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300 flex items-center gap-2 cursor-pointer"
+              title="Rafraîchir les données"
+            >
+              <i data-lucide="rotate-cw"></i> Rafraîchir
+            </button>
           </div>
           <div id="full_inventory">
             <table id="inventory_table" class="w-full border-collapse bg-white">
@@ -802,6 +809,10 @@
       </script>
 
       <!-- Script Includes -->
+      <script src="https://unpkg.com/lucide@latest"></script>
+      <script>
+        lucide.createIcons();
+      </script>
       <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
       <script src="javascript/sortUtils.js"></script>
       <script src="javascript/barcodeGenerator.js?v=3"></script>

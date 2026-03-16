@@ -16,10 +16,10 @@ try {
     
     // Vérifier que la caisse existe
     if ($id > 0) {
-        $checkStmt = $conn->prepare("SELECT id, Nom, Etat FROM Caisse WHERE id = :id");
+        $checkStmt = $conn->prepare("SELECT id, Nom, Etat FROM caisses WHERE id = :id");
         $checkStmt->execute([':id' => $id]);
     } else {
-        $checkStmt = $conn->prepare("SELECT id, Nom, Etat FROM Caisse WHERE Nom = :nom");
+        $checkStmt = $conn->prepare("SELECT id, Nom, Etat FROM caisses WHERE Nom = :nom");
         $checkStmt->execute([':nom' => $nom]);
     }
     
@@ -62,14 +62,14 @@ try {
     if ($objets_ids !== null && is_array($objets_ids)) {
         // Libérer tous les objets actuels
         $freeStmt = $conn->prepare("
-            UPDATE Objet SET Caisse_id = NULL, Etat = 'disponible' WHERE Caisse_id = :caisse_id
+            UPDATE objets SET Caisse_id = NULL, Etat = 'disponible' WHERE Caisse_id = :caisse_id
         ");
         $freeStmt->execute([':caisse_id' => $caisse['id']]);
         
         // Lier les nouveaux objets
         if (!empty($objets_ids)) {
             $linkStmt = $conn->prepare("
-                UPDATE Objet SET Caisse_id = :caisse_id, Etat = 'réservé'
+                UPDATE objets SET Caisse_id = :caisse_id, Etat = 'réservé'
                 WHERE id = :objet_id AND Caisse_id IS NULL
             ");
             foreach ($objets_ids as $objet_id) {
@@ -80,7 +80,7 @@ try {
     
     // Exécuter la mise à jour de la caisse
     if (!empty($updates)) {
-        $sql = "UPDATE Caisse SET " . implode(", ", $updates) . " WHERE id = :id";
+        $sql = "UPDATE caisses SET " . implode(", ", $updates) . " WHERE id = :id";
         $updateStmt = $conn->prepare($sql);
         $updateStmt->execute($params);
     }

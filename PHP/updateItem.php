@@ -12,7 +12,7 @@ try {
     }
     
     // Vérifier que l'objet existe
-    $checkStmt = $conn->prepare("SELECT id, Type, Nom, Code_bar, Caisse_id FROM Objet WHERE Code_bar = :code_barre");
+    $checkStmt = $conn->prepare("SELECT id, Type, Nom, Code_bar, Caisse_id FROM objets WHERE Code_bar = :code_barre");
     $checkStmt->execute([':code_barre' => $code_barre]);
     $objet = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -36,7 +36,7 @@ try {
     
     // Mettre à jour l'objet
     $updateStmt = $conn->prepare("
-        UPDATE Objet 
+        UPDATE objets 
         SET Etat = :etat, Emprunteur_id = :reserveur_emprunteur 
         WHERE Code_bar = :code_barre
     ");

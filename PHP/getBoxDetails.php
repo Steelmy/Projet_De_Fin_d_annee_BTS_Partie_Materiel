@@ -15,7 +15,7 @@ try {
         $stmt = $conn->prepare("
             SELECT c.id, c.Nom, c.Etat, c.created_at, c.updated_at, c.Emprunteur_id,
                    u.Prénom, u.Nom as user_nom
-            FROM Caisse c
+            FROM caisses c
             LEFT JOIN utilisateurs u ON c.Emprunteur_id = u.id
             WHERE c.id = :id
         ");
@@ -24,7 +24,7 @@ try {
         $stmt = $conn->prepare("
             SELECT c.id, c.Nom, c.Etat, c.created_at, c.updated_at, c.Emprunteur_id,
                    u.Prénom, u.Nom as user_nom
-            FROM Caisse c
+            FROM caisses c
             LEFT JOIN utilisateurs u ON c.Emprunteur_id = u.id
             WHERE c.Nom = :nom
         ");
@@ -39,7 +39,7 @@ try {
     
     // Récupérer les objets de la caisse
     $stmtObj = $conn->prepare("
-        SELECT id, Code_bar, Type, Nom, Etat FROM Objet WHERE Caisse_id = :id ORDER BY Type, Nom
+        SELECT id, Code_bar, Type, Nom, Etat FROM objets WHERE Caisse_id = :id ORDER BY Type, Nom
     ");
     $stmtObj->execute([':id' => $caisse['id']]);
     $contenu = $stmtObj->fetchAll(PDO::FETCH_ASSOC);

@@ -20,7 +20,7 @@ function generateUniqueBarcode($conn, $length = 13, $maxAttempts = 100) {
         }
         
         // Vérifier si le code-barre existe déjà
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Objet WHERE Code_bar = :code_barre");
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM objets WHERE Code_bar = :code_barre");
         $stmt->execute([':code_barre' => $barcode]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         

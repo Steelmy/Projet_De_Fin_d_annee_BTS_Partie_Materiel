@@ -15,7 +15,7 @@ try {
     }
     
     // Vérifier l'unicité du nom
-    $checkStmt = $conn->prepare("SELECT COUNT(*) as count FROM Caisse WHERE Nom = :nom");
+    $checkStmt = $conn->prepare("SELECT COUNT(*) as count FROM caisses WHERE Nom = :nom");
     $checkStmt->execute([':nom' => $nom]);
     $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -27,7 +27,7 @@ try {
     
     // Insérer la caisse
     $insertStmt = $conn->prepare("
-        INSERT INTO Caisse (Nom, Etat, Emprunteur_id)
+        INSERT INTO caisses (Nom, Etat, Emprunteur_id)
         VALUES (:nom, 'disponible', NULL)
     ");
     $insertStmt->execute([':nom' => $nom]);
@@ -36,7 +36,7 @@ try {
     // Lier les objets à la caisse
     if (!empty($objets_ids)) {
         $updateStmt = $conn->prepare("
-            UPDATE Objet 
+            UPDATE objets 
             SET Caisse_id = :caisse_id, Etat = 'réservé'
             WHERE id = :objet_id AND Caisse_id IS NULL
         ");
@@ -48,7 +48,7 @@ try {
     $conn->commit();
     
     // Récupérer les objets liés
-    $stmt = $conn->prepare("SELECT id, Code_bar, Type, Nom, Etat FROM Objet WHERE Caisse_id = ?");
+    $stmt = $conn->prepare("SELECT id, Code_bar, Type, Nom, Etat FROM objets WHERE Caisse_id = ?");
     $stmt->execute([$caisseId]);
     $objets = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

@@ -12,7 +12,7 @@ try {
     
     $stmt = $conn->prepare("
         SELECT id, Code_bar, Etat, Emprunteur_id 
-        FROM Objet 
+        FROM objets 
         WHERE Type = :type AND Nom = :nom
         ORDER BY Code_bar
     ");

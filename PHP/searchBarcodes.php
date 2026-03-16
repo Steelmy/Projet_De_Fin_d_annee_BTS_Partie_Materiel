@@ -10,7 +10,7 @@ try {
     $conditions = [];
     $params = [];
     
-    $sql = "SELECT Code_bar, Type, Nom FROM Objet";
+    $sql = "SELECT Code_bar, Type, Nom FROM objets";
     
     if (!empty($query)) {
         $conditions[] = "Code_bar LIKE :query";

@@ -30,6 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
     modalCaisse.classList.remove("hidden");
     modalCaisse.style.display = "flex";
     document.body.style.overflow = "hidden";
+
+    // Rafraîchir l'inventaire complet lors de l'ouverture de la modale
+    if (window.refreshInventory) {
+      window.refreshInventory();
+    }
   }
 
   function closeCaisseModal() {

@@ -135,9 +135,9 @@ try {
             u.Prénom,
             u.Nom AS Nom_utilisateur,
             c.Nom AS Nom_Caisse
-        FROM Objet o
+        FROM objets o
         LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
-        LEFT JOIN Caisse c ON o.Caisse_id = c.id
+        LEFT JOIN caisses c ON o.Caisse_id = c.id
         ORDER BY o.Type, o.Nom
     ");
     $stmt->execute();
@@ -252,7 +252,7 @@ try {
             c.Etat,
             u.Prénom,
             u.Nom AS Nom_utilisateur
-        FROM Caisse c
+        FROM caisses c
         LEFT JOIN utilisateurs u ON c.Emprunteur_id = u.id
         ORDER BY c.Nom
     ");
@@ -262,7 +262,7 @@ try {
     if (count($caisses) > 0) {
         $stmtObjetsCaisse = $conn->prepare("
             SELECT Code_bar, Type, Nom, Etat
-            FROM Objet
+            FROM objets
             WHERE Caisse_id = ?
             ORDER BY Type, Nom
         ");

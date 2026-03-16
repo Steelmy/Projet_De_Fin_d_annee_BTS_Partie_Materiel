@@ -16,9 +16,9 @@ try {
             o.created_at, o.updated_at,
             u.Nom as user_nom, u.Prénom as user_prenom,
             c.Nom as caisse_nom
-        FROM Objet o
+        FROM objets o
         LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
-        LEFT JOIN Caisse c ON o.Caisse_id = c.id
+        LEFT JOIN caisses c ON o.Caisse_id = c.id
         WHERE o.Code_bar = :code_barre
     ");
     $stmt->execute([':code_barre' => $codeBarre]);

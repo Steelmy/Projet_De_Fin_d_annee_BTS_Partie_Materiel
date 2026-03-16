@@ -576,6 +576,11 @@ async function autoFillTypeFromNom(nomValue) {
 
 // Exposer pour utilisation externe
 window.resetFiltersConsultation = resetFiltersConsultation;
-window.refreshInventory = loadAllInventory;
+window.refreshInventory = async function () {
+  await loadAllInventory();
+  if (isCaissesViewActive) {
+    await displayCaissesView();
+  }
+};
 window.applyFiltersConsultation = applyFilters;
 window.autoFillTypeFromNom = autoFillTypeFromNom;

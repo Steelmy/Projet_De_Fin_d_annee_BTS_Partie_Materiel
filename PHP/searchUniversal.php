@@ -30,7 +30,7 @@ try {
             break;
 
         case 'caisse':
-            $table = 'Caisse';
+            $table = 'caisses';
             $fields = 'id, Nom, Etat';
             if (!empty($query)) {
                 $where = "Nom LIKE :q_start";
@@ -42,7 +42,7 @@ try {
             break;
 
         case 'materiel_type':
-            $table = 'Objet';
+            $table = 'objets';
             $fields = 'DISTINCT Type';
             if (!empty($query)) {
                 $where = "Type LIKE :q_start";
@@ -54,7 +54,7 @@ try {
             break;
 
         case 'materiel_nom':
-            $table = 'Objet';
+            $table = 'objets';
             $fields = 'DISTINCT Nom';
             $conditions = [];
             if (!empty($query)) {
@@ -74,7 +74,7 @@ try {
             break;
         
         case 'materiel_code':
-            $table = 'Objet';
+            $table = 'objets';
             $fields = 'id, Code_bar, Nom, Type';
             $conditions = [];
             if (!empty($query)) {

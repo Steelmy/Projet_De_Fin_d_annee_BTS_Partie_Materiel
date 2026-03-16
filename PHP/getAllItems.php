@@ -8,9 +8,9 @@ try {
             o.id, o.Code_bar, o.Type, o.Nom, o.Etat,
             u.Prénom, u.Nom AS Nom_utilisateur,
             c.Nom AS Nom_caisse
-        FROM Objet o
+        FROM objets o
         LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
-        LEFT JOIN Caisse c ON o.Caisse_id = c.id
+        LEFT JOIN caisses c ON o.Caisse_id = c.id
         ORDER BY o.Type, o.Nom
     ");
     $stmt->execute();

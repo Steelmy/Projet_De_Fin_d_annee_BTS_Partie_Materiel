@@ -10,7 +10,7 @@ try {
     }
     
     // Vérifier que l'objet existe
-    $checkStmt = $conn->prepare("SELECT id, Type, Nom, Code_bar, Etat, Caisse_id FROM Objet WHERE Code_bar = :code_barre");
+    $checkStmt = $conn->prepare("SELECT id, Type, Nom, Code_bar, Etat, Caisse_id FROM objets WHERE Code_bar = :code_barre");
     $checkStmt->execute([':code_barre' => $code_barre]);
     $objet = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
@@ -29,7 +29,7 @@ try {
     }
     
     // Supprimer l'objet
-    $deleteStmt = $conn->prepare("DELETE FROM Objet WHERE Code_bar = :code_barre");
+    $deleteStmt = $conn->prepare("DELETE FROM objets WHERE Code_bar = :code_barre");
     $deleteStmt->execute([':code_barre' => $code_barre]);
     
     $logger->info("Matériel supprimé", ['code_barre' => $code_barre, 'type' => $objet['Type'], 'nom' => $objet['Nom']]);

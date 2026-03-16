@@ -22,7 +22,7 @@ try {
         }
 
         // Vérifier unicité
-        $checkStmt = $conn->prepare("SELECT COUNT(*) FROM Objet WHERE Code_bar = :code");
+        $checkStmt = $conn->prepare("SELECT COUNT(*) FROM objets WHERE Code_bar = :code");
         $checkStmt->execute([':code' => $codeBarre]);
         
         if ($checkStmt->fetchColumn() > 0) {
@@ -31,7 +31,7 @@ try {
         
         // Insérer l'objet
         $insertStmt = $conn->prepare("
-            INSERT INTO Objet (Type, Nom, Etat, Emprunteur_id, Code_bar)
+            INSERT INTO objets (Type, Nom, Etat, Emprunteur_id, Code_bar)
             VALUES (:type, :nom, 'disponible', NULL, :code_barre)
         ");
         $insertStmt->execute([':type' => $type, ':nom' => $nom, ':code_barre' => $codeBarre]);

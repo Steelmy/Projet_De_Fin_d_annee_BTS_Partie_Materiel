@@ -12,10 +12,10 @@ try {
     
     // Vérifier que la caisse existe
     if ($id > 0) {
-        $checkStmt = $conn->prepare("SELECT id, Nom FROM Caisse WHERE id = :id");
+        $checkStmt = $conn->prepare("SELECT id, Nom FROM caisses WHERE id = :id");
         $checkStmt->execute([':id' => $id]);
     } else {
-        $checkStmt = $conn->prepare("SELECT id, Nom FROM Caisse WHERE Nom = :nom");
+        $checkStmt = $conn->prepare("SELECT id, Nom FROM caisses WHERE Nom = :nom");
         $checkStmt->execute([':nom' => $nom]);
     }
     
@@ -29,12 +29,12 @@ try {
     
     // Remettre les objets en état disponible
     $freeStmt = $conn->prepare("
-        UPDATE Objet SET Etat = 'disponible' WHERE Caisse_id = :caisse_id
+        UPDATE objets SET Etat = 'disponible' WHERE Caisse_id = :caisse_id
     ");
     $freeStmt->execute([':caisse_id' => $caisse['id']]);
     
     // Supprimer la caisse
-    $deleteStmt = $conn->prepare("DELETE FROM Caisse WHERE id = :id");
+    $deleteStmt = $conn->prepare("DELETE FROM caisses WHERE id = :id");
     $deleteStmt->execute([':id' => $caisse['id']]);
     
     $conn->commit();
