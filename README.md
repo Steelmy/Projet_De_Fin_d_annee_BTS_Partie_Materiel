@@ -4,52 +4,46 @@ Application web de gestion d'inventaire matériel. Permet la gestion complète d
 
 ## Architecture
 
+L'application suit une architecture **MVC (Modèle-Vue-Contrôleur)** personnalisée, où les interactions frontend sont gérées par des appels AJAX vers des points d'entrée API en PHP.
+
 ```mermaid
-graph TB
-    subgraph "Frontend"
-        HTML["Gestion_materiel.html"]
-        CSS["css/output.css (Tailwind)"]
-        JS_CORE["javascript/"]
-        JS_CORE --> SORT["sortUtils.js"]
-        JS_CORE --> AC["universalAutocomplete.js"]
-        JS_CORE --> ACB["universalAutocompleteBarcode.js"]
-        JS_CORE --> INIT["initAutocompletes.js"]
-        JS_CORE --> CRUD_JS["add/delete/updateItem.js"]
-        JS_CORE --> CAISSE_JS["add/delete/updateBox.js"]
-        JS_CORE --> FILTER["filterConsultation.js"]
+graph TD
+    subgraph Frontend ["Interface (Vue)"]
+        Index["index.php"] --> Layout["app/Views/layout.php"]
+        Layout --> Partials["app/Views/partials/"]
+        Layout --> JS["javascript/"]
     end
 
-    subgraph "Backend PHP"
-        BOOTSTRAP["core/bootstrap.php"]
-        BOOTSTRAP --> ENV["core/EnvLoader.php"]
-        BOOTSTRAP --> LOG["core/Logger.php"]
-        BOOTSTRAP --> DB["core/Database.php"]
-        BOOTSTRAP --> API["core/ApiResponse.php"]
-
-        subgraph "Endpoints"
-            MATERIEL_API["add/delete/update/get_materiel*.php"]
-            CAISSE_API["add/delete/update/get_caisse*.php"]
-            SEARCH_API["searchUniversal.php / searchBarcodes.php"]
-            UTILS_API["checkBarcode.php / getIds.php / getUsers.php"]
-            MONITOR["monitor.php"]
-        end
+    subgraph API ["Points d'Entrée API"]
+        Endpoints["php/*.php (ex: addItem.php)"]
+        BootstrapAPI["php/core/bootstrap.api.php"]
+        BootstrapBase["php/core/bootstrap.php"]
     end
 
-    subgraph "Données"
-        ENV_FILE[".env"]
-        LOGS["logs/app-YYYY-MM-DD.log"]
-        BDD["MySQL/MariaDB"]
+    subgraph Backend ["Logique Métier (MVC)"]
+        Controllers["app/Controllers/"]
+        Models["app/Models/"]
     end
 
-    HTML --> JS_CORE
-    HTML --> CSS
-    JS_CORE -->|"fetch() API"| MATERIEL_API
-    JS_CORE -->|"fetch() API"| CAISSE_API
-    JS_CORE -->|"fetch() API"| SEARCH_API
-    BOOTSTRAP --> ENV_FILE
-    LOG --> LOGS
-    DB --> BDD
+    subgraph Infrastructure
+        DB["Base de Données (MySQL)"]
+        Logger["logs/"]
+    end
+
+    %% Interactions
+    JS -- "Requêtes AJAX (fetch)" --> Endpoints
+    Endpoints -- "Initialisation" --> BootstrapAPI
+    BootstrapAPI -- "Config/DB/Logs" --> BootstrapBase
+    BootstrapBase -- "Connexion" --> DB
+    
+    Endpoints -- "Instancie" --> Controllers
+    Controllers -- "Composants de données" --> Models
+    Models -- "Requêtes SQL" --> DB
+    Controllers -- "Réponse JSON" --> JS
 ```
+
+> [!TIP]
+> Pour plus de détails sur le fonctionnement interne, consultez le document [Architecture et Fonctionnement](app_data_dir/brain/3f25eb71-2eb4-4a78-87c5-c23b44c06e0d/architecture_overview.md).
 
 ## Structure des fichiers
 
@@ -58,56 +52,27 @@ graph TB
 ├── .env.example            # Template .env (commité)
 ├── .gitignore
 ├── README.md
-├── Gestion_materiel.html   # Page principale (SPA)
-├── BDD/                    # Script SQL de création de la BDD
+├── index.php               # Point d'entrée principal (Layout MVC)
+├── app/                    # Code source de l'application (MVC)
+│   ├── Controllers/        # Logique de traitement (ItemController, etc.)
+│   ├── Models/             # Accès aux données (Box, Item, etc.)
+│   └── Views/              # Templates HTML et partials
+├── bdd/                    # Scripts SQL de création de la BDD
 ├── css/
 │   ├── input.css           # Source Tailwind
-│   └── output.css          # CSS compilé
+│   └── output.css          # CSS compilé (Tailwind)
 ├── javascript/
-│   ├── sortUtils.js            # Utilitaire de tri centralisé (DRY)
-│   ├── universalAutocomplete.js # Autocomplétion texte
-│   ├── universalAutocompleteBarcode.js # Autocomplétion code-barre
-│   ├── initAutocompletes.js    # Initialisation des autocomplétions
-│   ├── filterConsultation.js   # Filtres et tri de l'inventaire
-│   ├── addItem.js          # Formulaire ajout matériel
-│   ├── deleteItem.js       # Formulaire suppression matériel
-│   ├── updateItem.js       # Formulaire modification matériel
-│   ├── addBox.js            # Formulaire ajout caisse
-│   ├── deleteBox.js         # Formulaire suppression caisse
-│   ├── updateBox.js         # Formulaire modification caisse
-│   ├── barcodeGenerator.js     # Génération de codes-barres
-│   ├── downloadPdf.js          # Export PDF
-│   ├── textFieldLoader.js       # Chargement dynamique des champs
-│   ├── boxFormToggle.js    # Toggle formulaires caisse
-│   └── formActions.js          # Actions formulaires
+│   ├── sortUtils.js            # Utilitaire de tri centralisé
+│   ├── universalAutocomplete.js # Autocomplétion texte/code-barre
+│   ├── filterConsultation.js   # Filtres de l'inventaire
+│   ├── addItem.js / addBox.js  # Gestions des formulaires
+│   └── ...                     # Scripts interactifs divers
 ├── php/
-│   ├── core/                    # Infrastructure commune
-│   │   ├── bootstrap.php        # Point d'entrée unique
-│   │   ├── EnvLoader.php        # Chargement .env
-│   │   ├── Logger.php           # Système de logging
-│   │   ├── Database.php         # Connexion PDO
-│   │   └── ApiResponse.php      # Réponses JSON standardisées
-│   ├── dbConnect.php           # Wrapper rétrocompatible
+│   ├── core/                    # Infrastructure commune (Bootstrap, DB, Logger)
+│   ├── addItem.php / addBox.php # Points d'entrée API (Actions)
 │   ├── monitor.php              # Health check & monitoring
-│   ├── addItem.php         # POST — Ajouter matériel
-│   ├── deleteItem.php      # POST — Supprimer matériel
-│   ├── updateItem.php      # POST — Modifier matériel
-│   ├── getAllItems.php     # GET — Liste tous les matériels
-│   ├── getItemDetails.php # GET — Détails d'un matériel
-│   ├── addBox.php           # POST — Ajouter caisse
-│   ├── deleteBox.php        # POST — Supprimer caisse
-│   ├── updateBox.php        # POST — Modifier caisse
-│   ├── getAllBoxes.php      # GET — Liste toutes les caisses
-│   ├── getBoxDetails.php   # GET — Détails d'une caisse
-│   ├── getAvailableObjects.php # GET — Objets disponibles
-│   ├── searchBarcodes.php  # GET — Recherche codes-barres
-│   ├── searchUniversal.php     # GET — Recherche universelle
-│   ├── checkBarcode.php        # GET — Vérifier unicité code-barre
-│   ├── getIds.php              # GET — IDs par type/nom
-│   ├── getUsers.php     # GET — Liste utilisateurs
-│   └── generateInventoryPdf.php # GET — Génération PDF
-└── logs/                        # Logs applicatifs (gitignored)
-    └── app-YYYY-MM-DD.log
+│   └── ...                      # Endpoints API divers
+└── logs/                        # Logs applicatifs (rotation quotidienne)
 ```
 
 ## Installation
@@ -130,7 +95,7 @@ graph TB
    source BDD/BDD_test_gestion_materiel_mariadb.sql
    ```
 4. **Démarrer XAMPP** (Apache + MySQL)
-5. **Accéder à l'application** : `http://localhost/Projet de fin d'année BTS/Gestion_materiel.html`
+5. **Accéder à l'application** : `http://localhost/Projet de fin d'année BTS/index.php`
 
 ## Principes appliqués
 
