@@ -33,7 +33,7 @@ formAjout.addEventListener("submit", async (e) => {
   // Demander les codes-barres de manière séquentielle
   const codesBarres = [];
   for (let i = 1; i <= nombre; i++) {
-    let codeBarre = prompt(`Code-barre pour matériel #${i} sur ${nombre}:`);
+    let codeBarre = prompt(`Veuillez scanner le code-barre pour le matériel #${i} sur ${nombre}:`);
 
     // Si l'utilisateur annule, arrêter le processus
     if (codeBarre === null) {
@@ -48,6 +48,14 @@ formAjout.addEventListener("submit", async (e) => {
       continue;
     }
     const codeTrimmed = codeBarre.trim();
+
+    // Demander confirmation du code scanné
+    const isConfirmed = confirm(`Code-barre scanné : ${codeTrimmed}\n\nEst-ce le bon code-barre ?\n(Cliquez sur 'OK' pour confirmer, ou 'Annuler' pour recommencer)`);
+    
+    if (!isConfirmed) {
+      i--; // Recommencer pour le même index
+      continue;
+    }
 
     // 1. Vérifier si déjà scanné dans ce lot
     if (codesBarres.includes(codeTrimmed)) {
