@@ -270,4 +270,30 @@
       justify-content: center;
     }
   }
+
+  /* Bouton de déconnexion */
+  .logout_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px auto 10px;
+    width: 90%;
+    padding: 12px;
+    background: transparent;
+    color: #ef4444;
+    border: 1.5px solid #ef4444;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: 0.3s;
+  }
+  .logout_btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    transform: translateY(-2px);
+  }
 }

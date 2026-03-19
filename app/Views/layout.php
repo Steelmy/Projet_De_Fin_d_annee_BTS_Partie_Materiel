@@ -34,10 +34,10 @@ $viewDir = __DIR__ . '/partials';
                 id="modeSelector"
                 class="w-full px-4 py-3 border border-[#ddd] rounded-lg text-[14px] font-bold text-[#333] transition-all duration-300 bg-white focus:outline-none focus:border-[#b8a274]"
               >
-                <option value="ajout">➕ Ajouter</option>
-                <option value="suppression">🗑️ Supprimer</option>
-                <option value="modification">✏️ Modifier</option>
-                <option value="consultation" selected>🔍 Consulter</option>
+                <option value="ajout">Ajouter</option>
+                <option value="suppression">Supprimer</option>
+                <option value="modification">Modifier</option>
+                <option value="consultation" selected>Consulter</option>
               </select>
             </div>
 

@@ -106,7 +106,7 @@
           id="btn_download_pdf"
           class="px-3 py-1.5 bg-white border border-[#ccc] rounded-lg cursor-pointer shadow-input font-inherit text-gray-800 hover:bg-gray-50 transition-colors"
         >
-          📄 Télécharger PDF
+          Télécharger PDF
         </button>
         <span class="text-[1.1em] font-medium">
           Total:

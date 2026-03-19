@@ -7,6 +7,6 @@
         <li class="h-[48px] px-[25px] cursor-pointer border-l-4 border-transparent flex items-center gap-2 hover:bg-gray-700 transition-colors"><a href="http://localhost/Projet-Partie-Alban/dashboard.php" class="text-white no-underline flex items-center gap-2 w-full font-bold">Dashboard</a></li>
         <li class="h-[48px] px-[25px] cursor-pointer border-l-4 border-transparent flex items-center gap-2 hover:bg-gray-700 transition-colors"><a href="http://localhost/Projet-Partie-Alban/dashboard.php?page=users" class="text-white no-underline flex items-center gap-2 w-full font-bold">Utilisateurs</a></li>
         <li class="h-[48px] px-[25px] cursor-pointer border-l-4 border-[#b8a274] bg-gray-700 flex items-center gap-2"><a href="http://localhost/Projet%20de%20fin%20d'ann%C3%A9e%20BTS/index.php" class="text-white no-underline flex items-center gap-2 w-full font-bold">Gestion du matériel</a></li>
-        <li onclick="toggleModal(true)" class="h-[48px] px-[25px] cursor-pointer border-l-4 border-transparent flex items-center gap-2 hover:bg-gray-700 transition-colors text-[#b8a274] font-bold">Nouvel Emprunt</li>
+        <a href="logout.php" class="logout_btn">Déconnexion</a>
     </ul>
 </nav>

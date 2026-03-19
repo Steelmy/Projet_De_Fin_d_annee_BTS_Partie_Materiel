@@ -12,6 +12,9 @@
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 
+// Vérification de la session admin (fichier du collègue Enzo)
+require_once $_SERVER['DOCUMENT_ROOT'] . 'auth_check.php';
+
 // Charger les classes core
 require_once __DIR__ . '/EnvLoader.php';
 require_once __DIR__ . '/Logger.php';
