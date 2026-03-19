@@ -3,6 +3,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const refForm = document.getElementById('form_create_reference');
     const refMessage = document.getElementById('ref_message');
 
+    // Make reset function available globally
+    window.resetReferenceForm = function() {
+        if (refForm) refForm.reset();
+        
+        // Explicitly clear inputs
+        const typeInput = document.getElementById('ref_type');
+        const sousTypeInput = document.getElementById('ref_sous_type');
+        const nomInput = document.getElementById('ref_nom');
+        if (typeInput) typeInput.value = '';
+        if (sousTypeInput) sousTypeInput.value = '';
+        if (nomInput) nomInput.value = '';
+
+        if (refMessage) {
+            refMessage.classList.add('hidden');
+            refMessage.textContent = '';
+        }
+    };
+
     // Make toggle function available globally
     window.toggleReferenceModal = function(show) {
         if (!refModal) return;
@@ -41,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             refModal.classList.add('hidden');
             refModal.style.display = 'none';
             document.body.style.overflow = '';
-            if (refForm) refForm.reset();
+            if (window.resetReferenceForm) window.resetReferenceForm();
         }
     };
 

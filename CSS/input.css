@@ -107,7 +107,7 @@
 /* Styles importés depuis l'ancien index.php */
 @layer components {
   :root {
-    --sidebar-w: 250px;
+    --sidebar-w: 280px;
     --primary: #b6a071;
     --dark: #1f2937;
   }

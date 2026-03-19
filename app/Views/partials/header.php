@@ -1,25 +1,21 @@
-<header
-  class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white py-10 px-8 text-center relative overflow-hidden"
->
-  <button
-    onclick="toggleSidebar()"
-    class="absolute top-5 bg-white/20 hover:bg-white/30 text-white border border-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm transition-all duration-300 transform hover:-translate-y-0.5 z-50 cursor-pointer"
-    style="left: 1.25rem;"
-  >
-    ☰ Menu
-  </button>
-  <h1
-    class="text-4xl lg:text-5xl font-bold mb-4 drop-shadow-md relative z-10 inline-block"
-  >
-    Gestion du matériel
-  </h1>
-  <p class="text-lg opacity-90 font-light relative z-10">
-    Administration et inventaire global
-  </p>
+<div class="bg-white py-[15px] px-[30px] rounded-[12px] mb-[20px] flex justify-between items-center shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+  <div class="flex items-center gap-4">
+    <button
+      onclick="toggleSidebar()"
+      class="bg-[#f3f4f6] text-black border-none w-10 h-10 rounded-lg cursor-pointer text-xl flex items-center justify-center shadow-sm hover:bg-gray-200 transition-all duration-300 hover:scale-105 active:scale-95"
+    >
+      ☰
+    </button>
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 m-0">Gestion du matériel</h1>
+      <p class="text-sm text-gray-500 m-0 font-light">Administration et inventaire global</p>
+    </div>
+  </div>
+
   <button
     id="btn-open-barcode"
-    class="absolute top-5 right-5 bg-white/20 hover:bg-white/30 text-white border border-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-sm transition-all duration-300 transform hover:-translate-y-0.5 z-20"
+    class="bg-[#b8a274] hover:bg-[#9a8552] text-white py-2 px-4 rounded-[20px] font-bold text-base transition-all duration-300 hover:-translate-y-0.5 shadow-sm border-none cursor-pointer flex items-center"
   >
     Générateur Code-barres
   </button>
-</header>
+</div>

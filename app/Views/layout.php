@@ -16,27 +16,23 @@ $viewDir = __DIR__ . '/partials';
     <link rel="stylesheet" href="css/output.css" />
   </head>
   <body
-    class="font-sans bg-white min-h-screen leading-relaxed text-gray-800"
+    class="font-sans bg-[#f3f4f6] min-h-screen leading-relaxed text-[#333]"
   >
     <?php include $viewDir . '/sidebar.php'; ?>
 
-    <div id="mainContent" class="main-content p-5">
-      <div
-        class="max-w-[1400px] mx-auto bg-white rounded-2xl shadow-custom-lg border border-custom-border relative"
-      >
+    <div id="mainContent" class="main-content min-h-screen transition-all duration-300">
+      <div class="p-[20px] max-w-[1400px] mx-auto w-full">
         <?php include $viewDir . '/header.php'; ?>
 
-        <div
-          class="p-8 bg-white border-b border-custom-border flex flex-wrap gap-5 items-center"
-        >
+        <div class="bg-white rounded-[12px] p-[25px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] flex flex-wrap gap-[20px] items-center mb-[20px]">
           <div
             id="main_horizontal_wrapper"
-            class="flex flex-wrap items-center w-full gap-4"
+            class="flex flex-wrap items-center w-full gap-[15px]"
           >
             <div class="min-w-[200px]">
               <select
                 id="modeSelector"
-                class="w-full px-4 py-3 border-2 border-custom-brandLight rounded-full text-sm font-bold text-custom-brandLight transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                class="w-full px-4 py-3 border border-[#ddd] rounded-lg text-[14px] font-bold text-[#333] transition-all duration-300 bg-white focus:outline-none focus:border-[#b8a274]"
               >
                 <option value="ajout">➕ Ajouter</option>
                 <option value="suppression">🗑️ Supprimer</option>
@@ -55,8 +51,9 @@ $viewDir = __DIR__ . '/partials';
 
           <?php include $viewDir . '/modals/box-manager.php'; ?>
 
-          <?php include $viewDir . '/inventory-table.php'; ?>
         </div>
+
+        <?php include $viewDir . '/inventory-table.php'; ?>
 
         <!-- Conteneurs legacy cachés -->
         <div id="section_ajout" class="hidden"></div>

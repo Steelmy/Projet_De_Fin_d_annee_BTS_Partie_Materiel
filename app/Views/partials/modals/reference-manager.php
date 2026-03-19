@@ -33,9 +33,12 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Nom (Modèle) <span class="text-red-500">*</span></label>
               <input type="text" id="ref_nom" required placeholder="Ex: HDMI 2m, Thinkpad T14..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
           </div>
-          <div class="pt-4 flex justify-end gap-3 border-t border-gray-100">
-              <button type="button" onclick="toggleReferenceModal(false)" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Annuler</button>
-              <button type="submit" class="px-6 py-2 bg-custom-brandLight text-white font-semibold rounded-lg shadow-md hover:-translate-y-0.5 transition-all">Enregistrer</button>
+          <div class="pt-4 flex justify-between border-t border-gray-100">
+              <button type="button" onclick="resetReferenceForm()" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors">Réinitialiser</button>
+              <div class="flex gap-3">
+                  <button type="button" onclick="toggleReferenceModal(false)" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Annuler</button>
+                  <button type="submit" class="px-6 py-2 bg-custom-brandLight text-white font-semibold rounded-lg shadow-md hover:-translate-y-0.5 transition-all">Enregistrer</button>
+              </div>
           </div>
           <div id="ref_message" class="text-sm text-center mt-2 hidden font-medium"></div>
       </form>
