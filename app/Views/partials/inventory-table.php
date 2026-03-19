@@ -1,5 +1,6 @@
 <div class="p-8 overflow-x-auto w-full mt-5">
   <div class="flex items-center gap-1.5 mb-4">
+<!--
     <input
       type="checkbox"
       id="toggle_caisse_view"
@@ -10,6 +11,7 @@
       class="cursor-pointer font-medium select-none"
       >Vue Caisses</label
     >
+    -->
     <button
       onclick="if(window.refreshInventory) window.refreshInventory();"
       class="ml-auto px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300 flex items-center gap-2 cursor-pointer"
@@ -64,6 +66,7 @@
             Utilisateur
             <span id="sort_icon_Utilisateur" class="text-xs opacity-50 ml-1">↕</span>
           </th>
+<!--
           <th
             class="p-4.5 font-semibold tracking-wide uppercase text-sm sticky top-0 z-10 border-b-2 border-custom-brandLight text-center cursor-pointer hover:bg-white/10 transition-colors"
             onclick="window.sortInventory('Nom_caisse')"
@@ -71,6 +74,7 @@
             Caisse
             <span id="sort_icon_Nom_caisse" class="text-xs opacity-50 ml-1">↕</span>
           </th>
+-->
         </tr>
       </thead>
       <tbody

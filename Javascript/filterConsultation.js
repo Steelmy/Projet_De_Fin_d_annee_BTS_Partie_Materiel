@@ -6,14 +6,21 @@ let isCaissesViewActive = false; // État de la vue caisses
 
 // Sélecteurs
 const typeConsultation = document.getElementById("type_materiel_consultation");
-const sousTypeConsultation = document.getElementById("sous_type_materiel_consultation");
+const sousTypeConsultation = document.getElementById(
+  "sous_type_materiel_consultation",
+);
 const nomConsultation = document.getElementById("nom_materiel_consultation");
 const codeBarreConsultation = document.getElementById(
   "code_barre_consultation",
 );
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (!typeConsultation || !sousTypeConsultation || !nomConsultation || !codeBarreConsultation) {
+  if (
+    !typeConsultation ||
+    !sousTypeConsultation ||
+    !nomConsultation ||
+    !codeBarreConsultation
+  ) {
     console.error("❌ Éléments de consultation non trouvés");
     return;
   }
@@ -65,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
       applyFilters();
     }
   });
-
 });
 
 // AUTO-REMPLIR type + nom depuis le code-barre (comme dans deleteItem.js)
@@ -436,7 +442,7 @@ function updateInventoryTable(data) {
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom}</td>
       <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${item.Etat}</td>
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
-      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom_caisse || "-"}</td>
+      <!-- <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom_caisse || "-"}</td> -->
     `;
     tbody.appendChild(tr);
   });

@@ -11,11 +11,10 @@ class PdfController
 
     public function inventory(): void
     {
-        require_once dirname(__DIR__, 2) . '/php/fpdf/fpdf.php';
 
         try {
             $materiels = $this->fetchMaterials();
-            $caisses = $this->fetchCaisses();
+            // $caisses = $this->fetchCaisses();
 
             $pdf = new PDF_MC_Table();
             $pdf->AddPage();
@@ -32,7 +31,7 @@ class PdfController
             $this->renderMainTable($pdf, $materiels, $maxPageWidth);
 
             // Tableaux par caisse
-            $this->renderCaisseTables($pdf, $caisses, $maxPageWidth);
+            // $this->renderCaisseTables($pdf, $caisses, $maxPageWidth);
 
             // Pied de page
             $pdf->SetLeftMargin(10);
@@ -76,7 +75,8 @@ class PdfController
     private function renderMainTable(PDF_MC_Table $pdf, array $materiels, float $maxPageWidth): void
     {
         $pdf->SetFont('Arial', 'B', 9);
-        $headers = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État'), 'Utilisateur', 'Caisse'];
+        // $headers = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État'), 'Utilisateur', 'Caisse'];
+        $headers = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État'), 'Utilisateur'];
         $cols = count($headers);
 
         $widths = [];
@@ -91,7 +91,7 @@ class PdfController
             if ($materiel['Etat'] !== 'disponible' && $materiel['Prénom']) {
                 $utilisateur = utf8_decode($materiel['Prénom'] . ' ' . $materiel['Nom_utilisateur']);
             }
-            $caisse = !empty($materiel['Nom_Caisse']) ? utf8_decode($materiel['Nom_Caisse']) : '-';
+            // $caisse = !empty($materiel['Nom_Caisse']) ? utf8_decode($materiel['Nom_Caisse']) : '-';
 
             $row = [
                 utf8_decode($materiel['Code_bar']),
@@ -99,8 +99,8 @@ class PdfController
                 utf8_decode($materiel['Sous_type']),
                 utf8_decode($materiel['Nom']),
                 utf8_decode($materiel['Etat']),
-                $utilisateur,
-                $caisse
+                $utilisateur
+                // $caisse
             ];
             $tableData[] = $row;
 
@@ -131,7 +131,8 @@ class PdfController
         // En-têtes
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetFillColor(200, 220, 255);
-        $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C']);
+        // $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C']);
+        $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C']);
         for ($i = 0; $i < $cols; $i++) {
             $pdf->Cell($widths[$i], 8, $headers[$i], 1, 0, 'C', true);
         }
@@ -139,7 +140,8 @@ class PdfController
 
         // Donnees
         $pdf->SetFont('Arial', '', 8);
-        $pdf->SetAligns(['L', 'L', 'L', 'L', 'C', 'L', 'L']);
+        // $pdf->SetAligns(['L', 'L', 'L', 'L', 'C', 'L', 'L']);
+        $pdf->SetAligns(['L', 'L', 'L', 'L', 'C', 'L']);
         $fill = false;
         foreach ($tableData as $row) {
             $pdf->SetFillColor($fill ? 240 : 255, $fill ? 240 : 255, $fill ? 240 : 255);
@@ -274,6 +276,7 @@ class PdfController
 /**
  * Extension FPDF pour tableaux multi-cellules
  */
+require_once dirname(__DIR__, 2) . '/php/fpdf/fpdf.php';
 class PDF_MC_Table extends FPDF
 {
     protected $widths;

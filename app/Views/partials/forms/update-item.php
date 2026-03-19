@@ -2,6 +2,7 @@
   id="form_modification"
   class="flex flex-wrap items-center gap-2.5 w-full hidden"
 >
+<!--
   <div class="flex items-center gap-1.5">
     <button
       type="button"
@@ -11,6 +12,7 @@
       Caisse
     </button>
   </div>
+-->
   <div class="box-input-wrapper">
     <input
       type="text"

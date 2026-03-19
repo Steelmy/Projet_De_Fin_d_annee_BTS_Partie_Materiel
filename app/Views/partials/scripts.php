@@ -41,7 +41,8 @@
     modeSelector.addEventListener("change", updateUI);
     updateUI();
 
-    // Toggle vue caisses
+    // Toggle vue caisses (Commented out)
+    /*
     document
       .getElementById("toggle_caisse_view")
       .addEventListener("change", (e) => {
@@ -55,6 +56,7 @@
           leg.dispatchEvent(new Event("change"));
         }
       });
+    */
 
     // Liaison des panneaux caisse
     const bindPanel = (chkId, pnlId) => {
@@ -101,9 +103,9 @@
 <script src="javascript/universalAutocomplete.js?v=2"></script>
 <script src="javascript/universalAutocompleteBarcode.js?v=5"></script>
 <script src="javascript/initAutocompletes.js?v=2"></script>
-<script src="javascript/addBox.js?v=2"></script>
-<script src="javascript/deleteBox.js"></script>
-<script src="javascript/updateBox.js?v=2"></script>
+<!-- <script src="javascript/addBox.js?v=2"></script> -->
+<!-- <script src="javascript/deleteBox.js"></script> -->
+<!-- <script src="javascript/updateBox.js?v=2"></script> -->
 <script src="javascript/textFieldLoader.js?v=2"></script>
 <script src="javascript/deleteItem.js"></script>
 <script src="javascript/updateItem.js?v=2"></script>
@@ -111,6 +113,6 @@
 <script src="javascript/downloadPdf.js"></script>
 <script src="javascript/addItem.js?v=3"></script>
 <script src="javascript/formActions.js?v=2"></script>
-<script src="javascript/boxFormToggle.js?v=1"></script>
+<!-- <script src="javascript/boxFormToggle.js?v=1"></script> -->
 <script src="javascript/dynamicSelects.js"></script>
 <script src="javascript/referenceManager.js"></script>
