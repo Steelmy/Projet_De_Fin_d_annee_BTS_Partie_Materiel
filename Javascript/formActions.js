@@ -38,6 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. Reset standard HTML
     form.reset();
 
+    const typeSelect = form.querySelector('select[id^="type_materiel_"]');
+    if (typeSelect) {
+      typeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
     // 3. Restaurer l'état de la checkbox
     if (toggleCaisse) {
       toggleCaisse.checked = wasChecked;

@@ -326,7 +326,7 @@ function applyFilters() {
   }
 
   // Update icons
-  const sortColumns = ["Type", "Nom", "Etat", "Utilisateur", "Nom_caisse"];
+  const sortColumns = ["Type", "Sous_type", "Nom", "Etat", "Utilisateur", "Nom_caisse"];
   sortColumns.forEach((col) => {
     const iconSpan = document.getElementById(`sort_icon_${col}`);
     if (iconSpan) {
