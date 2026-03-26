@@ -3,9 +3,6 @@ const typeInputAjout = document.getElementById("type_materiel_ajout");
 const nomInputAjout = document.getElementById("nom_materiel_ajout");
 const formAjout = document.getElementById("form_ajout");
 
-// Les fonctions de chargement des types et noms sont maintenant gérées par autocomplete_types_noms.js
-// Ce fichier se concentre uniquement sur la soumission du formulaire
-
 // Gérer la soumission du formulaire d'ajout
 formAjout.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -30,81 +27,17 @@ formAjout.addEventListener("submit", async (e) => {
     return;
   }
 
-  // Demander les codes-barres de manière séquentielle
-  const codesBarres = [];
-  for (let i = 1; i <= nombre; i++) {
-    let codeBarre = prompt(`Veuillez scanner le code-barre pour le matériel #${i} sur ${nombre}:`);
-
-    // Si l'utilisateur annule, arrêter le processus
-    if (codeBarre === null) {
-      alert("Ajout annulé");
-      return;
-    }
-
-    // Accepter un code-barre vide (génération automatique)
-    if (codeBarre.trim() === "") {
-      alert("Le code-barre est obligatoire.");
-      i--; // Réessayer pour le même index
-      continue;
-    }
-    const codeTrimmed = codeBarre.trim();
-
-    // Demander confirmation du code scanné
-    const isConfirmed = confirm(`Code-barre scanné : ${codeTrimmed}\n\nEst-ce le bon code-barre ?\n(Cliquez sur 'OK' pour confirmer, ou 'Annuler' pour recommencer)`);
-    
-    if (!isConfirmed) {
-      i--; // Recommencer pour le même index
-      continue;
-    }
-
-    // 1. Vérifier si déjà scanné dans ce lot
-    if (codesBarres.includes(codeTrimmed)) {
-      alert(
-        `Le code-barre "${codeTrimmed}" est déjà dans la liste d'ajout actuelle.`,
-      );
-      i--;
-      continue;
-    }
-
-    // 2. Vérification asynchrone de l'existence du code-barre en BDD
-    try {
-      const checkResponse = await fetch(
-        `php/checkBarcode.php?code_barre=${encodeURIComponent(codeTrimmed)}`,
-      );
-      const checkData = await checkResponse.json();
-
-      if (checkData.success && checkData.exists) {
-        alert(
-          `Le code-barre "${codeTrimmed}" existe déjà dans la base de données.\nVeuillez en saisir un autre.`,
-        );
-        i--; // Réessayer pour le même index
-        continue;
-      }
-    } catch (e) {
-      console.error("Erreur vérification code-barre", e);
-      // On laisse passer ou on bloque ? Mieux vaut bloquer si erreur technique pour éviter doublons
-      alert(
-        "Erreur technique lors de la vérification du code-barre. Veuillez réessayer.",
-      );
-      i--;
-      continue;
-    }
-
-    codesBarres.push(codeBarre.trim());
-  }
-
   try {
     const formData = new FormData();
     formData.append("type_materiel", type);
-    
+
     const sousTypeInput = document.getElementById("sous_type_materiel_ajout");
-    if(sousTypeInput) {
-        formData.append("sous_type_materiel", sousTypeInput.value.trim());
+    if (sousTypeInput) {
+      formData.append("sous_type_materiel", sousTypeInput.value.trim());
     }
 
     formData.append("nom_materiel", nom);
     formData.append("nombre", nombre);
-    formData.append("codes_barres", JSON.stringify(codesBarres));
 
     const response = await fetch("php/addItem.php", {
       method: "POST",
@@ -114,20 +47,37 @@ formAjout.addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (data.success) {
-      alert(data.message + "\n\nIDs ajoutés : " + data.ids_ajoutes.join(", "));
+      const codes = data.codes_barres_generes || [];
+      const codesStr = codes.join(", ");
+
+      // Proposer l'impression immédiate des codes-barres générés
+      const imprimerMaintenant = confirm(
+        data.message +
+          "\n\nCodes-barres EAN-13 générés :\n" +
+          codesStr +
+          "\n\nVoulez-vous imprimer les étiquettes maintenant ?"
+      );
+
+      if (imprimerMaintenant && codes.length > 0) {
+        imprimerCodesBarres(codes);
+      }
 
       // Réinitialiser le formulaire
       typeInputAjout.value = "";
-      if(sousTypeInput) sousTypeInput.value = "";
+      if (sousTypeInput) sousTypeInput.value = "";
       nomInputAjout.value = "";
       document.getElementById("nombre_materiel").value = "1";
 
-      // Recharger les types pour tous les formulaires (fonction définie dans autocomplete_types_noms.js)
+      // Désactiver les selects dépendants
+      if (sousTypeInput) sousTypeInput.disabled = true;
+      if (nomInputAjout) nomInputAjout.disabled = true;
+
+      // Recharger les types pour tous les formulaires
       if (window.rechargerTousLesTypes) {
         window.rechargerTousLesTypes();
       }
 
-      // Rafraîchir l'inventaire complet (fonction définie dans display_inventory.js)
+      // Rafraîchir l'inventaire complet
       if (window.refreshInventory) {
         window.refreshInventory();
       }
@@ -139,3 +89,107 @@ formAjout.addEventListener("submit", async (e) => {
     alert("Erreur lors de l'ajout du matériel");
   }
 });
+
+/**
+ * Imprime une liste de codes-barres EAN-13 via une iframe d'impression.
+ */
+function imprimerCodesBarres(codes) {
+  // Créer un conteneur temporaire
+  const tempDiv = document.createElement("div");
+  tempDiv.style.display = "none";
+  document.body.appendChild(tempDiv);
+
+  // Générer les SVG pour chaque code
+  let svgHtml = "";
+  codes.forEach((code, i) => {
+    const svgId = "print-ean-" + i;
+    const container = document.createElement("div");
+    container.className = "barcode-item";
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.id = svgId;
+    container.appendChild(svg);
+    tempDiv.appendChild(container);
+
+    try {
+      JsBarcode("#" + svgId, code, {
+        format: "EAN13",
+        lineColor: "#000",
+        width: 2,
+        height: 40,
+        displayValue: true,
+        fontSize: 14,
+        margin: 10,
+      });
+    } catch (e) {
+      // Fallback en CODE128 si EAN13 échoue
+      JsBarcode("#" + svgId, code, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 2,
+        height: 40,
+        displayValue: true,
+        fontSize: 14,
+        margin: 10,
+      });
+    }
+  });
+
+  // Récupérer le HTML généré
+  const printContent = tempDiv.innerHTML;
+
+  // Créer l'iframe d'impression
+  const printFrame = document.createElement("iframe");
+  printFrame.style.position = "absolute";
+  printFrame.style.width = "0";
+  printFrame.style.height = "0";
+  printFrame.style.border = "none";
+  document.body.appendChild(printFrame);
+
+  const doc = printFrame.contentWindow.document;
+  doc.write(`
+    <html>
+      <head>
+        <title>Codes-barres EAN-13</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+          }
+          .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            justify-items: center;
+            align-items: center;
+          }
+          .barcode-item {
+            page-break-inside: avoid;
+            text-align: center;
+          }
+          svg {
+            max-width: 100%;
+            height: auto;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="grid-container">
+          ${printContent}
+        </div>
+      </body>
+    </html>
+  `);
+  doc.close();
+
+  printFrame.contentWindow.focus();
+  printFrame.contentWindow.print();
+
+  setTimeout(() => {
+    document.body.removeChild(printFrame);
+    document.body.removeChild(tempDiv);
+  }, 1000);
+}
+
+// Exposer la fonction pour le générateur
+window.imprimerCodesBarres = imprimerCodesBarres;

@@ -1,115 +1,235 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Récupération des éléments du DOM
+  // Éléments du DOM
   const btnOpenBarcode = document.getElementById("btn-open-barcode");
   const modal = document.getElementById("barcode-modal");
   const closeModal = document.getElementById("close-barcode-modal");
-  const qtySlider = document.getElementById("barcode-qty");
-  const qtyVal = document.getElementById("qty-val");
-  const printZone = document.getElementById("print-zone");
+  const btnLoad = document.getElementById("btn-load-barcodes");
+  const btnClear = document.getElementById("btn-clear-print-zone");
   const btnPrint = document.getElementById("btn-print");
+  const printZone = document.getElementById("print-zone");
+  const barcodeCount = document.getElementById("barcode-count");
+  const filterType = document.getElementById("barcode-filter-type");
+  const filterSousType = document.getElementById("barcode-filter-sous-type");
+  const filterNom = document.getElementById("barcode-filter-nom");
 
-  if (!btnOpenBarcode || !modal || !qtySlider || !printZone || !btnPrint) {
-    console.error("Barcode generator: Missing elements", {
-      btn: !!btnOpenBarcode,
-      modal: !!modal,
-      slider: !!qtySlider,
-      zone: !!printZone,
-      print: !!btnPrint,
-    });
-    return;
-  }
+  let codesToPrint = new Set();
+  let barcodeIndex = 0;
 
-  // Ouvrir la modale
+  if (!btnOpenBarcode || !modal || !printZone || !btnPrint) return;
+
+  // === Ouverture de la modale ===
   btnOpenBarcode.addEventListener("click", () => {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
     document.body.style.overflow = "hidden";
 
-    // Reset à l'état initial (1 code-barre) à chaque ouverture
-    qtySlider.value = 1;
-    if (qtyVal) qtyVal.innerText = "1";
-    generateBarcodes(1);
+
+    // Reset filtres
+    filterSousType.disabled = true;
+    filterNom.disabled = true;
+    codesToPrint.clear();
+    printZone.innerHTML = "";
+    barcodeIndex = 0;
+    if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
+
+    // Charger les types disponibles
+    chargerFiltreTypes();
   });
 
-  // Fermer la modale
+  // === Fermeture ===
   if (closeModal) {
-    closeModal.addEventListener("click", () => {
-      modal.style.display = "none";
-      modal.classList.add("hidden");
-      document.body.style.overflow = "";
+    closeModal.addEventListener("click", fermerModale);
+  }
+  window.addEventListener("click", (event) => {
+    if (event.target === modal) fermerModale();
+  });
+
+  function fermerModale() {
+    modal.style.display = "none";
+    modal.classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+
+  // === Charger les types dans le filtre ===
+  async function chargerFiltreTypes() {
+    try {
+      const res = await fetch(
+        "php/searchUniversal.php?type=materiel_type&query=",
+      );
+      const data = await res.json();
+      filterType.innerHTML = '<option value="">Tous les types</option>';
+      if (data.success && data.data) {
+        data.data.forEach((r) => {
+          const opt = document.createElement("option");
+          opt.value = r.value;
+          opt.textContent = r.label;
+          filterType.appendChild(opt);
+        });
+      }
+    } catch (e) {
+      console.error("Erreur chargement types:", e);
+    }
+  }
+
+  // === Cascade des filtres ===
+  filterType.addEventListener("change", async () => {
+    const type = filterType.value;
+    filterSousType.innerHTML =
+      '<option value="">Tous les sous-types</option>';
+    filterNom.innerHTML = '<option value="">Tous les noms</option>';
+    filterNom.disabled = true;
+
+    if (!type) {
+      filterSousType.disabled = true;
+      return;
+    }
+
+    filterSousType.disabled = false;
+    try {
+      const res = await fetch(
+        `php/searchUniversal.php?type=materiel_sous_type&query=&filter=${encodeURIComponent(type)}`,
+      );
+      const data = await res.json();
+      if (data.success && data.data) {
+        data.data.forEach((r) => {
+          const opt = document.createElement("option");
+          opt.value = r.value;
+          opt.textContent = r.label;
+          filterSousType.appendChild(opt);
+        });
+      }
+    } catch (e) {
+      console.error("Erreur chargement sous-types:", e);
+    }
+  });
+
+  filterSousType.addEventListener("change", async () => {
+    const type = filterType.value;
+    const sousType = filterSousType.value;
+    filterNom.innerHTML = '<option value="">Tous les noms</option>';
+
+    if (!sousType) {
+      filterNom.disabled = true;
+      return;
+    }
+
+    filterNom.disabled = false;
+    try {
+      const res = await fetch(
+        `php/searchUniversal.php?type=materiel_nom&query=&filter=${encodeURIComponent(type)}&filter_sous_type=${encodeURIComponent(sousType)}`,
+      );
+      const data = await res.json();
+      if (data.success && data.data) {
+        data.data.forEach((r) => {
+          const opt = document.createElement("option");
+          opt.value = r.value;
+          opt.textContent = r.label;
+          filterNom.appendChild(opt);
+        });
+      }
+    } catch (e) {
+      console.error("Erreur chargement noms:", e);
+    }
+  });
+
+  // === Vider la liste d'impression ===
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      codesToPrint.clear();
+      barcodeIndex = 0;
+      printZone.innerHTML = "";
+      if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
     });
   }
 
-  // Fermer la modale en cliquant en dehors
-  window.addEventListener("click", (event) => {
-    if (event.target == modal) {
-      modal.style.display = "none";
-      modal.classList.add("hidden");
-      document.body.style.overflow = "";
-    }
-  });
+  // === Charger les codes-barres existants ===
+  btnLoad.addEventListener("click", async () => {
+    const params = new URLSearchParams();
+    if (filterType.value) params.append("type", filterType.value);
+    if (filterSousType.value) params.append("sous_type", filterSousType.value);
+    if (filterNom.value) params.append("nom", filterNom.value);
 
-  // Mettre à jour le texte du slider et générer l'aperçu
-  qtySlider.addEventListener("input", (e) => {
-    const qty = e.target.value;
-    if (qtyVal) qtyVal.innerText = qty;
-    generateBarcodes(qty);
-  });
-
-  function generateBarcodes(number) {
-    const num = parseInt(number, 10);
-    const minVal = 1;
-    const maxVal = 52;
-
-    if (isNaN(num) || num < minVal || num > maxVal) {
-      console.warn(
-        `Quantité non autorisée : ${number}. Les valeurs doivent être comprises entre ${minVal} et ${maxVal}.`,
+    try {
+      const res = await fetch(
+        `php/generateBarcode.php?${params.toString()}`,
       );
-      return;
-    }
+      const data = await res.json();
 
-    printZone.innerHTML = ""; // On vide la zone
-
-    for (let i = 1; i <= num; i++) {
-      // Création d'un conteneur pour chaque code
-      let container = document.createElement("div");
-      container.className = "barcode-item";
-
-      let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.id = "barcode" + i;
-      container.appendChild(svg);
-      printZone.appendChild(container);
-
-      // Génération d'un code numérique aléatoire (13 chiffres - pseudo EAN)
-      // Pas de checksum calculé ici pour simplifier, juste 13 chiffres aléatoires
-      let randomCode = "";
-      for (let j = 0; j < 13; j++) {
-        randomCode += Math.floor(Math.random() * 10);
+      if (!data.success || !data.barcodes || data.barcodes.length === 0) {
+        alert("Aucun code-barre trouvé pour ces critères.");
+        return;
       }
 
-      // Génération du code-barre
-      JsBarcode("#barcode" + i, randomCode, {
-        format: "CODE128", // CODE128 accepte tout, mais on lui donne que des chiffres
-        lineColor: "#000",
-        width: 2,
-        height: 40,
-        displayValue: true,
-      });
-    }
-  }
+      let addedCount = 0;
 
-  // Lancer l'impression propre
+      data.barcodes.forEach((item) => {
+        if (!codesToPrint.has(item.Code_bar)) {
+          codesToPrint.add(item.Code_bar);
+          addedCount++;
+          
+          const container = document.createElement("div");
+          container.className = "barcode-item";
+
+          // Label catégoriel au-dessus du code-barre
+          const label = document.createElement("p");
+          label.className = "text-xs text-gray-500 mb-1";
+          label.textContent = [item.Type, item.Sous_type, item.Nom]
+            .filter(Boolean)
+            .join(" > ");
+          container.appendChild(label);
+
+          const svgId = "barcode-list-" + barcodeIndex++;
+          const svg = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg",
+          );
+          svg.id = svgId;
+          container.appendChild(svg);
+          printZone.appendChild(container);
+
+          try {
+            JsBarcode("#" + svgId, item.Code_bar, {
+              format: "EAN13",
+              lineColor: "#000",
+              width: 2,
+              height: 40,
+              displayValue: true,
+              fontSize: 14,
+              margin: 10,
+            });
+          } catch (e) {
+            JsBarcode("#" + svgId, item.Code_bar, {
+              format: "CODE128",
+              lineColor: "#000",
+              width: 2,
+              height: 40,
+              displayValue: true,
+              fontSize: 14,
+              margin: 10,
+            });
+          }
+        }
+      });
+
+      if (barcodeCount) {
+        barcodeCount.textContent = `${codesToPrint.size} code(s) à imprimer`;
+      }
+
+    } catch (e) {
+      console.error("Erreur chargement codes-barres:", e);
+      alert("Erreur lors de l'ajout des codes-barres.");
+    }
+  });
+
+  // === Impression ===
   btnPrint.addEventListener("click", () => {
-    // Récupérer le contenu HTML des codes-barres
     const printContent = printZone.innerHTML;
 
-    // S'il n'y a rien à imprimer
     if (!printContent.trim()) {
-      console.warn("Rien à imprimer");
+      alert("Aucun code-barre à imprimer. Veuillez d'abord charger les codes-barres.");
       return;
     }
 
-    // Créer une fenêtre d'impression invisible (iframe)
     const printFrame = document.createElement("iframe");
     printFrame.style.position = "absolute";
     printFrame.style.width = "0";
@@ -119,11 +239,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const doc = printFrame.contentWindow.document;
 
-    // Injecter le contenu et les styles spécifiques pour l'impression 4 par ligne
     doc.write(`
       <html>
         <head>
-          <title>Codes-barres</title>
+          <title>Codes-barres EAN-13</title>
           <style>
             body {
               margin: 0;
@@ -156,12 +275,9 @@ document.addEventListener("DOMContentLoaded", () => {
     `);
 
     doc.close();
-
-    // Attendre que tout soit chargé, puis lancer l'impression
     printFrame.contentWindow.focus();
     printFrame.contentWindow.print();
 
-    // Nettoyer l'iframe après un léger délai pour s'assurer que l'impression est partie
     setTimeout(() => {
       document.body.removeChild(printFrame);
     }, 1000);

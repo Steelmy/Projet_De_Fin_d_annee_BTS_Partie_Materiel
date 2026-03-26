@@ -12,9 +12,11 @@ class Reference
     public function getTree(): array
     {
         $stmt = $this->conn->prepare("
-            SELECT Type, Sous_type, Nom
-            FROM catalogue_references
-            ORDER BY Type ASC, Sous_type ASC, Nom ASC
+            SELECT t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
+            FROM types t
+            LEFT JOIN sous_types st ON st.id_type = t.id
+            LEFT JOIN noms_references nr ON nr.id_sous_type = st.id
+            ORDER BY t.nom_type ASC, st.nom_sous_type ASC, nr.nom_reference ASC
         ");
         $stmt->execute();
         $references = $stmt->fetchAll();
@@ -39,16 +41,35 @@ class Reference
 
     public function create(string $type, string $sousType, string $nom): bool
     {
-        $stmt = $this->conn->prepare("
-            INSERT IGNORE INTO catalogue_references (Type, Sous_type, Nom)
-            VALUES (:type, :sous_type, :nom)
-        ");
-        $stmt->execute([
-            ':type' => $type,
-            ':sous_type' => $sousType,
-            ':nom' => $nom
-        ]);
-        return $stmt->rowCount() > 0;
+        // 1. Chercher ou créer Type
+        $stmtType = $this->conn->prepare("SELECT id FROM types WHERE nom_type = ?");
+        $stmtType->execute([$type]);
+        $typeId = $stmtType->fetchColumn();
+        if (!$typeId) {
+            $this->conn->prepare("INSERT INTO types (nom_type) VALUES (?)")->execute([$type]);
+            $typeId = $this->conn->lastInsertId();
+        }
+
+        // 2. Chercher ou créer Sous_type
+        if (empty($sousType)) $sousType = 'Non défini';
+        $stmtSousType = $this->conn->prepare("SELECT id FROM sous_types WHERE nom_sous_type = ? AND id_type = ?");
+        $stmtSousType->execute([$sousType, $typeId]);
+        $sousTypeId = $stmtSousType->fetchColumn();
+        if (!$sousTypeId) {
+            $this->conn->prepare("INSERT INTO sous_types (nom_sous_type, id_type) VALUES (?, ?)")->execute([$sousType, $typeId]);
+            $sousTypeId = $this->conn->lastInsertId();
+        }
+
+        // 3. Chercher ou créer Nom_reference
+        $stmtNom = $this->conn->prepare("SELECT id FROM noms_references WHERE nom_reference = ? AND id_sous_type = ?");
+        $stmtNom->execute([$nom, $sousTypeId]);
+        $nomRefId = $stmtNom->fetchColumn();
+        if (!$nomRefId) {
+            $this->conn->prepare("INSERT INTO noms_references (nom_reference, id_sous_type) VALUES (?, ?)")->execute([$nom, $sousTypeId]);
+            return true;
+        }
+
+        return false;
     }
 
     public function search(string $type, string $query, string $filter = '', string $filterSousType = ''): array
@@ -61,44 +82,44 @@ class Reference
 
         switch ($type) {
             case 'materiel_type':
-                $table = 'catalogue_references';
-                $fields = 'DISTINCT Type';
-                $orderBy = 'Type';
+                $table = 'types';
+                $fields = 'DISTINCT nom_type AS Type';
+                $orderBy = 'nom_type';
                 if (!empty($query)) {
-                    $conditions[] = "Type LIKE :q_start";
+                    $conditions[] = "nom_type LIKE :q_start";
                     $params[':q_start'] = $query . '%';
                 }
                 break;
 
             case 'materiel_sous_type':
-                $table = 'catalogue_references';
-                $fields = 'DISTINCT Sous_type';
-                $orderBy = 'Sous_type';
-                $conditions[] = "Sous_type != ''";
+                $table = 'sous_types st JOIN types t ON st.id_type = t.id';
+                $fields = 'DISTINCT st.nom_sous_type AS Sous_type';
+                $orderBy = 'st.nom_sous_type';
+                $conditions[] = "st.nom_sous_type != ''";
                 if (!empty($query)) {
-                    $conditions[] = "Sous_type LIKE :q_start";
+                    $conditions[] = "st.nom_sous_type LIKE :q_start";
                     $params[':q_start'] = $query . '%';
                 }
                 if (!empty($filter)) {
-                    $conditions[] = "Type = :filter";
+                    $conditions[] = "t.nom_type = :filter";
                     $params[':filter'] = $filter;
                 }
                 break;
 
             case 'materiel_nom':
-                $table = 'catalogue_references';
-                $fields = 'DISTINCT Nom';
-                $orderBy = 'Nom';
+                $table = 'noms_references nr JOIN sous_types st ON nr.id_sous_type = st.id JOIN types t ON st.id_type = t.id';
+                $fields = 'DISTINCT nr.nom_reference AS Nom';
+                $orderBy = 'nr.nom_reference';
                 if (!empty($query)) {
-                    $conditions[] = "Nom LIKE :q_start";
+                    $conditions[] = "nr.nom_reference LIKE :q_start";
                     $params[':q_start'] = $query . '%';
                 }
                 if (!empty($filter)) {
-                    $conditions[] = "Type = :filter";
+                    $conditions[] = "t.nom_type = :filter";
                     $params[':filter'] = $filter;
                 }
                 if (!empty($filterSousType)) {
-                    $conditions[] = "Sous_type = :f_sous_type";
+                    $conditions[] = "st.nom_sous_type = :f_sous_type";
                     $params[':f_sous_type'] = $filterSousType;
                 }
                 break;

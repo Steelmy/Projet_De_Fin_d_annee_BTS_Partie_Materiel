@@ -68,35 +68,41 @@ class SearchController
             $params = [];
 
             if (!empty($query)) {
-                $conditions[] = "Code_bar LIKE :query";
+                $conditions[] = "o.Code_bar LIKE :query";
                 $params[':query'] = $query . '%';
             }
             if (!empty($type)) {
-                $conditions[] = "Type = :type";
+                $conditions[] = "t.nom_type = :type";
                 $params[':type'] = $type;
             }
             if (!empty($sousType)) {
-                $conditions[] = "Sous_type = :sous_type";
+                $conditions[] = "st.nom_sous_type = :sous_type";
                 $params[':sous_type'] = $sousType;
             }
             if (!empty($nom)) {
-                $conditions[] = "Nom = :nom";
+                $conditions[] = "nr.nom_reference = :nom";
                 $params[':nom'] = $nom;
             }
             if (!empty($etat)) {
-                $conditions[] = "Etat = :etat";
+                $conditions[] = "o.Etat = :etat";
                 $params[':etat'] = $etat;
             }
             if ($disponibleOnly === '1') {
-                $conditions[] = "Etat = 'disponible'";
-                $conditions[] = "Caisse_id IS NULL";
+                $conditions[] = "o.Etat = 'disponible'";
+                $conditions[] = "o.Caisse_id IS NULL";
             }
 
-            $sql = "SELECT Code_bar, Type, Sous_type, Nom FROM objets";
+            $sql = "
+                SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
+                FROM objets o
+                LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+                LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+                LEFT JOIN types t ON st.id_type = t.id
+            ";
             if (!empty($conditions)) {
                 $sql .= " WHERE " . implode(' AND ', $conditions);
             }
-            $sql .= " ORDER BY Code_bar LIMIT 10";
+            $sql .= " ORDER BY o.Code_bar LIMIT 10";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute($params);
@@ -168,7 +174,7 @@ class SearchController
         $params = [];
 
         if (!empty($query)) {
-            $conditions[] = "Code_bar LIKE :q_start";
+            $conditions[] = "o.Code_bar LIKE :q_start";
             $params[':q_start'] = $query . '%';
         }
 
@@ -177,23 +183,29 @@ class SearchController
         $filterNom = isset($_GET['filter_nom']) ? trim($_GET['filter_nom']) : '';
 
         if (!empty($filterType)) {
-            $conditions[] = "Type = :f_type";
+            $conditions[] = "t.nom_type = :f_type";
             $params[':f_type'] = $filterType;
         }
         if (!empty($filterSousType)) {
-            $conditions[] = "Sous_type = :f_sous_type";
+            $conditions[] = "st.nom_sous_type = :f_sous_type";
             $params[':f_sous_type'] = $filterSousType;
         }
         if (!empty($filterNom)) {
-            $conditions[] = "Nom = :f_nom";
+            $conditions[] = "nr.nom_reference = :f_nom";
             $params[':f_nom'] = $filterNom;
         }
 
-        $sql = "SELECT id, Code_bar, Nom, Type, Sous_type FROM objets";
+        $sql = "
+            SELECT o.id, o.Code_bar, nr.nom_reference AS Nom, t.nom_type AS Type, st.nom_sous_type AS Sous_type
+            FROM objets o
+            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+            LEFT JOIN types t ON st.id_type = t.id
+        ";
         if (!empty($conditions)) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
-        $sql .= " ORDER BY Code_bar LIMIT $limit";
+        $sql .= " ORDER BY o.Code_bar LIMIT $limit";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);

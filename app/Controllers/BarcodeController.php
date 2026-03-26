@@ -28,29 +28,18 @@ class BarcodeController
         }
     }
 
-    public function generate(): void
+    /**
+     * Liste les codes-barres existants en BDD avec filtrage optionnel.
+     * Utilisé par le générateur pour la réimpression.
+     */
+    public function listAll(): void
     {
         try {
-            $count = isset($_GET['count']) ? intval($_GET['count']) : 1;
-            $length = isset($_GET['length']) ? intval($_GET['length']) : 13;
+            $filterType = isset($_GET['type']) ? trim($_GET['type']) : null;
+            $filterSousType = isset($_GET['sous_type']) ? trim($_GET['sous_type']) : null;
+            $filterNom = isset($_GET['nom']) ? trim($_GET['nom']) : null;
 
-            if ($count < 1 || $count > 100) {
-                ApiResponse::error('Le nombre de codes-barres doit être entre 1 et 100');
-            }
-            if ($length < 8 || $length > 20) {
-                ApiResponse::error('La longueur du code-barre doit être entre 8 et 20');
-            }
-
-            $barcodes = [];
-            $totalAttempts = 0;
-
-            for ($i = 0; $i < $count; $i++) {
-                $barcode = $this->model->generateUniqueBarcode($length);
-                if ($barcode === null) {
-                    ApiResponse::error('Impossible de générer un code-barre unique après 100 tentatives');
-                }
-                $barcodes[] = $barcode;
-            }
+            $barcodes = $this->model->getAllBarcodes($filterType, $filterSousType, $filterNom);
 
             ApiResponse::success([
                 'barcodes' => $barcodes,

@@ -49,12 +49,15 @@ class PdfController
     private function fetchMaterials(): array
     {
         $stmt = $this->conn->prepare("
-            SELECT o.Code_bar, o.Type, o.Sous_type, o.Nom, o.Etat,
+            SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom, o.Etat,
                    u.Prénom, u.Nom AS Nom_utilisateur, c.Nom AS Nom_Caisse
             FROM objets o
+            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+            LEFT JOIN types t ON st.id_type = t.id
             LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
             LEFT JOIN caisses c ON o.Caisse_id = c.id
-            ORDER BY o.Type, o.Nom
+            ORDER BY t.nom_type, nr.nom_reference
         ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -160,8 +163,12 @@ class PdfController
         }
 
         $stmtObjets = $this->conn->prepare("
-            SELECT Code_bar, Type, Sous_type, Nom, Etat
-            FROM objets WHERE Caisse_id = ? ORDER BY Type, Nom
+            SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom, o.Etat
+            FROM objets o
+            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+            LEFT JOIN types t ON st.id_type = t.id
+            WHERE o.Caisse_id = ? ORDER BY t.nom_type, nr.nom_reference
         ");
 
         foreach ($caisses as $caisse) {

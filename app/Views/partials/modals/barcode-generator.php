@@ -13,21 +13,47 @@
       id="close-barcode-modal"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-4">Générateur</h2>
-    <div class="my-4">
-      <label for="barcode-qty" class="font-medium"
-        >Nombre de codes :
-        <span id="qty-val" class="font-bold text-custom-primary">1</span></label
+    <h2 class="text-2xl font-bold mb-4">Réimpression Codes-barres</h2>
+
+    <!-- Filtres -->
+    <div class="flex flex-wrap items-center justify-center gap-3 my-4">
+      <select
+        id="barcode-filter-type"
+        class="px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight transition-all duration-300"
       >
-      <input
-        type="range"
-        id="barcode-qty"
-        min="1"
-        max="52"
-        value="1"
-        class="w-full mt-2.5 accent-custom-brandLight"
-      />
+        <option value="">Tous les types</option>
+      </select>
+      <select
+        id="barcode-filter-sous-type"
+        disabled
+        class="px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight transition-all duration-300 disabled:bg-gray-100 disabled:text-gray-400"
+      >
+        <option value="">Tous les sous-types</option>
+      </select>
+      <select
+        id="barcode-filter-nom"
+        disabled
+        class="px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight transition-all duration-300 disabled:bg-gray-100 disabled:text-gray-400"
+      >
+        <option value="">Tous les noms</option>
+      </select>
+      <button
+        id="btn-load-barcodes"
+        class="px-5 py-2 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
+      >
+        Ajouter
+      </button>
+      <button
+        id="btn-clear-print-zone"
+        type="button"
+        class="px-5 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
+      >
+        Vider
+      </button>
     </div>
+
+    <p id="barcode-count" class="text-sm text-gray-500 mb-2"></p>
+
     <button
       id="btn-print"
       class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"

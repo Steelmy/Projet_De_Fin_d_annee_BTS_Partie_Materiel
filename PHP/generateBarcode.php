@@ -1,3 +1,3 @@
 <?php
 require_once __DIR__ . '/core/bootstrap.api.php';
-createController('BarcodeController')->generate();
+createController('BarcodeController')->listAll();

@@ -74,31 +74,24 @@ class ItemController
             $sousType = isset($_POST['sous_type_materiel']) ? trim($_POST['sous_type_materiel']) : '';
             $nom = isset($_POST['nom_materiel']) ? trim($_POST['nom_materiel']) : '';
             $nombre = isset($_POST['nombre']) ? intval($_POST['nombre']) : 0;
-            $codesBarres = isset($_POST['codes_barres']) ? json_decode($_POST['codes_barres'], true) : [];
 
             if (empty($type) || empty($nom) || $nombre <= 0) {
                 ApiResponse::error('Tous les champs sont requis et le nombre doit être supérieur à 0');
             }
 
-            $idsAjoutes = [];
+            $resultats = [];
 
             for ($i = 0; $i < $nombre; $i++) {
-                if (!isset($codesBarres[$i]) || empty(trim($codesBarres[$i]))) {
-                    ApiResponse::error("Le code-barre est obligatoire pour tous les matériels (manquant pour l'article #" . ($i + 1) . ")");
-                }
-
-                $codeBarre = trim($codesBarres[$i]);
-
-                if ($this->model->barcodeExists($codeBarre)) {
-                    ApiResponse::error("Le code-barre '$codeBarre' existe déjà. Veuillez en scanner un autre.");
-                }
-
-                $idsAjoutes[] = $this->model->create($type, $sousType, $nom, $codeBarre);
+                $resultats[] = $this->model->create($type, $sousType, $nom);
             }
+
+            $idsAjoutes = array_column($resultats, 'id');
+            $codesGeneres = array_column($resultats, 'code_bar');
 
             $this->logger->info("Matériel ajouté", ['type' => $type, 'sous_type' => $sousType, 'nom' => $nom, 'nombre' => $nombre]);
             ApiResponse::success([
-                'ids_ajoutes' => $idsAjoutes
+                'ids_ajoutes' => $idsAjoutes,
+                'codes_barres_generes' => $codesGeneres
             ], "$nombre matériel(s) ajouté(s) avec succès");
         } catch (PDOException $e) {
             ApiResponse::exception($e);
