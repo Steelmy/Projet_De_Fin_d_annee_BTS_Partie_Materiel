@@ -29,13 +29,13 @@
             />
             <button
               type="submit"
-              class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+              class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
             >
               Créer
             </button>
             <button
               type="button"
-              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
               data-form="form_ajout_caisse"
             >
               Réinitialiser
@@ -84,13 +84,13 @@
           <div class="flex gap-2.5 mt-2.5">
             <button
               type="submit"
-              class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(239,68,68,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+              class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
             >
               Confirmer Suppression
             </button>
             <button
               type="button"
-              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
               data-form="form_suppression_caisse"
             >
               Réinitialiser
@@ -162,13 +162,13 @@
             <div class="flex gap-2.5 mt-2.5">
               <button
                 type="submit"
-                class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+                class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
               >
                 Sauvegarder Caisse
               </button>
               <button
                 type="button"
-                class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+                class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
                 data-form="form_modification_caisse"
               >
                 Réinitialiser

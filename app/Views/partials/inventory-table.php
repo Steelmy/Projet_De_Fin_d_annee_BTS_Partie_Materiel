@@ -14,7 +14,7 @@
     -->
     <button
       onclick="if(window.refreshInventory) window.refreshInventory();"
-      class="ml-auto px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300 flex items-center gap-2 cursor-pointer"
+      class="ml-auto px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300 flex items-center gap-2 cursor-pointer"
       title="Rafraîchir les données"
     >
       <i data-lucide="rotate-cw"></i> Rafraîchir
@@ -87,7 +87,7 @@
       <div class="table-footer-center">
         <button
           id="btn_prev_page"
-          class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onclick="window.changePage(-1)"
         >
           &larr; Précédent
@@ -95,7 +95,7 @@
         <span id="page_info" class="font-medium">Page 1 / 1</span>
         <button
           id="btn_next_page"
-          class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onclick="window.changePage(1)"
         >
           Suivant &rarr;
@@ -104,7 +104,7 @@
       <div class="table-footer-right">
         <button
           id="btn_download_pdf"
-          class="px-3 py-1.5 bg-white border border-[#ccc] rounded-lg cursor-pointer shadow-input font-inherit text-gray-800 hover:bg-gray-50 transition-colors"
+          class="px-3 py-1.5 bg-white border border-[#ccc] rounded-lg cursor-pointer shadow-input font-inherit text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors"
         >
           Télécharger PDF
         </button>

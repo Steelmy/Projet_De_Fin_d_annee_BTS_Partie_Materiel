@@ -47,7 +47,7 @@
     <button
       type="button"
       onclick="resetFiltersConsultation()"
-      class="px-6 py-3 border-2 border-[#ccc] bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+      class="px-6 py-3 border-2 border-[#ccc] bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
     >
       Effacer
     </button>

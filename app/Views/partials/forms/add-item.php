@@ -42,7 +42,7 @@
   <button
     type="button"
     onclick="window.toggleReferenceModal(true)"
-    class="px-4 py-3 border-2 border-custom-border bg-white text-gray-700 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 hover:text-custom-brandLight hover:border-custom-brandLight transition-all duration-300 flex items-center gap-2"
+    class="px-4 py-3 border-2 border-custom-border bg-white text-gray-700 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 hover:text-custom-brandLight hover:border-custom-brandLight transition-all duration-300 flex items-center gap-2"
     title="Gérer les Types, Sous-types et Noms"
   >
     <i data-lucide="settings" class="w-4 h-4"></i> Réf.
@@ -57,13 +57,13 @@
   />
   <button
     type="submit"
-    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:shadow-[0_4px_15px_rgba(182,160,113,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
   >
     Ajouter
   </button>
   <button
     type="button"
-    class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+    class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
     data-form="form_ajout"
   >
     Réinitialiser

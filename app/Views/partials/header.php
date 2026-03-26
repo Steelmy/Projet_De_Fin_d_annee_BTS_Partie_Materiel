@@ -14,7 +14,7 @@
 
   <button
     id="btn-open-barcode"
-    class="bg-[#b8a274] hover:bg-[#9a8552] text-white py-2 px-4 rounded-[20px] font-bold text-base shadow-sm border-none cursor-pointer flex items-center"
+    class="bg-custom-brandLight text-white py-2 px-4 rounded-[20px] font-bold text-base shadow-sm border-none cursor-pointer flex items-center hover:brightness-90 active:brightness-75 transition-all duration-300"
   >
     Générateur Code-barres
   </button>
