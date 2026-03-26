@@ -32,35 +32,35 @@
             Code-barre
           </th>
           <th
-            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer"
             onclick="window.sortInventory('Type')"
           >
             Type
             <span id="sort_icon_Type" class="text-xs opacity-50 ml-1">↕</span>
           </th>
           <th
-            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer"
             onclick="window.sortInventory('Sous_type')"
           >
             Sous-type
             <span id="sort_icon_Sous_type" class="text-xs opacity-50 ml-1">↕</span>
           </th>
           <th
-            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer"
             onclick="window.sortInventory('Nom')"
           >
             Nom
             <span id="sort_icon_Nom" class="text-xs opacity-50 ml-1">↕</span>
           </th>
           <th
-            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer"
             onclick="window.sortInventory('Etat')"
           >
             État
             <span id="sort_icon_Etat" class="text-xs opacity-50 ml-1">↕</span>
           </th>
           <th
-            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200 cursor-pointer"
             onclick="window.sortInventory('Utilisateur')"
           >
             Utilisateur
@@ -79,7 +79,7 @@
       </thead>
       <tbody
         id="inventory_tbody"
-        class="[&>tr]:transition-all [&>tr]:duration-300 [&>tr]:border-l-4 [&>tr]:border-transparent [&>tr:hover]:bg-linear-to-r [&>tr:hover]:from-[#b8a274]/5 [&>tr:hover]:to-[#b8a274]/5 [&>tr:hover]:translate-x-2 [&>tr:hover]:border-[#b8a274] [&>tr:hover]:shadow-[0_4px_15px_rgba(0,0,0,0.08)] [&>tr>td]:p-3 [&>tr>td]:border-b [&>tr>td]:border-gray-200 [&>tr>td]:text-sm [&>tr>td]:text-left [&>tr>td]:align-middle"
+        class="[&>tr]:border-l-4 [&>tr]:border-transparent [&>tr>td]:p-3 [&>tr>td]:border-b [&>tr>td]:border-gray-200 [&>tr>td]:text-sm [&>tr>td]:text-left [&>tr>td]:align-middle"
       ></tbody>
     </table>
     <div class="table-footer text-slate-500 text-sm">

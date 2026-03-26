@@ -235,7 +235,7 @@ async function displayCaissesView() {
           }
 
           tr.className =
-            "hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0";
+            "border-b border-gray-100 last:border-0";
           tr.innerHTML = `
             <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Code_bar || "-"}</td>
             <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Type || "-"}</td>
@@ -434,7 +434,7 @@ function updateInventoryTable(data) {
     }
 
     tr.className =
-      "hover:bg-linear-to-r hover:from-custom-brandLight/5 hover:to-custom-brandLight/5 transition-all duration-300 border-l-4 border-transparent hover:border-custom-brandLight hover:translate-x-2 border-b border-custom-border last:border-0 hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)] bg-white";
+      "border-b border-custom-border last:border-0 bg-white";
     tr.innerHTML = `
       <td class="p-4.5 text-center text-sm align-middle">${item.Code_bar}</td>
       <td class="p-4.5 text-center text-sm align-middle">${item.Type}</td>

@@ -188,6 +188,8 @@
     flex: 1;
     transition: 0.3s;
     width: calc(100% - var(--sidebar-w));
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   /* Ajustement quand la sidebar est cachée */
@@ -294,6 +296,5 @@
     background: #ef4444;
     color: white;
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-    transform: translateY(-2px);
   }
 }
