@@ -13,17 +13,17 @@ formAjout.addEventListener("submit", async (e) => {
 
   // Vérifier que tous les champs sont remplis
   if (!type) {
-    alert("Veuillez entrer un type de matériel");
+    await showAlert("Veuillez entrer un type de matériel", "warning");
     return;
   }
 
   if (!nom) {
-    alert("Veuillez entrer un nom de matériel");
+    await showAlert("Veuillez entrer un nom de matériel", "warning");
     return;
   }
 
   if (!nombre || nombre <= 0) {
-    alert("Veuillez entrer un nombre valide");
+    await showAlert("Veuillez entrer un nombre valide", "warning");
     return;
   }
 
@@ -51,11 +51,12 @@ formAjout.addEventListener("submit", async (e) => {
       const codesStr = codes.join(", ");
 
       // Proposer l'impression immédiate des codes-barres générés
-      const imprimerMaintenant = confirm(
+      const imprimerMaintenant = await showConfirm(
         data.message +
           "\n\nCodes-barres EAN-13 générés :\n" +
           codesStr +
-          "\n\nVoulez-vous imprimer les étiquettes maintenant ?"
+          "\n\nVoulez-vous imprimer les étiquettes maintenant ?",
+        { confirmText: "Imprimer", cancelText: "Plus tard", type: "success" }
       );
 
       if (imprimerMaintenant && codes.length > 0) {
@@ -82,11 +83,11 @@ formAjout.addEventListener("submit", async (e) => {
         window.refreshInventory();
       }
     } else {
-      alert("Erreur: " + data.message);
+      await showAlert("Erreur: " + data.message, "error");
     }
   } catch (error) {
     console.error("Erreur lors de l'ajout:", error);
-    alert("Erreur lors de l'ajout du matériel");
+    await showAlert("Erreur lors de l'ajout du matériel", "error");
   }
 });
 

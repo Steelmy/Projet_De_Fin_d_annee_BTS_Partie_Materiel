@@ -64,8 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Validation
       if (!id) {
-        alert(
+        await showAlert(
           "Veuillez sélectionner un matériel à modifier (code-barre manquant)",
+          "warning"
         );
         return;
       }
@@ -74,8 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
         etat !== "disponible" &&
         (!reserveur_id || reserveur_id.trim() === "")
       ) {
-        alert(
+        await showAlert(
           "Veuillez sélectionner un utilisateur pour un matériel réservé ou emprunté",
+          "warning"
         );
         return;
       }
@@ -100,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await response.json();
 
         if (data.success) {
-          alert(data.message);
+          await showAlert(data.message, "success");
 
           // Reset fields
           if (idModifInput) idModifInput.value = "";
@@ -113,11 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
           // Refresh inventory
           if (window.refreshInventory) window.refreshInventory();
         } else {
-          alert("Erreur: " + data.message);
+          await showAlert("Erreur: " + data.message, "error");
         }
       } catch (error) {
         console.error("Erreur update:", error);
-        alert("Erreur lors de la modification");
+        await showAlert("Erreur lors de la modification", "error");
       }
     });
   }

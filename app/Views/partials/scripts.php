@@ -98,6 +98,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <!-- JavaScript applicatif -->
+<script src="javascript/customModal.js?v=1"></script>
 <script src="javascript/sortUtils.js"></script>
 <script src="javascript/barcodeGenerator.js?v=3"></script>
 <script src="javascript/universalAutocomplete.js?v=2"></script>

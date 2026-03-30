@@ -290,13 +290,13 @@ async function addObjectToModif(codeBarre) {
 
       // Vérifier si l'objet est disponible
       if (data.materiel.etat !== "disponible") {
-        alert("Cet objet n'est pas disponible");
+        await showAlert("Cet objet n'est pas disponible", "warning");
         return;
       }
 
       // Vérifier si déjà dans la caisse
       if (modifSelectedObjects.some((o) => o.id === objet.id)) {
-        alert("Cet objet est déjà dans la caisse");
+        await showAlert("Cet objet est déjà dans la caisse", "warning");
         return;
       }
 
@@ -311,11 +311,11 @@ async function addObjectToModif(codeBarre) {
         checkbox.checked = true;
       }
     } else {
-      alert("Objet non trouvé ou non disponible");
+      await showAlert("Objet non trouvé ou non disponible", "error");
     }
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'objet:", error);
-    alert("Erreur lors de l'ajout de l'objet");
+    await showAlert("Erreur lors de l'ajout de l'objet", "error");
   }
 }
 
@@ -530,7 +530,7 @@ async function handleUpdateCaisse(e) {
 
   // Vérifier qu'une caisse est sélectionnée ET que les détails sont visibles
   if (!caisseId || detailsDiv.style.display === "none" || !currentCaisse) {
-    alert("Veuillez d'abord rechercher et sélectionner une caisse");
+    await showAlert("Veuillez d'abord rechercher et sélectionner une caisse", "warning");
     return;
   }
 
@@ -556,8 +556,9 @@ async function handleUpdateCaisse(e) {
       ).value;
 
       if (!emprunteurId) {
-        alert(
+        await showAlert(
           "Veuillez sélectionner un utilisateur pour réserver ou emprunter la caisse",
+          "warning"
         );
         return;
       }
@@ -572,7 +573,7 @@ async function handleUpdateCaisse(e) {
     const data = await response.json();
 
     if (data.success) {
-      alert("Caisse modifiée avec succès");
+      await showAlert("Caisse modifiée avec succès", "success");
       resetFormModificationCaisse();
 
       // Rafraîchir l'inventaire pour mettre à jour la colonne Caisse
@@ -585,11 +586,11 @@ async function handleUpdateCaisse(e) {
         window.reloadAddCaisseObjects();
       }
     } else {
-      alert("Erreur: " + data.message);
+      await showAlert("Erreur: " + data.message, "error");
     }
   } catch (error) {
     console.error("Erreur modification:", error);
-    alert("Erreur lors de la modification");
+    await showAlert("Erreur lors de la modification", "error");
   }
 }
 

@@ -324,13 +324,13 @@ async function addObjectByBarcode(codeBarre) {
 
       // Vérifier si l'objet est disponible
       if (data.materiel.etat !== "disponible") {
-        alert("Cet objet n'est pas disponible");
+        await showAlert("Cet objet n'est pas disponible", "warning");
         return;
       }
 
       // Vérifier si déjà sélectionné
       if (selectedObjects.some((o) => o.id === objet.id)) {
-        alert("Cet objet est déjà dans la sélection");
+        await showAlert("Cet objet est déjà dans la sélection", "warning");
         return;
       }
 
@@ -345,11 +345,11 @@ async function addObjectByBarcode(codeBarre) {
         checkbox.checked = true;
       }
     } else {
-      alert("Objet non trouvé ou non disponible");
+      await showAlert("Objet non trouvé ou non disponible", "error");
     }
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'objet:", error);
-    alert("Erreur lors de l'ajout de l'objet");
+    await showAlert("Erreur lors de l'ajout de l'objet", "error");
   }
 }
 
@@ -399,7 +399,7 @@ async function handleSubmitCaisse(e) {
   const nomCaisse = document.getElementById("nom_caisse_ajout").value.trim();
 
   if (!nomCaisse) {
-    alert("Veuillez entrer un nom pour la caisse");
+    await showAlert("Veuillez entrer un nom pour la caisse", "warning");
     return;
   }
 
@@ -419,8 +419,9 @@ async function handleSubmitCaisse(e) {
     const data = await response.json();
 
     if (data.success) {
-      alert(
+      await showAlert(
         `Caisse "${nomCaisse}" ajoutée avec succès (${objets_ids.length} objets)`,
+        "success"
       );
       resetFormAjoutCaisse();
 
@@ -434,11 +435,11 @@ async function handleSubmitCaisse(e) {
         window.reloadModifCaisseObjects();
       }
     } else {
-      alert("Erreur: " + data.message);
+      await showAlert("Erreur: " + data.message, "error");
     }
   } catch (error) {
     console.error("Erreur lors de l'ajout de la caisse:", error);
-    alert("Erreur lors de l'ajout de la caisse");
+    await showAlert("Erreur lors de l'ajout de la caisse", "error");
   }
 }
 

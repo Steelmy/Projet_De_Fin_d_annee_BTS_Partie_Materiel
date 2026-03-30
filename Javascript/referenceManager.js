@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (ids.length === 0) return;
 
-        if (!confirm(`Êtes-vous sûr de vouloir supprimer ${ids.length} référence(s) ?`)) return;
+        if (!(await showConfirm(`Êtes-vous sûr de vouloir supprimer ${ids.length} référence(s) ?`, { confirmText: "Supprimer", type: "error" }))) return;
 
         btnDelete.disabled = true;
         const originalBtnText = btnDelete.innerHTML;

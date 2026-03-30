@@ -94,14 +94,15 @@ async function handleDeleteCaisse(e) {
   const nom = document.getElementById("nom_caisse_suppr").value.trim();
 
   if (!nom) {
-    alert("Veuillez sélectionner une caisse");
+    await showAlert("Veuillez sélectionner une caisse", "warning");
     return;
   }
 
   if (
-    !confirm(
+    !(await showConfirm(
       `Êtes-vous sûr de vouloir supprimer la caisse "${nom}" ?\n(Cela ne supprimera pas les objets qu'elle contient)`,
-    )
+      { confirmText: "Supprimer", type: "error" }
+    ))
   ) {
     return;
   }
@@ -118,7 +119,7 @@ async function handleDeleteCaisse(e) {
     const data = await response.json();
 
     if (data.success) {
-      alert("Caisse supprimée avec succès");
+      await showAlert("Caisse supprimée avec succès", "success");
       resetFormSuppressionCaisse();
 
       // Rafraîchir l'inventaire pour mettre à jour la colonne Caisse
@@ -134,11 +135,11 @@ async function handleDeleteCaisse(e) {
         window.reloadModifCaisseObjects();
       }
     } else {
-      alert("Erreur: " + data.message);
+      await showAlert("Erreur: " + data.message, "error");
     }
   } catch (error) {
     console.error("Erreur suppression:", error);
-    alert("Erreur lors de la suppression");
+    await showAlert("Erreur lors de la suppression", "error");
   }
 }
 

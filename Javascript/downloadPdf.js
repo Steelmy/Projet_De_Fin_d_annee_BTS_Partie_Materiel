@@ -2,9 +2,10 @@
 const btnDownloadPDF = document.getElementById("btn_download_pdf");
 
 if (btnDownloadPDF) {
-  btnDownloadPDF.addEventListener("click", () => {
-    const confirmation = confirm(
+  btnDownloadPDF.addEventListener("click", async () => {
+    const confirmation = await showConfirm(
       "Voulez-vous télécharger l'inventaire complet en PDF ?",
+      { confirmText: "Télécharger", type: "info" }
     );
 
     if (confirmation) {

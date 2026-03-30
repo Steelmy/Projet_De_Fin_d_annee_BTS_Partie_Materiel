@@ -442,7 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const printContent = printZone.innerHTML;
 
     if (!printContent.trim()) {
-      alert("Aucun code-barre à imprimer. Veuillez d'abord charger les codes-barres.");
+      showAlert("Aucun code-barre à imprimer. Veuillez d'abord charger les codes-barres.", "warning");
       return;
     }
 

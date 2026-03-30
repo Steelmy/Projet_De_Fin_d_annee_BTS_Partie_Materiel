@@ -62,7 +62,7 @@ formSuppression.addEventListener("submit", async (e) => {
 
   // Vérifier qu'un ID est renseigné
   if (!id) {
-    alert("Veuillez scanner ou entrer un code-barre à supprimer");
+    await showAlert("Veuillez scanner ou entrer un code-barre à supprimer", "warning");
     return;
   }
 
@@ -74,7 +74,7 @@ formSuppression.addEventListener("submit", async (e) => {
     const detailsData = await detailsResponse.json();
 
     if (!detailsData.success || !detailsData.materiel) {
-      alert("Ce code-barre n'existe pas dans la base de données.");
+      await showAlert("Ce code-barre n'existe pas dans la base de données.", "error");
       return;
     }
 
@@ -82,25 +82,28 @@ formSuppression.addEventListener("submit", async (e) => {
 
     // Vérifier que l'objet n'est pas dans une caisse
     if (mat.caisse_id) {
-      alert(
+      await showAlert(
         `Cet objet est actuellement dans la caisse "${mat.caisse_nom || "inconnue"}". Veuillez d'abord le retirer de la caisse avant de pouvoir le supprimer.`,
+        "warning"
       );
       return;
     }
 
     // Vérifier que l'objet n'est pas réservé/emprunté
     if (mat.etat !== "disponible") {
-      alert(
+      await showAlert(
         `Cet objet est actuellement "${mat.etat}". Veuillez d'abord le remettre en état "disponible" avant de pouvoir le supprimer.`,
+        "warning"
       );
       return;
     }
 
     // 2. Demander confirmation avec les vraies infos
     if (
-      !confirm(
+      !(await showConfirm(
         `Êtes-vous sûr de vouloir supprimer ce matériel ?\n\nType: ${mat.type_materiel}\nNom: ${mat.nom_materiel}\nID: ${mat.code_barre}\nEtat: ${mat.etat}`,
-      )
+        { confirmText: "Supprimer", type: "error" }
+      ))
     ) {
       return;
     }
@@ -117,7 +120,7 @@ formSuppression.addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (data.success) {
-      alert(data.message);
+      await showAlert(data.message, "success");
 
       // Réinitialiser le formulaire
       idInputSuppr.value = "";
@@ -128,10 +131,10 @@ formSuppression.addEventListener("submit", async (e) => {
         window.refreshInventory();
       }
     } else {
-      alert("Erreur: " + data.message);
+      await showAlert("Erreur: " + data.message, "error");
     }
   } catch (error) {
     console.error("Erreur lors de la suppression:", error);
-    alert("Erreur lors de la suppression du matériel");
+    await showAlert("Erreur lors de la suppression du matériel", "error");
   }
 });
