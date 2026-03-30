@@ -1,7 +1,7 @@
 // javascript/dynamicSelects.js
 // Gère la logique des listes déroulantes en cascade pour (Type -> Sous-type -> Nom)
 
-let referenceTree = {};
+window.referenceTree = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadReferenceTree();

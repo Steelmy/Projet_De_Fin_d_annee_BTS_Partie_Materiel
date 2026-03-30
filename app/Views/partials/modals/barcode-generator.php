@@ -14,7 +14,7 @@
       id="close-barcode-modal"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-4">Impression Codes-barres</h2>
+    <h2 class="text-2xl font-bold mb-4">Impression de codes-barres</h2>
 
     <!-- Filtres -->
     <div class="flex flex-wrap items-center justify-center gap-3 my-4">

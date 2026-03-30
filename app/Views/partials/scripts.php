@@ -99,6 +99,7 @@
 
 <!-- JavaScript applicatif -->
 <script src="javascript/customModal.js?v=1"></script>
+<script src="javascript/sessionGuard.js?v=1"></script>
 <script src="javascript/sortUtils.js"></script>
 <script src="javascript/barcodeGenerator.js?v=3"></script>
 <script src="javascript/universalAutocomplete.js?v=2"></script>
@@ -116,4 +117,4 @@
 <script src="javascript/formActions.js?v=2"></script>
 <!-- <script src="javascript/boxFormToggle.js?v=1"></script> -->
 <script src="javascript/dynamicSelects.js"></script>
-<script src="javascript/referenceManager.js?v=4"></script>
+<script src="javascript/referenceManager.js?v=5"></script>

@@ -245,16 +245,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <th class="p-3 text-left font-semibold w-12 border-r border-white/20">
               <input type="checkbox" id="bc_select_all" class="rounded border-white/40 text-custom-primary focus:ring-white" />
             </th>
-            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors border-r border-white/20" onclick="window.sortBarcodeTable('Code_bar')">
+            <th class="p-3 font-semibold text-center cursor-pointer border-r border-white/20" onclick="window.sortBarcodeTable('Code_bar')">
               Code-barre ${getSortIcon("Code_bar")}
             </th>
-            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors border-r border-white/20" onclick="window.sortBarcodeTable('Type')">
+            <th class="p-3 font-semibold text-center cursor-pointer border-r border-white/20" onclick="window.sortBarcodeTable('Type')">
               Type ${getSortIcon("Type")}
             </th>
-            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors border-r border-white/20" onclick="window.sortBarcodeTable('Sous_type')">
+            <th class="p-3 font-semibold text-center cursor-pointer border-r border-white/20" onclick="window.sortBarcodeTable('Sous_type')">
               Sous-type ${getSortIcon("Sous_type")}
             </th>
-            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortBarcodeTable('Nom')">
+            <th class="p-3 font-semibold text-center cursor-pointer" onclick="window.sortBarcodeTable('Nom')">
               Nom ${getSortIcon("Nom")}
             </th>
           </tr>
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const isSelected = barcodeSelectedItems.has(objet.id);
         const objetJson = JSON.stringify(objet).replace(/'/g, "&apos;");
         html += `
-          <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="document.getElementById('bc_cb_${objet.id}').click()">
+          <tr class="cursor-pointer" onclick="document.getElementById('bc_cb_${objet.id}').click()">
             <td class="p-3 text-center border-r border-gray-100" onclick="event.stopPropagation()">
               <input type="checkbox" id="bc_cb_${objet.id}" 
                      class="bc-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 

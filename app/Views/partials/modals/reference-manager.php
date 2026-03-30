@@ -15,7 +15,7 @@
       onclick="toggleReferenceModal(false)"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="settings"></i> Gestion des Références</h2>
+    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">Gestion des Références</h2>
 
     <!-- Tabs -->
     <div class="flex gap-4 mb-6 border-b border-gray-200 font-medium">
@@ -30,11 +30,17 @@
       <form id="form_create_reference" class="space-y-4">
           <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
-              <input type="text" id="ref_type" required placeholder="Ex: Outils, Équipements..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+              <select id="ref_type_select" required class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15">
+                  <option value="">Sélectionner un type</option>
+              </select>
+              <input type="text" id="ref_type_new" placeholder="Saisir le nouveau type..." class="hidden w-full mt-2 px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
           </div>
           <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Sous-type</label>
-              <input type="text" id="ref_sous_type" placeholder="Ex: Tournevis, Clé à molette..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+              <select id="ref_sous_type_select" disabled class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400">
+                  <option value="">Sélectionner un sous-type</option>
+              </select>
+              <input type="text" id="ref_sous_type_new" placeholder="Saisir le nouveau sous-type..." class="hidden w-full mt-2 px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
               <p class="text-xs text-gray-500 mt-1">Laissez vide si non applicable.</p>
           </div>
           <div>
@@ -42,10 +48,10 @@
               <input type="text" id="ref_nom" required placeholder="Ex: Plat, Cruciforme..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
           </div>
           <div class="pt-4 flex justify-between border-t border-gray-100">
-              <button type="button" onclick="resetReferenceForm()" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 hover:border-red-300 transition-colors">Réinitialiser</button>
+              <button type="button" onclick="resetReferenceForm()" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:brightness-95 active:brightness-90 transition-all">Réinitialiser</button>
               <div class="flex gap-3">
-                  <button type="button" onclick="toggleReferenceModal(false)" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">Annuler</button>
-                  <button type="submit" class="px-6 py-2 bg-custom-brandLight text-white font-semibold rounded-lg shadow-md hover:brightness-90 active:brightness-75 transition-all">Enregistrer</button>
+                  <button type="button" onclick="toggleReferenceModal(false)" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:brightness-95 active:brightness-90 transition-all">Annuler</button>
+                  <button type="submit" class="px-6 py-2 bg-custom-brandLight text-white font-semibold rounded-lg shadow-md hover:brightness-95 active:brightness-90 transition-all">Enregistrer</button>
               </div>
           </div>
           <div id="ref_message" class="text-sm text-center mt-2 hidden font-medium"></div>

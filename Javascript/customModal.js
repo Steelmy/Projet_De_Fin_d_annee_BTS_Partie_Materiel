@@ -74,14 +74,14 @@
       font-weight: 600;
       cursor: pointer;
       border: none;
-      transition: filter 0.15s, transform 0.1s;
+      transition: filter 0.15s;
       outline: none;
     }
     .custom-modal-btn:hover {
-      filter: brightness(0.92);
+      filter: brightness(0.95);
     }
     .custom-modal-btn:active {
-      transform: scale(0.97);
+      filter: brightness(0.90);
     }
   `;
   document.head.appendChild(style);
