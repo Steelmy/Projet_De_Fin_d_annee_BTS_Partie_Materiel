@@ -14,6 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let codesToPrint = new Set();
   let barcodeIndex = 0;
+  
+  // Variables pour le tableau filtrable
+  let allInventoryBarcode = [];
+  let barcodeCurrentPage = 1;
+  const barcodeItemsPerPage = 10;
+  let barcodeSortColumn = null;
+  let barcodeSortDirection = "asc";
+  let barcodeSelectedItems = new Map(); // id -> item
 
   if (!btnOpenBarcode || !modal || !printZone || !btnPrint) return;
 
@@ -28,12 +36,16 @@ document.addEventListener("DOMContentLoaded", () => {
     filterSousType.disabled = true;
     filterNom.disabled = true;
     codesToPrint.clear();
+    barcodeSelectedItems.clear(); // Reset sélection tableau
     printZone.innerHTML = "";
+    printZone.style.display = "none";
+    btnPrint.style.display = "none";
     barcodeIndex = 0;
     if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
 
-    // Charger les types disponibles
+    // Charger les types disponibles et l'inventaire
     chargerFiltreTypes();
+    loadAllInventoryBarcode();
   });
 
   // === Fermeture ===
@@ -48,6 +60,20 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.style.display = "none";
     modal.classList.add("hidden");
     document.body.style.overflow = "";
+  }
+
+  // === Charger tout l'inventaire pour le tableau ===
+  async function loadAllInventoryBarcode() {
+    try {
+      const response = await fetch("php/getAllItems.php");
+      const data = await response.json();
+      if (data.success && data.data) {
+        allInventoryBarcode = data.data;
+        applyBarcodeFilters();
+      }
+    } catch (error) {
+      console.error("Erreur chargement inventaire pour codes-barres:", error);
+    }
   }
 
   // === Charger les types dans le filtre ===
@@ -101,6 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("Erreur chargement sous-types:", e);
     }
+    
+    applyBarcodeFilters();
   });
 
   filterSousType.addEventListener("change", async () => {
@@ -130,94 +158,263 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("Erreur chargement noms:", e);
     }
+    
+    applyBarcodeFilters();
+  });
+  
+  filterNom.addEventListener("change", () => {
+    applyBarcodeFilters();
   });
 
   // === Vider la liste d'impression ===
   if (btnClear) {
     btnClear.addEventListener("click", () => {
       codesToPrint.clear();
+      barcodeSelectedItems.clear(); // Reset table selection too
       barcodeIndex = 0;
       printZone.innerHTML = "";
+      printZone.style.display = "none";
+      btnPrint.style.display = "none";
+      
+      // Uncheck all checkboxes in the table
+      document.querySelectorAll(".bc-checkbox").forEach((cb) => {
+        cb.checked = false;
+      });
+      const selectAll = document.getElementById("bc_select_all");
+      if (selectAll) selectAll.checked = false;
+
       if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
     });
   }
 
-  // === Charger les codes-barres existants ===
-  btnLoad.addEventListener("click", async () => {
-    const params = new URLSearchParams();
-    if (filterType.value) params.append("type", filterType.value);
-    if (filterSousType.value) params.append("sous_type", filterSousType.value);
-    if (filterNom.value) params.append("nom", filterNom.value);
+  // === Fonction de Filtrage Local pour le Tableau ===
+  function applyBarcodeFilters() {
+    const typeValue = filterType.value.trim();
+    const sousTypeValue = filterSousType.value.trim();
+    const nomValue = filterNom.value.trim();
 
-    try {
-      const res = await fetch(
-        `php/generateBarcode.php?${params.toString()}`,
-      );
-      const data = await res.json();
+    let filtered = [...allInventoryBarcode];
 
-      if (!data.success || !data.barcodes || data.barcodes.length === 0) {
-        alert("Aucun code-barre trouvé pour ces critères.");
-        return;
+    if (typeValue) filtered = filtered.filter((item) => item.Type === typeValue);
+    if (sousTypeValue) filtered = filtered.filter((item) => item.Sous_type === sousTypeValue);
+    if (nomValue) filtered = filtered.filter((item) => item.Nom === nomValue);
+
+    // Tri (utilise sortUtils.js si dispo, ou tri basique)
+    if (barcodeSortColumn) {
+      if (window.localeSortComparator) {
+        filtered.sort((a, b) => window.localeSortComparator(a, b, barcodeSortColumn, barcodeSortDirection));
+      } else {
+        filtered.sort((a, b) => {
+          let valA = a[barcodeSortColumn] || "";
+          let valB = b[barcodeSortColumn] || "";
+          if (valA < valB) return barcodeSortDirection === "asc" ? -1 : 1;
+          if (valA > valB) return barcodeSortDirection === "asc" ? 1 : -1;
+          return 0;
+        });
       }
+    }
 
-      let addedCount = 0;
+    renderBarcodeTable(filtered);
+  }
 
-      data.barcodes.forEach((item) => {
-        if (!codesToPrint.has(item.Code_bar)) {
-          codesToPrint.add(item.Code_bar);
-          addedCount++;
-          
-          const container = document.createElement("div");
-          container.className = "barcode-item";
+  // === Rendu du Tableau avec Checkboxes ===
+  function renderBarcodeTable(filtered) {
+    const container = document.getElementById("barcode_table_container");
+    if (!container) return;
 
-          // Label catégoriel au-dessus du code-barre
-          const label = document.createElement("p");
-          label.className = "text-xs text-gray-500 mb-1";
-          label.textContent = [item.Type, item.Sous_type, item.Nom]
-            .filter(Boolean)
-            .join(" > ");
-          container.appendChild(label);
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / barcodeItemsPerPage) || 1;
 
-          const svgId = "barcode-list-" + barcodeIndex++;
-          const svg = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "svg",
-          );
-          svg.id = svgId;
-          container.appendChild(svg);
-          printZone.appendChild(container);
+    if (barcodeCurrentPage > totalPages) barcodeCurrentPage = totalPages;
+    if (barcodeCurrentPage < 1) barcodeCurrentPage = 1;
 
-          try {
-            JsBarcode("#" + svgId, item.Code_bar, {
-              format: "EAN13",
-              lineColor: "#000",
-              width: 2,
-              height: 40,
-              displayValue: true,
-              fontSize: 14,
-              margin: 10,
-            });
-          } catch (e) {
-            JsBarcode("#" + svgId, item.Code_bar, {
-              format: "CODE128",
-              lineColor: "#000",
-              width: 2,
-              height: 40,
-              displayValue: true,
-              fontSize: 14,
-              margin: 10,
-            });
+    const startIndex = (barcodeCurrentPage - 1) * barcodeItemsPerPage;
+    const endIndex = startIndex + barcodeItemsPerPage;
+    const paginatedItems = filtered.slice(startIndex, endIndex);
+
+    const getSortIcon = (col) => {
+      if (barcodeSortColumn === col) {
+        return barcodeSortDirection === "asc" ? "↑" : "↓";
+      }
+      return '<span class="opacity-50">↕</span>';
+    };
+
+    let html = `
+      <table class="w-full border-collapse bg-white shadow-input rounded-lg overflow-hidden text-sm">
+        <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white select-none">
+          <tr>
+            <th class="p-3 text-left font-semibold w-12 border-r border-white/20">
+              <input type="checkbox" id="bc_select_all" class="rounded border-white/40 text-custom-primary focus:ring-white" />
+            </th>
+            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors border-r border-white/20" onclick="window.sortBarcodeTable('Code_bar')">
+              Code-barre ${getSortIcon("Code_bar")}
+            </th>
+            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors border-r border-white/20" onclick="window.sortBarcodeTable('Type')">
+              Type ${getSortIcon("Type")}
+            </th>
+            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors border-r border-white/20" onclick="window.sortBarcodeTable('Sous_type')">
+              Sous-type ${getSortIcon("Sous_type")}
+            </th>
+            <th class="p-3 font-semibold text-center cursor-pointer hover:bg-white/10 transition-colors" onclick="window.sortBarcodeTable('Nom')">
+              Nom ${getSortIcon("Nom")}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+    `;
+
+    if (paginatedItems.length === 0) {
+      html += `<tr><td colspan="5" class="p-4 text-center text-gray-400 italic">Aucun objet trouvé pour ces critères</td></tr>`;
+    } else {
+      paginatedItems.forEach((objet) => {
+        const isSelected = barcodeSelectedItems.has(objet.id);
+        const objetJson = JSON.stringify(objet).replace(/'/g, "&apos;");
+        html += `
+          <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="document.getElementById('bc_cb_${objet.id}').click()">
+            <td class="p-3 text-center border-r border-gray-100" onclick="event.stopPropagation()">
+              <input type="checkbox" id="bc_cb_${objet.id}" 
+                     class="bc-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
+                     data-objet='${objetJson}'
+                     ${isSelected ? "checked" : ""} />
+            </td>
+            <td class="p-3 text-center border-r border-gray-100">${objet.Code_bar}</td>
+            <td class="p-3 text-center border-r border-gray-100">${objet.Type}</td>
+            <td class="p-3 text-center border-r border-gray-100">${objet.Sous_type || "-"}</td>
+            <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
+          </tr>
+        `;
+      });
+    }
+
+    html += `</tbody></table>`;
+
+    // Pagination
+    html += `
+      <div class="p-3 flex justify-between items-center text-slate-500 text-sm border border-t-0 border-gray-200 mt-0 bg-gray-50 rounded-b-lg shadow-input">
+        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+                onclick="window.changeBarcodePage(-1)" ${barcodeCurrentPage === 1 ? "disabled" : ""}>
+          &larr; Précédent
+        </button>
+        <span class="font-medium">Page ${barcodeCurrentPage} / ${totalPages} <span class="text-xs ml-2">(Total: ${totalItems})</span></span>
+        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+                onclick="window.changeBarcodePage(1)" ${barcodeCurrentPage === totalPages ? "disabled" : ""}>
+          Suivant &rarr;
+        </button>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+    // Gérer sélection multiple "Select All"
+    const selectAll = document.getElementById("bc_select_all");
+    if (selectAll) {
+      selectAll.addEventListener("change", (e) => {
+        document.querySelectorAll(".bc-checkbox").forEach((cb) => {
+          cb.checked = e.target.checked;
+          const objet = JSON.parse(cb.dataset.objet.replace(/&apos;/g, "'"));
+          if (cb.checked) {
+            barcodeSelectedItems.set(objet.id, objet);
+          } else {
+            barcodeSelectedItems.delete(objet.id);
           }
+        });
+      });
+    }
+
+    // Checkbox individuelle
+    document.querySelectorAll(".bc-checkbox").forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        const objet = JSON.parse(e.target.dataset.objet.replace(/&apos;/g, "'"));
+        if (e.target.checked) {
+          barcodeSelectedItems.set(objet.id, objet);
+        } else {
+          barcodeSelectedItems.delete(objet.id);
         }
       });
+    });
+  }
 
-      if (barcodeCount) {
-        barcodeCount.textContent = `${codesToPrint.size} code(s) à imprimer`;
+  // --- Helpers de pagination & tri (rendus globaux pour le HTML) ---
+  window.changeBarcodePage = function (delta) {
+    barcodeCurrentPage += delta;
+    applyBarcodeFilters();
+  };
+
+  window.sortBarcodeTable = function (column) {
+    if (barcodeSortColumn === column) {
+      barcodeSortDirection = barcodeSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      barcodeSortColumn = column;
+      barcodeSortDirection = "asc";
+    }
+    barcodeCurrentPage = 1;
+    applyBarcodeFilters();
+  };
+
+  // === Ajouter les codes-barres sélectionnés à la zone d'impression ===
+  btnLoad.addEventListener("click", () => {
+    if (barcodeSelectedItems.size === 0) {
+      alert("Veuillez d'abord sélectionner au moins un objet dans le tableau.");
+      return;
+    }
+
+    // Afficher zone impression et bouton Imprimer
+    printZone.style.display = "flex";
+    btnPrint.style.display = "inline-block";
+
+    let addedCount = 0;
+
+    barcodeSelectedItems.forEach((item) => {
+      if (!codesToPrint.has(item.Code_bar)) {
+        codesToPrint.add(item.Code_bar);
+        addedCount++;
+        
+        const container = document.createElement("div");
+        container.className = "barcode-item flex flex-col items-center p-2 border border-gray-100 rounded bg-white shadow-sm";
+
+        // Label catégoriel au-dessus du code-barre
+        const label = document.createElement("p");
+        label.className = "text-xs text-center text-gray-500 mb-2 truncate max-w-[200px]";
+        label.textContent = [item.Type, item.Sous_type, item.Nom]
+          .filter(Boolean)
+          .join(" > ");
+        container.appendChild(label);
+
+        const svgId = "barcode-list-" + barcodeIndex++;
+        const svg = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "svg",
+        );
+        svg.id = svgId;
+        container.appendChild(svg);
+        printZone.appendChild(container);
+
+        try {
+          JsBarcode("#" + svgId, item.Code_bar, {
+            format: "EAN13",
+            lineColor: "#000",
+            width: 2,
+            height: 40,
+            displayValue: true,
+            fontSize: 14,
+            margin: 10,
+          });
+        } catch (e) {
+          JsBarcode("#" + svgId, item.Code_bar, {
+            format: "CODE128",
+            lineColor: "#000",
+            width: 2,
+            height: 40,
+            displayValue: true,
+            fontSize: 14,
+            margin: 10,
+          });
+        }
       }
+    });
 
-    } catch (e) {
-      console.error("Erreur chargement codes-barres:", e);
-      alert("Erreur lors de l'ajout des codes-barres.");
+    if (addedCount > 0 && barcodeCount) {
+      barcodeCount.textContent = `${codesToPrint.size} code(s) à imprimer`;
     }
   });
 

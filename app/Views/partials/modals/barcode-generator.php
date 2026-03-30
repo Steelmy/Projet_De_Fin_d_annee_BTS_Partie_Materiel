@@ -52,17 +52,24 @@
       </button>
     </div>
 
-    <p id="barcode-count" class="text-sm text-gray-500 mb-2"></p>
+    <div
+      id="barcode_table_container"
+      class="mt-4 text-left"
+    ></div>
+
+    <p id="barcode-count" class="text-sm text-gray-500 my-4">0 code(s) à imprimer</p>
 
     <button
       id="btn-print"
-      class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
+      style="display: none;"
+      class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300 mb-2"
     >
-      Imprimer
+      Imprimer la sélection
     </button>
     <div
       id="print-zone"
-      class="flex flex-wrap justify-center gap-4 mt-6 max-h-[400px] overflow-y-auto custom-scrollbar border-t border-gray-100 pt-4"
+      style="display: none;"
+      class="flex flex-wrap justify-center gap-4 mt-2 max-h-[300px] overflow-y-auto custom-scrollbar border-t border-gray-100 pt-4"
     ></div>
   </div>
 </div>
