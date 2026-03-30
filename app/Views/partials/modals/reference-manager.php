@@ -22,16 +22,16 @@
       <form id="form_create_reference" class="space-y-4">
           <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
-              <input type="text" id="ref_type" required placeholder="Ex: Câble, Ordinateur..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+              <input type="text" id="ref_type" required placeholder="Ex: Outils, Équipements..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
           </div>
           <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Sous-type</label>
-              <input type="text" id="ref_sous_type" placeholder="Ex: Vidéo, Réseau, Portable..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+              <input type="text" id="ref_sous_type" placeholder="Ex: Tournevis, Clé à molette..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
               <p class="text-xs text-gray-500 mt-1">Laissez vide si non applicable.</p>
           </div>
           <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Nom (Modèle) <span class="text-red-500">*</span></label>
-              <input type="text" id="ref_nom" required placeholder="Ex: HDMI 2m, Thinkpad T14..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
+              <input type="text" id="ref_nom" required placeholder="Ex: Plat, Cruciforme..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
           </div>
           <div class="pt-4 flex justify-between border-t border-gray-100">
               <button type="button" onclick="resetReferenceForm()" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 hover:border-red-300 transition-colors">Réinitialiser</button>

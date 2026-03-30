@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS `objets` (
   `id` int NOT NULL AUTO_INCREMENT,
   `Code_bar` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_nom_reference` int NOT NULL,
+  `Nom` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Etat` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

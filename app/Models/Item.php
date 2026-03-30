@@ -135,10 +135,10 @@ class Item
 
         // 4. Insérer l'objet avec un code-barre temporaire
         $stmt = $this->conn->prepare("
-            INSERT INTO objets (id_nom_reference, Etat, Emprunteur_id, Code_bar)
-            VALUES (:id_nom_reference, 'disponible', NULL, 'TEMP')
+            INSERT INTO objets (id_nom_reference, Nom, Etat, Emprunteur_id, Code_bar)
+            VALUES (:id_nom_reference, :nom, 'disponible', NULL, 'TEMP')
         ");
-        $stmt->execute([':id_nom_reference' => $nomRefId]);
+        $stmt->execute([':id_nom_reference' => $nomRefId, ':nom' => $nom]);
         $objetId = (int) $this->conn->lastInsertId();
 
         // 5. Générer le code EAN-13 à partir des IDs
