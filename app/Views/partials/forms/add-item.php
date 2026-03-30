@@ -39,14 +39,7 @@
       <option value="">Sélectionner un nom</option>
     </select>
   </div>
-  <button
-    type="button"
-    onclick="window.toggleReferenceModal(true)"
-    class="px-4 py-3 border-2 border-custom-border bg-white text-gray-700 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 hover:text-custom-brandLight hover:border-custom-brandLight transition-all duration-300 flex items-center gap-2"
-    title="Gérer les Types, Sous-types et Noms"
-  >
-    <i data-lucide="settings" class="w-4 h-4"></i> Réf.
-  </button>
+
   <input
     type="number"
     id="nombre_materiel"

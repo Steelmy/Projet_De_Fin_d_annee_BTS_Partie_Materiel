@@ -7,16 +7,24 @@
     onclick="toggleReferenceModal(false)"
   ></div>
   <div
-    class="bg-white p-8 border border-[#888] w-[90%] max-w-[600px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left"
+    class="bg-white p-8 border border-[#888] w-[90%] max-w-[600px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
+    style="max-height: 90vh;"
   >
     <span
       class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black"
       onclick="toggleReferenceModal(false)"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i data-lucide="settings"></i> Gestion des Références</h2>
+    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="settings"></i> Gestion des Références</h2>
 
-    <div class="space-y-6">
+    <!-- Tabs -->
+    <div class="flex gap-4 mb-6 border-b border-gray-200 font-medium">
+        <button type="button" onclick="switchReferenceTab('add')" id="tab-ref-add" class="pb-2 border-b-2 border-custom-brandLight text-custom-brandLight transition-colors">Ajouter une référence</button>
+        <button type="button" onclick="switchReferenceTab('list')" id="tab-ref-list" class="pb-2 text-gray-500 hover:text-gray-800 transition-colors">Liste des références</button>
+    </div>
+
+    <!-- View: Ajout -->
+    <div id="ref-view-add" class="space-y-6">
       <p class="text-sm text-gray-600">Ajoutez de nouvelles références au catalogue pour les rendre disponibles lors de l'ajout de matériel.</p>
 
       <form id="form_create_reference" class="space-y-4">
@@ -42,6 +50,31 @@
           </div>
           <div id="ref_message" class="text-sm text-center mt-2 hidden font-medium"></div>
       </form>
+    </div>
+
+    <!-- View: Liste -->
+    <div id="ref-view-list" class="space-y-4 hidden">
+        <div class="overflow-y-auto custom-scrollbar border border-gray-200 rounded-lg max-h-[300px]">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="bg-gray-100 text-gray-700 sticky top-0 z-10 shadow-sm">
+                    <tr>
+                        <th class="p-3 w-10 text-center border-b border-gray-200"><input type="checkbox" id="ref-check-all" onchange="toggleAllReferences(this)" class="rounded border-gray-300 text-custom-brandLight focus:ring-custom-brandLight/20 cursor-pointer w-4 h-4"></th>
+                        <th class="p-3 font-semibold border-b border-gray-200">Type</th>
+                        <th class="p-3 font-semibold border-b border-gray-200">Sous-type</th>
+                        <th class="p-3 font-semibold border-b border-gray-200">Nom</th>
+                    </tr>
+                </thead>
+                <tbody id="ref-table-body" class="divide-y divide-gray-100 bg-white">
+                    <tr><td colspan="4" class="p-8 text-center text-gray-500">Chargement des références...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="ref-list-message" class="text-sm font-medium mt-2 hidden whitespace-pre-wrap"></div>
+
+        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
+            <span class="text-sm text-gray-600 font-medium whitespace-nowrap"><span id="ref-selected-count">0</span> référence(s) sélectionnée(s)</span>
+            <button type="button" id="btn-delete-refs" onclick="deleteSelectedReferences()" class="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors text-white cursor-not-allowed" style="background-color: #6b7280;" disabled>Supprimer la sélection</button>
+        </div>
     </div>
   </div>
 </div>

@@ -115,4 +115,4 @@
 <script src="javascript/formActions.js?v=2"></script>
 <!-- <script src="javascript/boxFormToggle.js?v=1"></script> -->
 <script src="javascript/dynamicSelects.js"></script>
-<script src="javascript/referenceManager.js"></script>
+<script src="javascript/referenceManager.js?v=4"></script>

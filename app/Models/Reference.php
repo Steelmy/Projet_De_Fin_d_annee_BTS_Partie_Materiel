@@ -138,4 +138,76 @@ class Reference
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
+
+    public function getAllFlat(): array
+    {
+        $stmt = $this->conn->prepare("
+            SELECT nr.id as id, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
+            FROM noms_references nr
+            JOIN sous_types st ON nr.id_sous_type = st.id
+            JOIN types t ON st.id_type = t.id
+            ORDER BY t.nom_type ASC, st.nom_sous_type ASC, nr.nom_reference ASC
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function delete(array $ids): array
+    {
+        $errors = [];
+        $deleted = 0;
+
+        foreach ($ids as $id) {
+            // Check if there are objects using this reference
+            $checkStmt = $this->conn->prepare("SELECT COUNT(*) FROM objets WHERE id_nom_reference = ?");
+            $checkStmt->execute([$id]);
+            $count = $checkStmt->fetchColumn();
+
+            if ($count > 0) {
+                // Get the reference name for the error message
+                $nameStmt = $this->conn->prepare("SELECT nom_reference FROM noms_references WHERE id = ?");
+                $nameStmt->execute([$id]);
+                $refName = $nameStmt->fetchColumn();
+
+                $errors[] = "Impossible de supprimer la référence '$refName' : des objets y sont encore associés. Veuillez d'abord supprimer ou modifier les objets correspondants.";
+                continue;
+            }
+
+            // Get sous_type id to check for later cleanup
+            $stStmt = $this->conn->prepare("SELECT id_sous_type FROM noms_references WHERE id = ?");
+            $stStmt->execute([$id]);
+            $sousTypeId = $stStmt->fetchColumn();
+
+            if ($sousTypeId) {
+                // Delete the reference
+                $delStmt = $this->conn->prepare("DELETE FROM noms_references WHERE id = ?");
+                $delStmt->execute([$id]);
+                $deleted++;
+
+                // Cleanup: Check if sous_type is now empty
+                $checkSt = $this->conn->prepare("SELECT COUNT(*) FROM noms_references WHERE id_sous_type = ?");
+                $checkSt->execute([$sousTypeId]);
+                if ($checkSt->fetchColumn() == 0) {
+                    $tStmt = $this->conn->prepare("SELECT id_type FROM sous_types WHERE id = ?");
+                    $tStmt->execute([$sousTypeId]);
+                    $typeId = $tStmt->fetchColumn();
+
+                    $delSt = $this->conn->prepare("DELETE FROM sous_types WHERE id = ?");
+                    $delSt->execute([$sousTypeId]);
+
+                    if ($typeId) {
+                        // Cleanup: Check if type is now empty
+                        $checkT = $this->conn->prepare("SELECT COUNT(*) FROM sous_types WHERE id_type = ?");
+                        $checkT->execute([$typeId]);
+                        if ($checkT->fetchColumn() == 0) {
+                            $delT = $this->conn->prepare("DELETE FROM types WHERE id = ?");
+                            $delT->execute([$typeId]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return ['success' => count($errors) === 0, 'deleted' => $deleted, 'errors' => $errors];
+    }
 }

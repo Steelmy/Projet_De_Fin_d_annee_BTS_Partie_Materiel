@@ -6,7 +6,8 @@
     class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"
   ></div>
   <div
-    class="bg-white p-5 border border-[#888] w-[80%] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
+    class="bg-white p-5 border border-[#888] w-[80%] overflow-y-auto custom-scrollbar shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
+    style="max-height: 90vh;"
   >
     <span
       class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black"
@@ -37,12 +38,6 @@
       >
         <option value="">Tous les noms</option>
       </select>
-      <button
-        id="btn-load-barcodes"
-        class="px-5 py-2 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
-      >
-        Ajouter
-      </button>
       <button
         id="btn-clear-print-zone"
         type="button"

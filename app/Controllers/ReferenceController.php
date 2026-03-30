@@ -81,4 +81,46 @@ class ReferenceController
             ApiResponse::error('Erreur serveur lors de l\'ajout');
         }
     }
+
+    public function getAll(): void
+    {
+        try {
+            $references = $this->model->getAllFlat();
+            ApiResponse::success(['references' => $references]);
+        } catch (PDOException $e) {
+            ApiResponse::exception($e);
+        }
+    }
+
+    public function delete(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                ApiResponse::error('Méthode non autorisée', 405);
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+            $ids = isset($data['ids']) ? $data['ids'] : [];
+
+            if (empty($ids) || !is_array($ids)) {
+                ApiResponse::error('Aucune référence sélectionnée pour la suppression.', 400);
+            }
+
+            $result = $this->model->delete($ids);
+
+            ApiResponse::success([
+                'success' => $result['success'],
+                'message' => $result['success'] ? 'Références supprimées avec succès.' : 'Erreur lors de la suppression de certaines références.',
+                'deleted_count' => $result['deleted'],
+                'errors' => $result['errors']
+            ]);
+
+        } catch (PDOException $e) {
+            error_log("Database Error in deleteReference: " . $e->getMessage());
+            ApiResponse::error('Erreur base de données lors de la suppression');
+        } catch (Exception $e) {
+            error_log("Error in deleteReference: " . $e->getMessage());
+            ApiResponse::error('Erreur serveur lors de la suppression');
+        }
+    }
 }

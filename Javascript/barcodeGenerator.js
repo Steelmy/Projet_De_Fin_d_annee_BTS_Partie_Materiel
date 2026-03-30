@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnOpenBarcode = document.getElementById("btn-open-barcode");
   const modal = document.getElementById("barcode-modal");
   const closeModal = document.getElementById("close-barcode-modal");
-  const btnLoad = document.getElementById("btn-load-barcodes");
   const btnClear = document.getElementById("btn-clear-print-zone");
   const btnPrint = document.getElementById("btn-print");
   const printZone = document.getElementById("print-zone");
@@ -313,11 +312,18 @@ document.addEventListener("DOMContentLoaded", () => {
           cb.checked = e.target.checked;
           const objet = JSON.parse(cb.dataset.objet.replace(/&apos;/g, "'"));
           if (cb.checked) {
-            barcodeSelectedItems.set(objet.id, objet);
+            if (!barcodeSelectedItems.has(objet.id)) {
+              barcodeSelectedItems.set(objet.id, objet);
+              toggleBarcodeInPrintZone(objet, true);
+            }
           } else {
-            barcodeSelectedItems.delete(objet.id);
+            if (barcodeSelectedItems.has(objet.id)) {
+              barcodeSelectedItems.delete(objet.id);
+              toggleBarcodeInPrintZone(objet, false);
+            }
           }
         });
+        updatePrintZoneVisibility();
       });
     }
 
@@ -327,9 +333,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const objet = JSON.parse(e.target.dataset.objet.replace(/&apos;/g, "'"));
         if (e.target.checked) {
           barcodeSelectedItems.set(objet.id, objet);
+          toggleBarcodeInPrintZone(objet, true);
         } else {
           barcodeSelectedItems.delete(objet.id);
+          toggleBarcodeInPrintZone(objet, false);
         }
+        updatePrintZoneVisibility();
       });
     });
   }
@@ -351,26 +360,15 @@ document.addEventListener("DOMContentLoaded", () => {
     applyBarcodeFilters();
   };
 
-  // === Ajouter les codes-barres sélectionnés à la zone d'impression ===
-  btnLoad.addEventListener("click", () => {
-    if (barcodeSelectedItems.size === 0) {
-      alert("Veuillez d'abord sélectionner au moins un objet dans le tableau.");
-      return;
-    }
-
-    // Afficher zone impression et bouton Imprimer
-    printZone.style.display = "flex";
-    btnPrint.style.display = "inline-block";
-
-    let addedCount = 0;
-
-    barcodeSelectedItems.forEach((item) => {
-      if (!codesToPrint.has(item.Code_bar)) {
-        codesToPrint.add(item.Code_bar);
-        addedCount++;
+  // === Gérer la zone d'impression dynamiquement ===
+  function toggleBarcodeInPrintZone(item, add) {
+    if (add) {
+      if (!codesToPrint.has(item.id)) {
+        codesToPrint.add(item.id);
         
         const container = document.createElement("div");
         container.className = "barcode-item flex flex-col items-center p-2 border border-gray-100 rounded bg-white shadow-sm";
+        container.id = "barcode-item-container-" + item.id;
 
         // Label catégoriel au-dessus du code-barre
         const label = document.createElement("p");
@@ -380,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .join(" > ");
         container.appendChild(label);
 
-        const svgId = "barcode-list-" + barcodeIndex++;
+        const svgId = "barcode-svg-" + item.id;
         const svg = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "svg",
@@ -400,23 +398,44 @@ document.addEventListener("DOMContentLoaded", () => {
             margin: 10,
           });
         } catch (e) {
-          JsBarcode("#" + svgId, item.Code_bar, {
-            format: "CODE128",
-            lineColor: "#000",
-            width: 2,
-            height: 40,
-            displayValue: true,
-            fontSize: 14,
-            margin: 10,
-          });
+          try {
+            JsBarcode("#" + svgId, item.Code_bar, {
+              format: "CODE128",
+              lineColor: "#000",
+              width: 2,
+              height: 40,
+              displayValue: true,
+              fontSize: 14,
+              margin: 10,
+            });
+          } catch(err) {
+            console.error("Erreur de génération du code-barre :", item.Code_bar);
+          }
         }
       }
-    });
+    } else {
+      if (codesToPrint.has(item.id)) {
+        codesToPrint.delete(item.id);
+        const container = document.getElementById("barcode-item-container-" + item.id);
+        if (container) {
+          container.remove();
+        }
+      }
+    }
+  }
 
-    if (addedCount > 0 && barcodeCount) {
+  function updatePrintZoneVisibility() {
+    if (codesToPrint.size > 0) {
+      printZone.style.display = "flex";
+      btnPrint.style.display = "inline-block";
+    } else {
+      printZone.style.display = "none";
+      btnPrint.style.display = "none";
+    }
+    if (barcodeCount) {
       barcodeCount.textContent = `${codesToPrint.size} code(s) à imprimer`;
     }
-  });
+  }
 
   // === Impression ===
   btnPrint.addEventListener("click", () => {

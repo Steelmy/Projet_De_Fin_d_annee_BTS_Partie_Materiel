@@ -7,7 +7,8 @@
   ></div>
 
   <div
-    class="bg-white p-8 border border-[#888] w-[80%] max-w-[700px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl"
+    class="bg-white p-8 border border-[#888] w-[80%] max-w-[700px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl overflow-y-auto custom-scrollbar"
+    style="max-height: 90vh;"
   >
     <span
       class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black absolute top-[15px] right-[20px] z-10001"
