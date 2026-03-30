@@ -1,7 +1,7 @@
 <script>
   /* Fonction pour ouvrir/fermer la sidebar */
   function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('hidden');
+      document.getElementById('sidebar').classList.toggle('collapsed');
       const mainContent = document.getElementById('mainContent');
       if (mainContent) {
           mainContent.classList.toggle('full');

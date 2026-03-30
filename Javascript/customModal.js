@@ -20,12 +20,6 @@
       justify-content: center;
       padding: 1rem;
       background: rgba(0,0,0,0.45);
-      backdrop-filter: blur(4px);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-    .custom-modal-overlay.visible {
-      opacity: 1;
     }
     .custom-modal-box {
       background: #fff;
@@ -33,15 +27,8 @@
       padding: 28px 32px 22px;
       max-width: 460px;
       width: 100%;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
-      transform: translateY(16px) scale(0.97);
-      transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s ease;
-      opacity: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       text-align: center;
-    }
-    .custom-modal-overlay.visible .custom-modal-box {
-      transform: translateY(0) scale(1);
-      opacity: 1;
     }
     .custom-modal-icon {
       width: 48px;
@@ -74,14 +61,7 @@
       font-weight: 600;
       cursor: pointer;
       border: none;
-      transition: filter 0.15s;
       outline: none;
-    }
-    .custom-modal-btn:hover {
-      filter: brightness(0.95);
-    }
-    .custom-modal-btn:active {
-      filter: brightness(0.90);
     }
   `;
   document.head.appendChild(style);
@@ -103,24 +83,11 @@
 
   function animateIn(overlay) {
     document.body.appendChild(overlay);
-    // Force reflow
-    overlay.offsetHeight;
-    overlay.classList.add("visible");
   }
 
   function animateOut(overlay) {
-    return new Promise((resolve) => {
-      overlay.classList.remove("visible");
-      overlay.addEventListener("transitionend", () => {
-        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        resolve();
-      }, { once: true });
-      // Fallback si transitionend ne fire pas
-      setTimeout(() => {
-        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        resolve();
-      }, 350);
-    });
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    return Promise.resolve();
   }
 
   // ── showAlert ──

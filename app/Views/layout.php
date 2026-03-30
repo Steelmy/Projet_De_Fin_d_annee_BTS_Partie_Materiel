@@ -20,8 +20,8 @@ $viewDir = __DIR__ . '/partials';
   >
     <?php include $viewDir . '/sidebar.php'; ?>
 
-    <div id="mainContent" class="main-content min-h-screen transition-all duration-300">
-      <div class="p-[20px] max-w-[1400px] mx-auto w-full">
+    <div id="mainContent" class="main-content min-h-screen">
+      <div class="p-[20px] w-full">
         <?php include $viewDir . '/header.php'; ?>
 
         <div class="bg-white rounded-[12px] p-[25px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] flex flex-wrap gap-[20px] items-center mb-[20px]">

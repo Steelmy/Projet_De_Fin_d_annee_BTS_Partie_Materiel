@@ -248,9 +248,6 @@
   .right-\[20px\] {
     right: 20px;
   }
-  .left-0 {
-    left: calc(var(--spacing) * 0);
-  }
   .z-10 {
     z-index: 10;
   }
@@ -286,9 +283,6 @@
   }
   .m-0 {
     margin: calc(var(--spacing) * 0);
-  }
-  .mx-auto {
-    margin-inline: auto;
   }
   .my-2\.5 {
     margin-block: calc(var(--spacing) * 2.5);
@@ -445,9 +439,6 @@
   }
   .max-w-\[700px\] {
     max-width: 700px;
-  }
-  .max-w-\[1400px\] {
-    max-width: 1400px;
   }
   .min-w-\[150px\] {
     min-width: 150px;
@@ -1409,7 +1400,7 @@
     transition: 0.3s;
     z-index: 100;
   }
-  .sidebar.hidden {
+  .sidebar.collapsed {
     left: calc(-1 * var(--sidebar-w));
   }
   .sidebar-header {

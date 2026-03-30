@@ -125,8 +125,8 @@
     z-index: 100;
   }
 
-  /* Classe ajoutée via JS pour cacher la sidebar */
-  .sidebar.hidden {
+  /* Classe ajoutée via JS pour faire glisser la sidebar hors-écran */
+  .sidebar.collapsed {
     left: calc(-1 * var(--sidebar-w));
   }
 
