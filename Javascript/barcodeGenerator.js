@@ -269,8 +269,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <th class="p-3 font-semibold text-center cursor-pointer border-r border-white/20" onclick="window.sortBarcodeTable('Sous_type')">
               Sous-type ${getSortIcon("Sous_type")}
             </th>
-            <th class="p-3 font-semibold text-center cursor-pointer" onclick="window.sortBarcodeTable('Nom')">
+            <th class="p-3 font-semibold text-center cursor-pointer border-r border-white/20" onclick="window.sortBarcodeTable('Nom')">
               Nom ${getSortIcon("Nom")}
+            </th>
+            <th class="p-3 font-semibold text-center cursor-pointer" onclick="window.sortBarcodeTable('created_at')">
+              Date de création ${getSortIcon("created_at")}
             </th>
           </tr>
         </thead>
@@ -278,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     if (paginatedItems.length === 0) {
-      html += `<tr><td colspan="5" class="p-4 text-center text-gray-400 italic">Aucun objet trouvé pour ces critères</td></tr>`;
+      html += `<tr><td colspan="6" class="p-4 text-center text-gray-400 italic">Aucun objet trouvé pour ces critères</td></tr>`;
     } else {
       paginatedItems.forEach((objet) => {
         const isSelected = barcodeSelectedItems.has(objet.id);
@@ -294,7 +297,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <td class="p-3 text-center border-r border-gray-100">${objet.Code_bar}</td>
             <td class="p-3 text-center border-r border-gray-100">${objet.Type}</td>
             <td class="p-3 text-center border-r border-gray-100">${objet.Sous_type || "-"}</td>
-            <td class="p-3 text-center text-gray-600">${objet.Nom}</td>
+            <td class="p-3 text-center border-r border-gray-100 text-gray-600">${objet.Nom}</td>
+            <td class="p-3 text-center text-gray-600">${objet.created_at ? new Date(objet.created_at).toLocaleDateString('fr-FR') : "-"}</td>
           </tr>
         `;
       });

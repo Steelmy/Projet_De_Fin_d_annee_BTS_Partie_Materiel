@@ -326,7 +326,7 @@ function applyFilters() {
   }
 
   // Update icons
-  const sortColumns = ["Type", "Sous_type", "Nom", "Etat", "Utilisateur", "Nom_caisse"];
+  const sortColumns = ["Type", "Sous_type", "Nom", "Etat", "Utilisateur", "Nom_caisse", "created_at"];
   sortColumns.forEach((col) => {
     const iconSpan = document.getElementById(`sort_icon_${col}`);
     if (iconSpan) {
@@ -403,7 +403,7 @@ function updateInventoryTable(data) {
   if (data.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML =
-      '<td colspan="7" style="text-align: center; padding: 20px;">Aucun résultat trouvé</td>';
+      '<td colspan="8" style="text-align: center; padding: 20px;">Aucun résultat trouvé</td>';
     tbody.appendChild(tr);
     return;
   }
@@ -443,6 +443,7 @@ function updateInventoryTable(data) {
       <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${item.Etat}</td>
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
       <!-- <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom_caisse || "-"}</td> -->
+      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : "-"}</td>
     `;
     tbody.appendChild(tr);
   });

@@ -16,7 +16,8 @@ class Item
                 o.id, o.Code_bar, o.Etat,
                 t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom,
                 u.Prénom, u.Nom AS Nom_utilisateur,
-                c.Nom AS Nom_caisse
+                c.Nom AS Nom_caisse,
+                o.created_at
             FROM objets o
             LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
             LEFT JOIN sous_types st ON nr.id_sous_type = st.id
@@ -257,7 +258,7 @@ class Item
         }
 
         $sql = "
-            SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
+            SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom, o.created_at
             FROM objets o
             LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
             LEFT JOIN sous_types st ON nr.id_sous_type = st.id
