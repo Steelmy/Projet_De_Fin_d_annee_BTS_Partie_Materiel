@@ -7,7 +7,7 @@
     <button
       type="button"
       id="btn_caisse_ajout"
-      class="px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 transition-all duration-300"
+      class="px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input"
     >
       Caisse
     </button>
@@ -16,7 +16,7 @@
   <div class="box-input-wrapper">
     <select
       id="type_materiel_ajout"
-      class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+      class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
     >
       <option value="">Sélectionner un type</option>
     </select>
@@ -25,7 +25,7 @@
     <select
       id="sous_type_materiel_ajout"
       disabled
-      class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
+      class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
     >
       <option value="">Sélectionner un sous-type</option>
     </select>
@@ -34,7 +34,7 @@
     <select
       id="nom_materiel_ajout"
       disabled
-      class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
+      class="w-full px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 disabled:bg-gray-100 disabled:text-gray-400"
     >
       <option value="">Sélectionner un nom</option>
     </select>
@@ -45,18 +45,18 @@
     id="nombre_materiel"
     value="1"
     min="1"
-    class="w-20 px-4 py-3 border-2 border-custom-border rounded-full text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+    class="w-20 px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
     placeholder="Qté"
   />
   <button
     type="submit"
-    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
+    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input"
   >
     Ajouter
   </button>
   <button
     type="button"
-    class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
+    class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input"
     data-form="form_ajout"
   >
     Réinitialiser

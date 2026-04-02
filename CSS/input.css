@@ -31,6 +31,13 @@
   }
 }
 
+/* Curseur pointer sur tous les éléments cliquables */
+button,
+select,
+.close-modal {
+  cursor: pointer;
+}
+
 /* Keep minimal custom styles for complex elements difficult to do purely in inline Tailwind */
 /* Autocomplete positioning */
 @layer components {

@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.style.display = "none";
     modal.classList.add("hidden");
     document.body.style.overflow = "";
+    resetBarcode();
   }
 
   // === Charger tout l'inventaire pour le tableau ===
@@ -165,25 +166,39 @@ document.addEventListener("DOMContentLoaded", () => {
     applyBarcodeFilters();
   });
 
+  // === Tout réinitialiser (filtres + zone d'impression) ===
+  function resetBarcode() {
+    codesToPrint.clear();
+    barcodeSelectedItems.clear();
+    barcodeIndex = 0;
+    printZone.innerHTML = "";
+    printZone.style.display = "none";
+    btnPrint.style.display = "none";
+
+    // Reset filtres
+    filterType.value = "";
+    filterSousType.innerHTML = '<option value="">Tous les sous-types</option>';
+    filterSousType.disabled = true;
+    filterNom.innerHTML = '<option value="">Tous les noms</option>';
+    filterNom.disabled = true;
+
+    // Uncheck all checkboxes in the table
+    document.querySelectorAll(".bc-checkbox").forEach((cb) => {
+      cb.checked = false;
+    });
+    const selectAll = document.getElementById("bc_select_all");
+    if (selectAll) selectAll.checked = false;
+
+    if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
+
+    // Réappliquer les filtres pour réafficher tout l'inventaire
+    barcodeCurrentPage = 1;
+    applyBarcodeFilters();
+  }
+
   // === Vider la liste d'impression ===
   if (btnClear) {
-    btnClear.addEventListener("click", () => {
-      codesToPrint.clear();
-      barcodeSelectedItems.clear(); // Reset table selection too
-      barcodeIndex = 0;
-      printZone.innerHTML = "";
-      printZone.style.display = "none";
-      btnPrint.style.display = "none";
-      
-      // Uncheck all checkboxes in the table
-      document.querySelectorAll(".bc-checkbox").forEach((cb) => {
-        cb.checked = false;
-      });
-      const selectAll = document.getElementById("bc_select_all");
-      if (selectAll) selectAll.checked = false;
-
-      if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
-    });
+    btnClear.addEventListener("click", resetBarcode);
   }
 
   // === Fonction de Filtrage Local pour le Tableau ===

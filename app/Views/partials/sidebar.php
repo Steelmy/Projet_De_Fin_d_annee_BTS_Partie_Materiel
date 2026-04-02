@@ -1,6 +1,6 @@
-<nav class="sidebar fixed top-0 h-screen w-[280px] bg-linear-to-b from-gray-800 to-gray-900 text-white z-50 transition-all duration-300" id="sidebar">
+<nav class="sidebar fixed top-0 h-screen w-[280px] bg-linear-to-b from-gray-800 to-gray-900 text-white z-50" id="sidebar">
     <div class="px-5 py-[30px] text-center bg-gray-900 border-b border-gray-700 relative">
-        <button class="close-sidebar-btn absolute top-3 right-3 text-gray-400 hover:text-white text-2xl" onclick="toggleSidebar()">&times;</button>
+        <button class="close-sidebar-btn absolute top-3 right-3 text-gray-400 text-2xl" onclick="toggleSidebar()">&times;</button>
         <h2 class="text-[#b8a274] font-bold text-2xl">INVENTAIRE</h2>
     </div>
     <ul class="list-none py-5 m-0">

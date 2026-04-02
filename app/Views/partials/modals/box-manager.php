@@ -3,7 +3,7 @@
   class="fixed inset-0 z-1000 hidden items-center justify-center p-4"
 >
   <div
-    class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"
+    class="absolute inset-0 bg-black/50 modal-backdrop"
   ></div>
 
   <div
@@ -11,7 +11,7 @@
     style="max-height: 90vh;"
   >
     <span
-      class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer transition-colors duration-200 hover:text-black focus:text-black absolute top-[15px] right-[20px] z-10001"
+      class="close-modal text-[#aaa] float-right text-[28px] font-bold cursor-pointer absolute top-[15px] right-[20px] z-10001"
       id="close_modal_caisse"
       >&times;</span
     >
@@ -26,17 +26,17 @@
               id="nom_caisse_ajout"
               placeholder="Nom de la caisse"
               required
-              class="flex-1 px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+              class="flex-1 px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
             />
             <button
               type="submit"
-              class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
+              class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input"
             >
               Créer
             </button>
             <button
               type="button"
-              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
+              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input"
               data-form="form_ajout_caisse"
             >
               Réinitialiser
@@ -49,7 +49,7 @@
               type="text"
               id="search_objets_ajout"
               placeholder="Scanner objets pour la caisse..."
-              class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+              class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
             />
             <div
               id="objets_suggestions_ajout"
@@ -74,7 +74,7 @@
               type="text"
               id="nom_caisse_suppr"
               placeholder="Nom caisse..."
-              class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+              class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
             />
             <div class="autocomplete-suggestions"></div>
           </div>
@@ -85,13 +85,13 @@
           <div class="flex gap-2.5 mt-2.5">
             <button
               type="submit"
-              class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
+              class="px-6 py-3 border-2 border-custom-danger bg-linear-to-br from-custom-danger to-custom-dangerDark text-white rounded-lg font-semibold text-sm shadow-input"
             >
               Confirmer Suppression
             </button>
             <button
               type="button"
-              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
+              class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input"
               data-form="form_suppression_caisse"
             >
               Réinitialiser
@@ -110,7 +110,7 @@
               type="text"
               id="nom_caisse_modif"
               placeholder="Rechercher caisse..."
-              class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+              class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
             />
             <div class="autocomplete-suggestions"></div>
           </div>
@@ -120,11 +120,11 @@
                 type="text"
                 id="nouveau_nom_caisse"
                 placeholder="Nouveau nom"
-                class="flex-1 px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                class="flex-1 px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
               />
               <select
                 id="etat_caisse_modif"
-                class="px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                class="px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
               >
                 <option value="disponible">Disponible</option>
                 <option value="réservé">Réservé</option>
@@ -138,7 +138,7 @@
                 type="text"
                 id="utilisateur_caisse_modif"
                 placeholder="Utilisateur..."
-                class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
               />
               <input type="hidden" id="utilisateur_caisse_modif_id" />
             </div>
@@ -150,7 +150,7 @@
                 type="text"
                 id="search_objets_modif"
                 placeholder="Scanner objets..."
-                class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm transition-all duration-300 bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+                class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
               />
               <div
                 id="objets_suggestions_modif"
@@ -163,13 +163,13 @@
             <div class="flex gap-2.5 mt-2.5">
               <button
                 type="submit"
-                class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input hover:brightness-90 active:brightness-75 transition-all duration-300"
+                class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-lg font-semibold text-sm shadow-input"
               >
                 Sauvegarder Caisse
               </button>
               <button
                 type="button"
-                class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input hover:bg-gray-50 active:bg-gray-100 transition-all duration-300"
+                class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input"
                 data-form="form_modification_caisse"
               >
                 Réinitialiser

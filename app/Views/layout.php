@@ -32,7 +32,7 @@ $viewDir = __DIR__ . '/partials';
             <div class="min-w-[200px]">
               <select
                 id="modeSelector"
-                class="w-full px-4 py-3 border border-[#ddd] rounded-lg text-[14px] font-bold text-[#333] transition-all duration-300 bg-white focus:outline-none focus:border-[#b8a274]"
+                class="w-full px-4 py-3 border border-[#ddd] rounded-lg text-[14px] font-bold text-[#333] bg-white focus:outline-none focus:border-[#b8a274] cursor-pointer"
               >
                 <option value="ajout">Ajouter</option>
                 <option value="suppression">Supprimer</option>

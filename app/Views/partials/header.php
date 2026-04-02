@@ -16,14 +16,14 @@
     <button
       type="button"
       onclick="window.toggleReferenceModal(true)"
-      class="bg-white text-gray-700 py-2 px-4 border border-gray-300 rounded-[20px] font-bold text-base shadow-sm cursor-pointer flex items-center gap-2 hover:brightness-95 active:brightness-90 transition-all duration-300"
+      class="bg-white text-gray-700 py-2 px-4 border border-gray-300 rounded-[20px] font-bold text-base shadow-sm cursor-pointer flex items-center gap-2"
       title="Gérer les Références"
     >
       Gestion des références
     </button>
     <button
       id="btn-open-barcode"
-      class="bg-custom-brandLight text-white py-2 px-4 rounded-[20px] font-bold text-base shadow-sm border-none cursor-pointer flex items-center hover:brightness-95 active:brightness-90 transition-all duration-300"
+      class="bg-custom-brandLight text-white py-2 px-4 rounded-[20px] font-bold text-base shadow-sm border-none cursor-pointer flex items-center"
     >
       Impression de codes-barres
     </button>
