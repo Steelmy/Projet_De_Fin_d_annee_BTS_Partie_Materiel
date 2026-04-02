@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             refModal.style.display = 'none';
             document.body.style.overflow = '';
             if (window.resetReferenceForm) window.resetReferenceForm();
+            if (window.switchReferenceTab) window.switchReferenceTab('add');
         }
     };
 
