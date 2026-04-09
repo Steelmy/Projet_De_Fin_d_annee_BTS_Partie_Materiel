@@ -63,6 +63,7 @@ $viewDir = __DIR__ . '/partials';
 
         <?php include $viewDir . '/modals/barcode-generator.php'; ?>
         <?php include $viewDir . '/modals/reference-manager.php'; ?>
+        <?php include $viewDir . '/modals/comment-modal.php'; ?>
         <?php include $viewDir . '/scripts.php'; ?>
       </div>
     </div>

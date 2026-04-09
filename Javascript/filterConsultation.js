@@ -403,7 +403,7 @@ function updateInventoryTable(data) {
   if (data.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML =
-      '<td colspan="8" style="text-align: center; padding: 20px;">Aucun résultat trouvé</td>';
+      '<td colspan="9" style="text-align: center; padding: 20px;">Aucun résultat trouvé</td>';
     tbody.appendChild(tr);
     return;
   }
@@ -444,6 +444,14 @@ function updateInventoryTable(data) {
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
       <!-- <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom_caisse || "-"}</td> -->
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : "-"}</td>
+      <td class="p-4.5 text-center text-sm align-middle">
+        <button
+          onclick="openCommentModal(${item.id}, ${item.id_com ? 'true' : 'false'})"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold border ${item.id_com ? 'border-custom-brandLight text-custom-brandLight' : 'border-gray-300 text-gray-500'}"
+        >
+          ${item.id_com ? 'Voir le commentaire' : 'Ajouter un commentaire'}
+        </button>
+      </td>
     `;
     tbody.appendChild(tr);
   });

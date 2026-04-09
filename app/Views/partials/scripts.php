@@ -118,3 +118,4 @@
 <!-- <script src="javascript/boxFormToggle.js?v=1"></script> -->
 <script src="javascript/dynamicSelects.js"></script>
 <script src="javascript/referenceManager.js?v=5"></script>
+<script src="javascript/commentManager.js?v=1"></script>

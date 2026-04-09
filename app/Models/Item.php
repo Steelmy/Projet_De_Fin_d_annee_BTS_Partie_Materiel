@@ -13,7 +13,7 @@ class Item
     {
         $stmt = $this->conn->prepare("
             SELECT
-                o.id, o.Code_bar, o.Etat,
+                o.id, o.Code_bar, o.Etat, o.id_com,
                 t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom,
                 u.Prénom, u.Nom AS Nom_utilisateur,
                 c.Nom AS Nom_caisse,

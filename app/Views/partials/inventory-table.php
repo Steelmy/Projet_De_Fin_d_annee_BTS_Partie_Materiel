@@ -82,6 +82,11 @@
             Date de création
             <span id="sort_icon_created_at" class="text-xs opacity-50 ml-1">↕</span>
           </th>
+          <th
+            class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200"
+          >
+            Commentaire
+          </th>
         </tr>
       </thead>
       <tbody
