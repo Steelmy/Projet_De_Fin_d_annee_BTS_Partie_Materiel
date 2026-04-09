@@ -67,33 +67,46 @@ class ItemController
         }
     }
 
+    /**
+     * Gère la création de nouveaux matériels (action "store").
+     * Cette méthode est appelée lors de la soumission du formulaire d'ajout.
+     */
     public function store(): void
     {
         try {
+            // 1. Récupération et nettoyage des données envoyées par le client (méthode POST)
             $type = isset($_POST['type_materiel']) ? trim($_POST['type_materiel']) : '';
             $sousType = isset($_POST['sous_type_materiel']) ? trim($_POST['sous_type_materiel']) : '';
             $nom = isset($_POST['nom_materiel']) ? trim($_POST['nom_materiel']) : '';
             $nombre = isset($_POST['nombre']) ? intval($_POST['nombre']) : 0;
 
+            // 2. Validation des données : arrêt du processus si les champs sont invalides
             if (empty($type) || empty($nom) || $nombre <= 0) {
                 ApiResponse::error('Tous les champs sont requis et le nombre doit être supérieur à 0');
             }
 
             $resultats = [];
 
+            // 3. Boucle d'insertion : on crée autant d'objets en base qu'indiqué par '$nombre'
             for ($i = 0; $i < $nombre; $i++) {
+                // Le modèle exécute la requête SQL INSERT et retourne les infos du nouvel objet (id, code_bar)
                 $resultats[] = $this->model->create($type, $sousType, $nom);
             }
 
+            // 4. Extraction des colonnes spécifiques pour préparer la réponse
             $idsAjoutes = array_column($resultats, 'id');
             $codesGeneres = array_column($resultats, 'code_bar');
 
+            // 5. Inscription de l'action dans le journal d'activité (logs) du serveur
             $this->logger->info("Matériel ajouté", ['type' => $type, 'sous_type' => $sousType, 'nom' => $nom, 'nombre' => $nombre]);
+            
+            // 6. Envoi de la réponse formatée en JSON au client pour qu'il la traite (ex: afficher les codes à imprimer)
             ApiResponse::success([
                 'ids_ajoutes' => $idsAjoutes,
                 'codes_barres_generes' => $codesGeneres
             ], "$nombre matériel(s) ajouté(s) avec succès");
         } catch (PDOException $e) {
+            // Interception des erreurs de la base de données pour éviter de "planter" et renvoyer une erreur JSON propre
             ApiResponse::exception($e);
         }
     }

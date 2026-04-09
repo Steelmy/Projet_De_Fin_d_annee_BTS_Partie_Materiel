@@ -39,53 +39,66 @@ formAjout.addEventListener("submit", async (e) => {
     formData.append("nom_materiel", nom);
     formData.append("nombre", nombre);
 
+    // 1. Envoi de la requête HTTP POST au serveur avec les données du formulaire.
+    // 'await' met en pause l'exécution de cette fonction jusqu'à ce que le serveur réponde.
     const response = await fetch("php/addItem.php", {
       method: "POST",
       body: formData,
     });
 
+    // 2. Extraction du corps de la réponse renvoyée par le serveur.
+    // '.json()' transforme le texte reçu (format JSON) en objet JavaScript.
+    // L'exécution est à nouveau mise en pause jusqu'à la fin de cette extraction.
     const data = await response.json();
 
+    // 3. Traitement de la réponse si l'API indique un succès (data.success === true)
     if (data.success) {
+      // Récupération des codes-barres générés renvoyés par l'API
       const codes = data.codes_barres_generes || [];
       const codesStr = codes.join(", ");
 
-      // Proposer l'impression immédiate des codes-barres générés
+      // Proposer l'impression immédiate via une modale interactive
       const imprimerMaintenant = await showConfirm(
         data.message +
           "\n\nCodes-barres EAN-13 générés :\n" +
           codesStr +
           "\n\nVoulez-vous imprimer les étiquettes maintenant ?",
-        { confirmText: "Imprimer", cancelText: "Plus tard", type: "success" }
+        { confirmText: "Imprimer", cancelText: "Plus tard", type: "success" },
       );
 
+      // Si l'utilisateur a cliqué sur "Imprimer", on déclenche l'impression
       if (imprimerMaintenant && codes.length > 0) {
         imprimerCodesBarres(codes);
       }
 
-      // Réinitialiser le formulaire
+      // 4. Nettoyage de l'interface utilisateur (UI)
+      // Réinitialiser les champs du formulaire après l'ajout
       typeInputAjout.value = "";
       if (sousTypeInput) sousTypeInput.value = "";
       nomInputAjout.value = "";
       document.getElementById("nombre_materiel").value = "1";
 
-      // Désactiver les selects dépendants
+      // Désactiver les listes déroulantes (selects) qui dépendent du type principal
       if (sousTypeInput) sousTypeInput.disabled = true;
       if (nomInputAjout) nomInputAjout.disabled = true;
 
-      // Recharger les types pour tous les formulaires
+      // Forcer la mise à jour des données globales si les fonctions existent sur la page
       if (window.rechargerTousLesTypes) {
         window.rechargerTousLesTypes();
       }
 
-      // Rafraîchir l'inventaire complet
       if (window.refreshInventory) {
         window.refreshInventory();
       }
     } else {
+      // 5. Gestion des erreurs renvoyées volontairement par le serveur 
+      // (ex: champs manquants contrôlés par le PHP)
       await showAlert("Erreur: " + data.message, "error");
     }
   } catch (error) {
+    // 6. Gestion des blocages et pannes (Erreurs inattendues)
+    // Capture les coupures réseau, les plantages serveurs (Erreur 500), 
+    // ou si '.json()' plante parce que le serveur n'a pas renvoyé du JSON (ex: erreur fatale PHP)
     console.error("Erreur lors de l'ajout:", error);
     await showAlert("Erreur lors de l'ajout du matériel", "error");
   }
