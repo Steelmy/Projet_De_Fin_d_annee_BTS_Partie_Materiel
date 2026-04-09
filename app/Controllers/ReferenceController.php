@@ -123,4 +123,55 @@ class ReferenceController
             ApiResponse::error('Erreur serveur lors de la suppression');
         }
     }
+
+    public function update(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'PUT') {
+                ApiResponse::error('Méthode non autorisée', 405);
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            $id = isset($data['id']) ? intval($data['id']) : 0;
+            $type = isset($data['type']) ? trim($data['type']) : '';
+            $sousType = isset($data['sous_type']) ? trim($data['sous_type']) : '';
+            $nom = isset($data['nom']) ? trim($data['nom']) : '';
+
+            if (empty($id) || empty($type) || empty($nom)) {
+                ApiResponse::error('L\'ID, le type et le nom sont requis');
+            }
+
+            $type = mb_convert_case($type, MB_CASE_TITLE, "UTF-8");
+            if (!empty($sousType)) {
+                $sousType = mb_convert_case($sousType, MB_CASE_TITLE, "UTF-8");
+            }
+            $nom = mb_convert_case($nom, MB_CASE_TITLE, "UTF-8");
+
+            $this->conn->beginTransaction();
+
+            try {
+                $updated = $this->model->update($id, $type, $sousType, $nom);
+
+                if ($updated) {
+                    $this->conn->commit();
+                    ApiResponse::success([
+                        'message' => 'Référence modifiée avec succès.'
+                    ]);
+                } else {
+                    $this->conn->rollBack();
+                    ApiResponse::error('Cette combinaison de références existe déjà dans le catalogue.', 409);
+                }
+            } catch (Exception $e) {
+                $this->conn->rollBack();
+                throw $e;
+            }
+        } catch (PDOException $e) {
+            error_log("Database Error in updateReference: " . $e->getMessage());
+            ApiResponse::error('Erreur base de données lors de la modification de la référence');
+        } catch (Exception $e) {
+            error_log("Error in updateReference: " . $e->getMessage());
+            ApiResponse::error('Erreur serveur lors de la modification');
+        }
+    }
 }

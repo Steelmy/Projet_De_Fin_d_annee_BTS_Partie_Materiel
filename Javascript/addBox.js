@@ -254,20 +254,39 @@ function renderAddCaisseTable() {
 
   container.innerHTML = html;
 
-  // Gérer le "Tout sélectionner" de la page courante
+  // Gérer le "Tout sélectionner" de tout le tableau
   const selectAll = document.getElementById("select_all_objets");
   if (selectAll) {
+    const allSelected = filtered.length > 0 && filtered.every((objet) => selectedObjects.some((o) => o.id === objet.id));
+    selectAll.checked = allSelected;
+
     selectAll.addEventListener("change", (e) => {
+      const isChecked = e.target.checked;
+      filtered.forEach((objet) => {
+        if (isChecked) {
+          if (!selectedObjects.some((o) => o.id === objet.id)) {
+            selectedObjects.push(objet);
+          }
+        } else {
+          selectedObjects = selectedObjects.filter((o) => o.id !== objet.id);
+        }
+      });
+      updateSelectedObjectsDisplay();
+
       document.querySelectorAll(".objet-checkbox").forEach((cb) => {
-        cb.checked = e.target.checked;
-        handleCheckboxChange({ target: cb });
+        cb.checked = isChecked;
       });
     });
   }
 
   // Gérer les checkboxes individuelles
   document.querySelectorAll(".objet-checkbox").forEach((checkbox) => {
-    checkbox.addEventListener("change", handleCheckboxChange);
+    checkbox.addEventListener("change", (e) => {
+      handleCheckboxChange(e);
+      if (selectAll) {
+        selectAll.checked = filtered.length > 0 && filtered.every((objet) => selectedObjects.some((o) => o.id === objet.id));
+      }
+    });
   });
 }
 

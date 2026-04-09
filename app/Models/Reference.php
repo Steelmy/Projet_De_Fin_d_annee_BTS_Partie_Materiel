@@ -210,4 +210,43 @@ class Reference
 
         return ['success' => count($errors) === 0, 'deleted' => $deleted, 'errors' => $errors];
     }
+
+    public function update(int $id, string $type, string $sousType, string $nom): bool
+    {
+        // 1. Chercher ou créer Type
+        $stmtType = $this->conn->prepare("SELECT id FROM types WHERE nom_type = ?");
+        $stmtType->execute([$type]);
+        $typeId = $stmtType->fetchColumn();
+        if (!$typeId) {
+            $this->conn->prepare("INSERT INTO types (nom_type) VALUES (?)")->execute([$type]);
+            $typeId = $this->conn->lastInsertId();
+        }
+
+        // 2. Chercher ou créer Sous_type
+        if (empty($sousType)) $sousType = 'Non défini';
+        $stmtSousType = $this->conn->prepare("SELECT id FROM sous_types WHERE nom_sous_type = ? AND id_type = ?");
+        $stmtSousType->execute([$sousType, $typeId]);
+        $sousTypeId = $stmtSousType->fetchColumn();
+        if (!$sousTypeId) {
+            $this->conn->prepare("INSERT INTO sous_types (nom_sous_type, id_type) VALUES (?, ?)")->execute([$sousType, $typeId]);
+            $sousTypeId = $this->conn->lastInsertId();
+        }
+
+        // Check if another reference with same name and same sous-type exists (and is not our current one)
+        $stmtCheck = $this->conn->prepare("SELECT id FROM noms_references WHERE nom_reference = ? AND id_sous_type = ? AND id != ?");
+        $stmtCheck->execute([$nom, $sousTypeId, $id]);
+        if ($stmtCheck->fetchColumn()) {
+            return false; // Already exists
+        }
+
+        // Update the reference
+        $stmtUpdateRef = $this->conn->prepare("UPDATE noms_references SET nom_reference = ?, id_sous_type = ? WHERE id = ?");
+        $stmtUpdateRef->execute([$nom, $sousTypeId, $id]);
+
+        // Update objects with the new reference name
+        $stmtUpdateObj = $this->conn->prepare("UPDATE objets SET Nom = ? WHERE id_nom_reference = ?");
+        $stmtUpdateObj->execute([$nom, $id]);
+
+        return true;
+    }
 }

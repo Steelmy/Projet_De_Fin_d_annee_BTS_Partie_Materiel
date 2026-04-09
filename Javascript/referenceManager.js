@@ -135,6 +135,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const nomInput = document.getElementById('ref_nom');
         if (nomInput) nomInput.value = '';
 
+        const editIdInput = document.getElementById('ref_edit_id');
+        if (editIdInput) editIdInput.value = '';
+
+        const tabAdd = document.getElementById('tab-ref-add');
+        if (tabAdd) tabAdd.textContent = 'Ajouter une référence';
+
+        const descAdd = document.getElementById('ref-view-add-desc');
+        if (descAdd) descAdd.textContent = "Ajoutez de nouvelles références au catalogue pour les rendre disponibles lors de l'ajout de matériel.";
+
         if (refMessage) {
             refMessage.classList.add('hidden');
             refMessage.textContent = '';
@@ -203,16 +212,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.innerHTML = '<span class="opacity-70">Enregistrement...</span>';
                 submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
-                const response = await fetch('php/addReference.php', {
-                    method: 'POST',
+                const editIdInput = document.getElementById('ref_edit_id');
+                const isEdit = editIdInput && editIdInput.value;
+                const endpoint = isEdit ? 'php/updateReference.php' : 'php/addReference.php';
+                const payload = {
+                    type: typeValue,
+                    sous_type: sousTypeValue,
+                    nom: nomValue
+                };
+                if (isEdit) {
+                    payload.id = editIdInput.value;
+                }
+
+                const response = await fetch(endpoint, {
+                    method: isEdit ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        type: typeValue,
-                        sous_type: sousTypeValue,
-                        nom: nomValue
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
@@ -286,6 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tabList.classList.remove('border-b-2', 'border-custom-brandLight', 'text-custom-brandLight');
             tabList.classList.add('text-gray-500', 'hover:text-gray-800');
+            
+            // If we're an explicit click on the "Ajouter" tab and had an edit ID set, reset the form
+            // Or if the tab name is literally "Ajouter..." we don't necessarily reset unless needed, but we check if we were in edit mode
+            const editId = document.getElementById('ref_edit_id');
+            if (editId && editId.value && event && event.target && event.target.id === 'tab-ref-add') {
+                window.resetReferenceForm();
+            }
         } else {
             viewAdd.classList.add('hidden');
             viewList.classList.remove('hidden');
@@ -371,6 +395,21 @@ document.addEventListener('DOMContentLoaded', () => {
             btnDelete.style.backgroundColor = '#6b7280';
             if (checkAll) checkAll.checked = false;
         }
+
+        const btnEdit = document.getElementById('btn-edit-ref');
+        if (btnEdit) {
+            if (count === 1) {
+                btnEdit.disabled = false;
+                btnEdit.classList.remove('hidden', 'cursor-not-allowed');
+                btnEdit.classList.add('cursor-pointer');
+                btnEdit.style.backgroundColor = '#fbbf24'; // Yellow-ish
+            } else {
+                btnEdit.disabled = true;
+                btnEdit.classList.add('hidden', 'cursor-not-allowed');
+                btnEdit.classList.remove('cursor-pointer');
+                btnEdit.style.backgroundColor = '#6b7280';
+            }
+        }
     };
 
     window.deleteSelectedReferences = async function() {
@@ -439,4 +478,86 @@ document.addEventListener('DOMContentLoaded', () => {
             listMessage.textContent = '';
         }
     }
+
+    window.editSelectedReference = function() {
+        const checkboxes = document.querySelectorAll('.ref-checkbox:checked');
+        if (checkboxes.length !== 1) return;
+        
+        const activeRefId = checkboxes[0].value;
+        const tr = checkboxes[0].closest('tr');
+        const type = tr.children[1].textContent.trim();
+        const sousType = tr.children[2].textContent.trim() === '-' ? '' : tr.children[2].textContent.trim();
+        const nom = tr.children[3].textContent.trim();
+
+        // Bascule vers l'onglet Add pour l'éditer
+        window.switchReferenceTab('add');
+        
+        document.getElementById('ref_edit_id').value = activeRefId;
+        
+        const tabAdd = document.getElementById('tab-ref-add');
+        if (tabAdd) tabAdd.textContent = 'Modifier la référence';
+
+        const descAdd = document.getElementById('ref-view-add-desc');
+        if (descAdd) descAdd.textContent = "Modifiez les informations de cette référence. Tous les objets matériels associés seront mis à jour avec le nouveau nom.";
+
+        // Remplir les champs avec un petit délai pour être sûr que l'UI est prête
+        setTimeout(() => {
+            if (typeSelect) {
+                // Cherche si l'option existe, sinon on met "Nouveau..."
+                let typeExists = false;
+                Array.from(typeSelect.options).forEach(opt => {
+                    if (opt.value === type) typeExists = true;
+                });
+                
+                if (typeExists) {
+                    typeSelect.value = type;
+                    typeNewInput.classList.add('hidden');
+                    typeNewInput.value = '';
+                } else {
+                    typeSelect.value = NEW_VALUE;
+                    typeNewInput.classList.remove('hidden');
+                    typeNewInput.value = type;
+                }
+                
+                // Déclencher le handle de cascade manuellement
+                if (typeSelect.value !== NEW_VALUE) {
+                    populateRefSousTypeSelect(typeSelect.value);
+                } else {
+                    // Si on a dû forcer en + Nouveau... la cascade doit être vide
+                    if (sousTypeSelect) {
+                        sousTypeSelect.disabled = false;
+                        sousTypeSelect.innerHTML = '';
+                        sousTypeSelect.appendChild(createOption('', '(Aucun sous-type)'));
+                        sousTypeSelect.appendChild(createOption(NEW_VALUE, '+ Nouveau sous-type...'));
+                    }
+                }
+            }
+
+            if (sousTypeSelect && sousType) {
+                let stExists = false;
+                Array.from(sousTypeSelect.options).forEach(opt => {
+                    if (opt.value === sousType) stExists = true;
+                });
+
+                if (stExists) {
+                    sousTypeSelect.value = sousType;
+                    sousTypeNewInput.classList.add('hidden');
+                    sousTypeNewInput.value = '';
+                } else {
+                    sousTypeSelect.value = NEW_VALUE;
+                    sousTypeNewInput.classList.remove('hidden');
+                    sousTypeNewInput.value = sousType;
+                }
+            } else if (sousTypeSelect) {
+                sousTypeSelect.value = '';
+                if (sousTypeNewInput) {
+                    sousTypeNewInput.classList.add('hidden');
+                    sousTypeNewInput.value = '';
+                }
+            }
+
+            const refNom = document.getElementById('ref_nom');
+            if (refNom) refNom.value = nom;
+        }, 50);
+    };
 });

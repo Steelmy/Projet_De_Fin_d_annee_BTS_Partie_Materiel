@@ -323,14 +323,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.innerHTML = html;
 
-    // Gérer sélection multiple "Select All"
+    // Gérer sélection multiple "Select All" de tout le tableau
     const selectAll = document.getElementById("bc_select_all");
     if (selectAll) {
+      const allSelected = filtered.length > 0 && filtered.every((objet) => barcodeSelectedItems.has(objet.id));
+      selectAll.checked = allSelected;
+
       selectAll.addEventListener("change", (e) => {
-        document.querySelectorAll(".bc-checkbox").forEach((cb) => {
-          cb.checked = e.target.checked;
-          const objet = JSON.parse(cb.dataset.objet.replace(/&apos;/g, "'"));
-          if (cb.checked) {
+        const isChecked = e.target.checked;
+        filtered.forEach((objet) => {
+          if (isChecked) {
             if (!barcodeSelectedItems.has(objet.id)) {
               barcodeSelectedItems.set(objet.id, objet);
               toggleBarcodeInPrintZone(objet, true);
@@ -342,6 +344,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
         });
+
+        document.querySelectorAll(".bc-checkbox").forEach((cb) => {
+          cb.checked = isChecked;
+        });
+
         updatePrintZoneVisibility();
       });
     }
@@ -358,6 +365,10 @@ document.addEventListener("DOMContentLoaded", () => {
           toggleBarcodeInPrintZone(objet, false);
         }
         updatePrintZoneVisibility();
+
+        if (selectAll) {
+          selectAll.checked = filtered.length > 0 && filtered.every((obj) => barcodeSelectedItems.has(obj.id));
+        }
       });
     });
   }

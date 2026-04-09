@@ -23,11 +23,12 @@
         <button type="button" onclick="switchReferenceTab('list')" id="tab-ref-list" class="pb-2 text-gray-500">Liste des références</button>
     </div>
 
-    <!-- View: Ajout -->
+    <!-- View: Ajout / Modif -->
     <div id="ref-view-add" class="space-y-6">
-      <p class="text-sm text-gray-600">Ajoutez de nouvelles références au catalogue pour les rendre disponibles lors de l'ajout de matériel.</p>
+      <p id="ref-view-add-desc" class="text-sm text-gray-600">Ajoutez de nouvelles références au catalogue pour les rendre disponibles lors de l'ajout de matériel.</p>
 
       <form id="form_create_reference" class="space-y-4">
+          <input type="hidden" id="ref_edit_id" value="" />
           <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
               <select id="ref_type_select" required class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15">
@@ -79,7 +80,10 @@
 
         <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
             <span class="text-sm text-gray-600 font-medium whitespace-nowrap"><span id="ref-selected-count">0</span> référence(s) sélectionnée(s)</span>
-            <button type="button" id="btn-delete-refs" onclick="deleteSelectedReferences()" class="px-5 py-2 text-sm font-semibold rounded-lg shadow-sm text-white cursor-not-allowed" style="background-color: #6b7280;" disabled>Supprimer la sélection</button>
+            <div class="flex gap-2">
+                <button type="button" id="btn-edit-ref" onclick="editSelectedReference()" class="px-3 py-2 text-sm font-semibold rounded-lg shadow-sm text-white cursor-not-allowed hidden" style="background-color: #6b7280;" disabled>Modifier la référence</button>
+                <button type="button" id="btn-delete-refs" onclick="deleteSelectedReferences()" class="px-3 py-2 text-sm font-semibold rounded-lg shadow-sm text-white cursor-not-allowed" style="background-color: #6b7280;" disabled>Supprimer la sélection</button>
+            </div>
         </div>
     </div>
   </div>

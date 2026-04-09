@@ -468,20 +468,41 @@ function renderModifCaisseTable() {
 
   container.innerHTML = html;
 
-  // Gérer le "Tout sélectionner" de la page courante
+  // Gérer le "Tout sélectionner" de tout le tableau
   const selectAll = document.getElementById("select_all_objets_modif");
   if (selectAll) {
+    const allSelected = filtered.length > 0 && filtered.every((objet) => modifSelectedObjects.some((o) => o.id === objet.id));
+    selectAll.checked = allSelected;
+
     selectAll.addEventListener("change", (e) => {
+      const isChecked = e.target.checked;
+      filtered.forEach((objet) => {
+        if (isChecked) {
+          if (!modifSelectedObjects.some((o) => o.id === objet.id)) {
+            modifSelectedObjects.push(objet);
+          }
+        } else {
+          modifSelectedObjects = modifSelectedObjects.filter(
+            (o) => o.id !== objet.id,
+          );
+        }
+      });
+      updateModifObjectsDisplay();
+
       document.querySelectorAll(".objet-checkbox-modif").forEach((cb) => {
-        cb.checked = e.target.checked;
-        handleCheckboxChangeModif({ target: cb });
+        cb.checked = isChecked;
       });
     });
   }
 
   // Gérer les checkboxes individuelles
   document.querySelectorAll(".objet-checkbox-modif").forEach((checkbox) => {
-    checkbox.addEventListener("change", handleCheckboxChangeModif);
+    checkbox.addEventListener("change", (e) => {
+      handleCheckboxChangeModif(e);
+      if (selectAll) {
+        selectAll.checked = filtered.length > 0 && filtered.every((objet) => modifSelectedObjects.some((o) => o.id === objet.id));
+      }
+    });
   });
 }
 
