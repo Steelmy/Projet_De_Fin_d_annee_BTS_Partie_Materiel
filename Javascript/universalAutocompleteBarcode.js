@@ -16,6 +16,7 @@ class UniversalAutocompleteBarcode {
     onSelectCallback = null,
     etatFilter = null,
     disponibleOnly = false,
+    nonDisponibleOnly = false
   ) {
     this.input = document.getElementById(inputId);
     if (!this.input) return;
@@ -26,6 +27,7 @@ class UniversalAutocompleteBarcode {
     this.onSelectCallback = onSelectCallback;
     this.etatFilter = etatFilter;
     this.disponibleOnly = disponibleOnly;
+    this.nonDisponibleOnly = nonDisponibleOnly;
     this.debounceTimer = null;
     this.containerClass = "autocomplete-suggestions";
 
@@ -124,6 +126,7 @@ class UniversalAutocompleteBarcode {
       if (this.etatFilter)
         url += `&etat=${encodeURIComponent(this.etatFilter)}`;
       if (this.disponibleOnly) url += `&disponible_only=1`;
+      if (this.nonDisponibleOnly) url += `&non_disponible_only=1`;
 
       const response = await fetch(url);
       const data = await response.json();

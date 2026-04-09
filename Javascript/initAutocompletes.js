@@ -62,26 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // Modification
-  if (document.getElementById("id_materiel")) {
-    new UniversalAutocompleteBarcode(
-      "id_materiel",
-      null, // containerId est recréé dynamiquement
-      null, // Pas de champ Type pour filtre
-      null, // Pas de champ Sous-Type pour filtre
-      null, // Pas de champ Nom pour filtre
-      (item) => {
-        // Si on est dans le formulaire de modif, on déclenche aussi le chargement des autres infos
-        if (typeof window.remplirFormulaireModification === "function") {
-          window.remplirFormulaireModification(item.Code_bar);
-        } else {
-          console.warn("remplirFormulaireModification non trouvée");
-        }
-      },
-      null, // etatFilter
-      false, // n'importe quel état pour modiifcation
-    );
-  }
+
 
   // --- INITIALISATION GÉNÉRIQUE DE SECOURS ---
   // Pour tous les champs dans .autocomplete-container-code-barre qui n'ont pas été init

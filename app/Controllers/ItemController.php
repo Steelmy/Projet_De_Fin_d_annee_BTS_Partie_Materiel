@@ -224,4 +224,39 @@ class ItemController
             ApiResponse::exception($e);
         }
     }
+
+    public function restitute(): void
+    {
+        try {
+            $codeBarre = isset($_POST['code_barre']) ? trim($_POST['code_barre']) : '';
+            
+            if (empty($codeBarre)) {
+                ApiResponse::error('Le code-barre est requis pour la restitution');
+            }
+
+            $objet = $this->model->findByBarcode($codeBarre);
+            if (!$objet) {
+                ApiResponse::error('Objet non trouvé');
+            }
+
+            if (!empty($objet['Caisse_id'])) {
+                ApiResponse::error('Cet objet est actuellement dans une caisse. Veuillez d\'abord le retirer de la caisse.');
+            }
+
+            if ($objet['Etat'] === 'disponible') {
+                ApiResponse::error('Cet objet est déjà disponible.');
+            }
+
+            $this->model->restitute($codeBarre);
+
+            $this->logger->info("Matériel restitué", ['code_barre' => $codeBarre]);
+            ApiResponse::success([
+                'restituted' => [
+                    'code_barre' => $codeBarre
+                ]
+            ], 'Objet restitué avec succès');
+        } catch (PDOException $e) {
+            ApiResponse::exception($e);
+        }
+    }
 }

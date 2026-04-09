@@ -172,6 +172,54 @@ class Item
         $stmt->execute([':code_barre' => $codeBarre]);
     }
 
+    public function restitute(string $codeBarre): void
+    {
+        // On récupère infos de l'objet pour l'historique
+        $stmtObj = $this->conn->prepare("SELECT id, Emprunteur_id FROM objets WHERE Code_bar = :code_barre");
+        $stmtObj->execute([':code_barre' => $codeBarre]);
+        $objet = $stmtObj->fetch();
+
+        if ($objet) {
+            $idMateriel = $objet['id'];
+            $idUser = $objet['Emprunteur_id'];
+
+            // Tenter de fermer une entrée d'historique existante
+            $stmtHistUpdate = $this->conn->prepare("
+                UPDATE historique 
+                SET Date_retour_reelle = NOW() 
+                WHERE id_materiel = :id_materiel 
+                AND id_utilisateur = :id_user 
+                AND Date_retour_reelle IS NULL
+                ORDER BY id DESC LIMIT 1
+            ");
+            $stmtHistUpdate->execute([
+                ':id_materiel' => $idMateriel,
+                ':id_user' => $idUser
+            ]);
+
+            // S'il n'y avait pas de ligne d'historique ouverte, ou si pas d'user (cas rare mais possible pour réservé, bien que réservé demande user_id dans update() maintenant),
+            // la consigne "cela doit bien créer une ligne dans la table historique pour bien log le fait que l'objet a bien été restitué" nous invite à en forcer une :
+            if ($stmtHistUpdate->rowCount() === 0 && $idUser) {
+                 $stmtForceHist = $this->conn->prepare("
+                    INSERT INTO historique (id_materiel, id_utilisateur, Date_start, Date_end, Date_retour_reelle, retard)
+                    VALUES (:id_materiel, :id_user, NOW(), NOW(), NOW(), 0)
+                ");
+                $stmtForceHist->execute([
+                    ':id_materiel' => $idMateriel,
+                    ':id_user' => $idUser
+                ]);
+            }
+
+            // Mettre à jour l'état de l'objet
+            $stmt = $this->conn->prepare("
+                UPDATE objets
+                SET Etat = 'disponible', Emprunteur_id = NULL
+                WHERE Code_bar = :code_barre
+            ");
+            $stmt->execute([':code_barre' => $codeBarre]);
+        }
+    }
+
     public function findByBarcode(string $codeBarre): ?array
     {
         $stmt = $this->conn->prepare("

@@ -63,6 +63,7 @@ class SearchController
             $nom = isset($_GET['nom']) ? trim($_GET['nom']) : '';
             $etat = isset($_GET['etat']) ? trim($_GET['etat']) : '';
             $disponibleOnly = isset($_GET['disponible_only']) ? trim($_GET['disponible_only']) : '';
+            $nonDisponibleOnly = isset($_GET['non_disponible_only']) ? trim($_GET['non_disponible_only']) : '';
 
             $conditions = [];
             $params = [];
@@ -89,6 +90,10 @@ class SearchController
             }
             if ($disponibleOnly === '1') {
                 $conditions[] = "o.Etat = 'disponible'";
+                $conditions[] = "o.Caisse_id IS NULL";
+            }
+            if ($nonDisponibleOnly === '1') {
+                $conditions[] = "o.Etat IN ('emprunté', 'réservé')";
                 $conditions[] = "o.Caisse_id IS NULL";
             }
 

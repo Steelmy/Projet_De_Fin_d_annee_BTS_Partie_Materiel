@@ -28,8 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleCaisse = document.getElementById("toggle_caisse_ajout");
     if (form.id === "form_suppression")
       toggleCaisse = document.getElementById("toggle_caisse_suppression");
-    if (form.id === "form_modification")
-      toggleCaisse = document.getElementById("toggle_caisse_modification");
 
     if (toggleCaisse) {
       wasChecked = toggleCaisse.checked;
@@ -78,31 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    if (
-      form.id === "form_modification_caisse" ||
-      (wasChecked && form.id === "form_modification")
-    ) {
-      if (typeof window.resetFormModificationCaisse === "function") {
-        window.resetFormModificationCaisse();
-      } else {
-        const contenuModif = document.getElementById("caisse_contenu_modif");
-        if (contenuModif) {
-          contenuModif.innerHTML = "";
-          contenuModif.classList.add("hidden");
-        }
 
-        const objetsTableModif = document.getElementById(
-          "objets_table_container_modif",
-        );
-        if (objetsTableModif) {
-          objetsTableModif.innerHTML = "";
-          objetsTableModif.classList.add("hidden");
-        }
-
-        const detailsModif = document.getElementById("caisse_details_modif");
-        if (detailsModif) detailsModif.classList.add("hidden");
-      }
-    }
 
     // 4.5 Si c'est un formulaire principal ET une caisse était cochée, on reset le formulaire caisse aussi
     if (wasChecked) {
@@ -110,8 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (form.id === "form_ajout") crateFormId = "form_ajout_caisse";
       if (form.id === "form_suppression")
         crateFormId = "form_suppression_caisse";
-      if (form.id === "form_modification")
-        crateFormId = "form_modification_caisse";
 
       if (crateFormId) {
         const crateForm = document.getElementById(crateFormId);
@@ -134,40 +106,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const hiddenInputs = form.querySelectorAll("input[type='hidden']");
     hiddenInputs.forEach((input) => (input.value = ""));
 
-    // 7. Specific adjustments
-    if (form.id === "form_modification") {
-      const etatSelect = document.getElementById("etat");
-      if (etatSelect) {
-        etatSelect.value = "disponible";
-        etatSelect.dispatchEvent(new Event("change"));
-      }
-    }
+
   }
 
   // --- 2. Nettoyage des champs dépendants quand le Code-barre est vidé ---
 
-  // A. Modification
-  const idModif = document.getElementById("id_materiel");
-  if (idModif) {
-    idModif.addEventListener("input", () => {
-      if (idModif.value.trim() === "") {
-        console.log("Code-barre (Modif) vidé : nettoyage dépendances.");
 
-        // Clear dependent fields
-        // Note: Type and Nom hidden fields are being removed, but we clear if they exist/are visible just in case
-        const etatSelect = document.getElementById("etat");
-        const reserveurInput = document.getElementById("reserveur_emprunteur");
-        const reserveurId = document.getElementById("reserveur_emprunteur_id");
-
-        if (etatSelect) {
-          etatSelect.value = "disponible";
-          etatSelect.dispatchEvent(new Event("change"));
-        }
-        if (reserveurInput) reserveurInput.value = "";
-        if (reserveurId) reserveurId.value = "";
-      }
-    });
-  }
 
   // B. Suppression
   const idSuppr = document.getElementById("id_materiel_suppr");

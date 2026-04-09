@@ -85,7 +85,7 @@
           <th
             class="p-3 text-left font-normal tracking-wide uppercase text-xs sticky top-0 z-10 border-b-2 border-gray-200"
           >
-            Commentaire
+            Commentaire sur l'état du matériel
           </th>
         </tr>
       </thead>

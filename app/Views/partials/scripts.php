@@ -110,7 +110,7 @@
 <!-- <script src="javascript/updateBox.js?v=2"></script> -->
 <script src="javascript/textFieldLoader.js?v=2"></script>
 <script src="javascript/deleteItem.js"></script>
-<script src="javascript/updateItem.js?v=2"></script>
+<script src="javascript/restituteItem.js?v=1"></script>
 <script src="javascript/filterConsultation.js"></script>
 <script src="javascript/downloadPdf.js"></script>
 <script src="javascript/addItem.js?v=3"></script>

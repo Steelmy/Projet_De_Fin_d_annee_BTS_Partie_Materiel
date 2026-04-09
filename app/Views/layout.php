@@ -36,7 +36,6 @@ $viewDir = __DIR__ . '/partials';
               >
                 <option value="ajout">Ajouter</option>
                 <option value="suppression">Supprimer</option>
-                <option value="modification">Modifier</option>
                 <option value="consultation" selected>Consulter</option>
               </select>
             </div>
@@ -44,7 +43,7 @@ $viewDir = __DIR__ . '/partials';
             <div id="actionForms" class="flex-1 pl-3">
               <?php include $viewDir . '/forms/add-item.php'; ?>
               <?php include $viewDir . '/forms/delete-item.php'; ?>
-              <?php include $viewDir . '/forms/update-item.php'; ?>
+
               <?php include $viewDir . '/forms/consultation.php'; ?>
             </div>
           </div>
@@ -63,6 +62,7 @@ $viewDir = __DIR__ . '/partials';
 
         <?php include $viewDir . '/modals/barcode-generator.php'; ?>
         <?php include $viewDir . '/modals/reference-manager.php'; ?>
+        <?php include $viewDir . '/modals/restitution-modal.php'; ?>
         <?php include $viewDir . '/modals/comment-modal.php'; ?>
         <?php include $viewDir . '/scripts.php'; ?>
       </div>

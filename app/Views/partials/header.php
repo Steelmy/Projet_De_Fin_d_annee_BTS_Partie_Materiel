@@ -15,6 +15,15 @@
   <div class="flex items-center gap-3">
     <button
       type="button"
+      id="btn-open-restitution"
+      onclick="window.toggleRestitutionModal(true)"
+      class="bg-white text-gray-700 py-2 px-4 border border-gray-300 rounded-[20px] font-bold text-base shadow-sm cursor-pointer flex items-center gap-2"
+      title="Restituer un objet emprunté"
+    >
+      Restituer un objet
+    </button>
+    <button
+      type="button"
       onclick="window.toggleReferenceModal(true)"
       class="bg-white text-gray-700 py-2 px-4 border border-gray-300 rounded-[20px] font-bold text-base shadow-sm cursor-pointer flex items-center gap-2"
       title="Gérer les Références"
