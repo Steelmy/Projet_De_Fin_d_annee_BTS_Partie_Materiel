@@ -1,0 +1,41 @@
+{
+  "name": "gestion-materiel-tests",
+  "version": "1.0.0",
+  "description": "Tests automatisés pour la gestion de matériel",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:ui": "npx playwright test --ui",
+    "test:autocomplete": "npx playwright test tests/01-autocomplete.spec.js",
+    "test:cascade": "npx playwright test tests/02-cascade.spec.js",
+    "test:crud-materiel": "npx playwright test tests/03-crud-materiel.spec.js",
+    "test:crud-caisse": "npx playwright test tests/04-crud-caisse.spec.js",
+    "test:state": "npx playwright test tests/05-state-propagation.spec.js",
+    "test:tables": "npx playwright test tests/06-tables.spec.js",
+    "build-css": "tailwindcss -i ./css/input.css -o ./css/output.css"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "tailwindcss": "^4.2.1"
+  },
+  "main": "playwright.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.1",
+    "playwright": "^1.58.2",
+    "playwright-core": "^1.58.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Steelmy/Projet_De_Fin_d_annee_BTS_Partie_Materiel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Steelmy/Projet_De_Fin_d_annee_BTS_Partie_Materiel/issues"
+  },
+  "homepage": "https://github.com/Steelmy/Projet_De_Fin_d_annee_BTS_Partie_Materiel#readme"
+}
