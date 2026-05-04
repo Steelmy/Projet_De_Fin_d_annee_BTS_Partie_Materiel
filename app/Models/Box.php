@@ -62,6 +62,22 @@ class Box
         return $stmt->fetch() ?: null;
     }
 
+    public function search(string $query, int $limit): array
+    {
+        $sql = "SELECT id, Nom, Etat FROM caisses";
+        $params = [];
+
+        if (!empty($query)) {
+            $sql .= " WHERE Nom LIKE :q_start";
+            $params[':q_start'] = $query . '%';
+        }
+        $sql .= " ORDER BY Nom LIMIT " . (int) $limit;
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
     public function nameExists(string $nom): bool
     {
         $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM caisses WHERE Nom = :nom");

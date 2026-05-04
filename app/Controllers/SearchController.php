@@ -1,35 +1,43 @@
 <?php
 
 require_once __DIR__ . '/../Models/Reference.php';
+require_once __DIR__ . '/../Models/User.php';
+require_once __DIR__ . '/../Models/Box.php';
+require_once __DIR__ . '/../Models/Item.php';
 
 class SearchController
 {
-    private PDO $conn;
+    private const AUTOCOMPLETE_LIMIT = 10;
+
     private Reference $referenceModel;
+    private User $userModel;
+    private Box $boxModel;
+    private Item $itemModel;
 
     public function __construct(PDO $conn)
     {
-        $this->conn = $conn;
         $this->referenceModel = new Reference($conn);
+        $this->userModel = new User($conn);
+        $this->boxModel = new Box($conn);
+        $this->itemModel = new Item($conn);
     }
 
     public function universal(): void
     {
         try {
-            $type = isset($_GET['type']) ? $_GET['type'] : '';
+            $type = $_GET['type'] ?? '';
             $query = isset($_GET['query']) ? trim($_GET['query']) : '';
             $filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
-            $limit = 10;
-
-            $results = [];
 
             switch ($type) {
                 case 'user':
-                    $results = $this->searchUsers($query, $limit);
+                    $rows = $this->userModel->search($query, self::AUTOCOMPLETE_LIMIT);
+                    $results = $this->formatUserResults($rows);
                     break;
 
                 case 'caisse':
-                    $results = $this->searchCaisses($query, $limit);
+                    $rows = $this->boxModel->search($query, self::AUTOCOMPLETE_LIMIT);
+                    $results = $this->formatCaisseResults($rows);
                     break;
 
                 case 'materiel_type':
@@ -41,7 +49,11 @@ class SearchController
                     break;
 
                 case 'materiel_code':
-                    $results = $this->searchMaterielCode($query, $limit);
+                    $filterType = isset($_GET['filter_type']) ? trim($_GET['filter_type']) : '';
+                    $filterSousType = isset($_GET['filter_sous_type']) ? trim($_GET['filter_sous_type']) : '';
+                    $filterNom = isset($_GET['filter_nom']) ? trim($_GET['filter_nom']) : '';
+                    $rows = $this->itemModel->searchByCode($query, self::AUTOCOMPLETE_LIMIT, $filterType, $filterSousType, $filterNom);
+                    $results = $this->formatMaterielCodeResults($rows);
                     break;
 
                 default:
@@ -62,56 +74,19 @@ class SearchController
             $sousType = isset($_GET['sous_type']) ? trim($_GET['sous_type']) : '';
             $nom = isset($_GET['nom']) ? trim($_GET['nom']) : '';
             $etat = isset($_GET['etat']) ? trim($_GET['etat']) : '';
-            $disponibleOnly = isset($_GET['disponible_only']) ? trim($_GET['disponible_only']) : '';
-            $nonDisponibleOnly = isset($_GET['non_disponible_only']) ? trim($_GET['non_disponible_only']) : '';
+            $disponibleOnly = (isset($_GET['disponible_only']) && trim($_GET['disponible_only']) === '1');
+            $nonDisponibleOnly = (isset($_GET['non_disponible_only']) && trim($_GET['non_disponible_only']) === '1');
 
-            $conditions = [];
-            $params = [];
-
-            if (!empty($query)) {
-                $conditions[] = "o.Code_bar LIKE :query";
-                $params[':query'] = $query . '%';
-            }
-            if (!empty($type)) {
-                $conditions[] = "t.nom_type = :type";
-                $params[':type'] = $type;
-            }
-            if (!empty($sousType)) {
-                $conditions[] = "st.nom_sous_type = :sous_type";
-                $params[':sous_type'] = $sousType;
-            }
-            if (!empty($nom)) {
-                $conditions[] = "nr.nom_reference = :nom";
-                $params[':nom'] = $nom;
-            }
-            if (!empty($etat)) {
-                $conditions[] = "o.Etat = :etat";
-                $params[':etat'] = $etat;
-            }
-            if ($disponibleOnly === '1') {
-                $conditions[] = "o.Etat = 'disponible'";
-                $conditions[] = "o.Caisse_id IS NULL";
-            }
-            if ($nonDisponibleOnly === '1') {
-                $conditions[] = "o.Etat IN ('emprunté', 'réservé')";
-                $conditions[] = "o.Caisse_id IS NULL";
-            }
-
-            $sql = "
-                SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
-                FROM objets o
-                LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
-                LEFT JOIN sous_types st ON nr.id_sous_type = st.id
-                LEFT JOIN types t ON st.id_type = t.id
-            ";
-            if (!empty($conditions)) {
-                $sql .= " WHERE " . implode(' AND ', $conditions);
-            }
-            $sql .= " ORDER BY o.Code_bar LIMIT 10";
-
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute($params);
-            $results = $stmt->fetchAll();
+            $results = $this->itemModel->searchBarcodes(
+                $query,
+                $type,
+                $sousType,
+                $nom,
+                $etat,
+                $disponibleOnly,
+                $nonDisponibleOnly,
+                self::AUTOCOMPLETE_LIMIT
+            );
 
             ApiResponse::success(['results' => $results]);
         } catch (PDOException $e) {
@@ -119,21 +94,8 @@ class SearchController
         }
     }
 
-    private function searchUsers(string $query, int $limit): array
+    private function formatUserResults(array $rows): array
     {
-        $sql = "SELECT id, Nom, Prénom FROM utilisateurs";
-        $params = [];
-
-        if (!empty($query)) {
-            $sql .= " WHERE (Nom LIKE :q_start OR Prénom LIKE :q_start)";
-            $params[':q_start'] = $query . '%';
-        }
-        $sql .= " ORDER BY Nom, Prénom LIMIT $limit";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll();
-
         $results = [];
         foreach ($rows as $row) {
             $results[] = [
@@ -146,21 +108,8 @@ class SearchController
         return $results;
     }
 
-    private function searchCaisses(string $query, int $limit): array
+    private function formatCaisseResults(array $rows): array
     {
-        $sql = "SELECT id, Nom, Etat FROM caisses";
-        $params = [];
-
-        if (!empty($query)) {
-            $sql .= " WHERE Nom LIKE :q_start";
-            $params[':q_start'] = $query . '%';
-        }
-        $sql .= " ORDER BY Nom LIMIT $limit";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll();
-
         $results = [];
         foreach ($rows as $row) {
             $results[] = [
@@ -173,49 +122,8 @@ class SearchController
         return $results;
     }
 
-    private function searchMaterielCode(string $query, int $limit): array
+    private function formatMaterielCodeResults(array $rows): array
     {
-        $conditions = [];
-        $params = [];
-
-        if (!empty($query)) {
-            $conditions[] = "o.Code_bar LIKE :q_start";
-            $params[':q_start'] = $query . '%';
-        }
-
-        $filterType = isset($_GET['filter_type']) ? trim($_GET['filter_type']) : '';
-        $filterSousType = isset($_GET['filter_sous_type']) ? trim($_GET['filter_sous_type']) : '';
-        $filterNom = isset($_GET['filter_nom']) ? trim($_GET['filter_nom']) : '';
-
-        if (!empty($filterType)) {
-            $conditions[] = "t.nom_type = :f_type";
-            $params[':f_type'] = $filterType;
-        }
-        if (!empty($filterSousType)) {
-            $conditions[] = "st.nom_sous_type = :f_sous_type";
-            $params[':f_sous_type'] = $filterSousType;
-        }
-        if (!empty($filterNom)) {
-            $conditions[] = "nr.nom_reference = :f_nom";
-            $params[':f_nom'] = $filterNom;
-        }
-
-        $sql = "
-            SELECT o.id, o.Code_bar, nr.nom_reference AS Nom, t.nom_type AS Type, st.nom_sous_type AS Sous_type
-            FROM objets o
-            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
-            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
-            LEFT JOIN types t ON st.id_type = t.id
-        ";
-        if (!empty($conditions)) {
-            $sql .= " WHERE " . implode(' AND ', $conditions);
-        }
-        $sql .= " ORDER BY o.Code_bar LIMIT $limit";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll();
-
         $results = [];
         foreach ($rows as $row) {
             $results[] = [

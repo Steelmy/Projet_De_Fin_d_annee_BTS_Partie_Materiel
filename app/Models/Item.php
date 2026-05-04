@@ -270,6 +270,115 @@ class Item
     }
 
     /**
+     * Recherche d'objets par préfixe de code-barres avec filtres catégoriels (autocomplete).
+     */
+    public function searchByCode(
+        string $query,
+        int $limit,
+        ?string $filterType = null,
+        ?string $filterSousType = null,
+        ?string $filterNom = null
+    ): array {
+        $conditions = [];
+        $params = [];
+
+        if (!empty($query)) {
+            $conditions[] = "o.Code_bar LIKE :q_start";
+            $params[':q_start'] = $query . '%';
+        }
+        if (!empty($filterType)) {
+            $conditions[] = "t.nom_type = :f_type";
+            $params[':f_type'] = $filterType;
+        }
+        if (!empty($filterSousType)) {
+            $conditions[] = "st.nom_sous_type = :f_sous_type";
+            $params[':f_sous_type'] = $filterSousType;
+        }
+        if (!empty($filterNom)) {
+            $conditions[] = "nr.nom_reference = :f_nom";
+            $params[':f_nom'] = $filterNom;
+        }
+
+        $sql = "
+            SELECT o.id, o.Code_bar, nr.nom_reference AS Nom, t.nom_type AS Type, st.nom_sous_type AS Sous_type
+            FROM objets o
+            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+            LEFT JOIN types t ON st.id_type = t.id
+        ";
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+        $sql .= " ORDER BY o.Code_bar LIMIT " . (int) $limit;
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Recherche de codes-barres avec filtres étendus (état, dispo, etc.) pour l'autocomplete code-barres.
+     */
+    public function searchBarcodes(
+        string $query,
+        ?string $type,
+        ?string $sousType,
+        ?string $nom,
+        ?string $etat,
+        bool $disponibleOnly,
+        bool $nonDisponibleOnly,
+        int $limit
+    ): array {
+        $conditions = [];
+        $params = [];
+
+        if (!empty($query)) {
+            $conditions[] = "o.Code_bar LIKE :query";
+            $params[':query'] = $query . '%';
+        }
+        if (!empty($type)) {
+            $conditions[] = "t.nom_type = :type";
+            $params[':type'] = $type;
+        }
+        if (!empty($sousType)) {
+            $conditions[] = "st.nom_sous_type = :sous_type";
+            $params[':sous_type'] = $sousType;
+        }
+        if (!empty($nom)) {
+            $conditions[] = "nr.nom_reference = :nom";
+            $params[':nom'] = $nom;
+        }
+        if (!empty($etat)) {
+            $conditions[] = "o.Etat = :etat";
+            $params[':etat'] = $etat;
+        }
+        if ($disponibleOnly) {
+            $conditions[] = "o.Etat = 'disponible'";
+            $conditions[] = "o.Caisse_id IS NULL";
+        }
+        if ($nonDisponibleOnly) {
+            $conditions[] = "o.Etat IN ('emprunté', 'réservé')";
+            $conditions[] = "o.Caisse_id IS NULL";
+        }
+
+        $sql = "
+            SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
+            FROM objets o
+            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+            LEFT JOIN types t ON st.id_type = t.id
+        ";
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+        $sql .= " ORDER BY o.Code_bar LIMIT " . (int) $limit;
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Récupère tous les codes-barres existants avec leurs infos catégorielles (pour le générateur/réimpression).
      */
     public function getAllBarcodes(?string $filterType = null, ?string $filterSousType = null, ?string $filterNom = null): array
