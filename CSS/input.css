@@ -128,13 +128,15 @@ select,
     height: 100%;
     left: 0;
     top: 0;
-    transition: 0.3s;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
     z-index: 100;
   }
 
   /* Classe ajoutée via JS pour faire glisser la sidebar hors-écran */
   .sidebar.collapsed {
-    left: calc(-1 * var(--sidebar-w));
+    transform: translateX(-100%);
   }
 
   /* En-tête de la sidebar */
@@ -191,24 +193,24 @@ select,
 
   /* IMPORTANT : Pour que le contenu à côté de la sidebar s'ajuste bien */
   .main-content {
-    margin-left: var(--sidebar-w);
+    padding-left: var(--sidebar-w);
     flex: 1;
-    transition: 0.3s;
-    width: calc(100% - var(--sidebar-w));
+    transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
     min-width: 0;
     box-sizing: border-box;
+    will-change: padding-left;
   }
 
   /* Ajustement quand la sidebar est cachée */
   .main-content.full {
-    margin-left: 0;
-    width: 100%;
+    padding-left: 0;
   }
 
   /* RESPONSIVE: écrans 4:3 (<= 1024px) */
   @media (max-width: 1024px) {
     .main-content {
-      margin-left: 0 !important;
+      padding-left: 0 !important;
       width: 100% !important;
     }
     .sidebar {
