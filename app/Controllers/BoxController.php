@@ -3,12 +3,27 @@
 require_once __DIR__ . '/../Models/Box.php';
 require_once __DIR__ . '/../Models/Item.php';
 
+/**
+ * Contrôleur des opérations sur les caisses (CRUD + gestion du contenu).
+ *
+ * Les opérations create/update/delete s'exécutent sous transaction
+ * pour conserver la cohérence entre `caisses` et `objets.Caisse_id`.
+ */
 class BoxController
 {
+    /** @var Box Modèle d'accès aux caisses. */
     private Box $boxModel;
+
+    /** @var Item Modèle d'accès aux objets. */
     private Item $itemModel;
+
+    /** @var Logger Logger applicatif partagé. */
     private Logger $logger;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     * @param Logger $logger Logger applicatif partagé.
+     */
     public function __construct(PDO $conn, Logger $logger)
     {
         $this->boxModel = new Box($conn);
@@ -16,6 +31,11 @@ class BoxController
         $this->logger = $logger;
     }
 
+    /**
+     * Liste toutes les caisses, chacune enrichie de son contenu et du nombre d'objets.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function index(): void
     {
         try {
@@ -35,6 +55,12 @@ class BoxController
         }
     }
 
+    /**
+     * Récupère le détail complet d'une caisse (contenu + utilisateur emprunteur).
+     * Entrée GET : `nom` ou `id` (au moins un requis).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function show(): void
     {
         try {
@@ -81,6 +107,12 @@ class BoxController
         }
     }
 
+    /**
+     * Crée une caisse et y affecte les objets fournis.
+     * Entrée POST : `nom`, `objets_ids` (JSON list d'IDs).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function store(): void
     {
         try {
@@ -124,6 +156,13 @@ class BoxController
         }
     }
 
+    /**
+     * Met à jour une caisse : nom, état, emprunteur et/ou contenu.
+     * Si un nouveau contenu est fourni, l'ancien est libéré et remplacé intégralement.
+     * Entrée POST : `id` ou `nom`, plus `nouveau_nom`/`etat`/`emprunteur_id`/`objets_ids` (tous optionnels).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function update(): void
     {
         try {
@@ -148,7 +187,6 @@ class BoxController
 
             $this->boxModel->beginTransaction();
 
-            // Préparer les champs à mettre à jour
             $fields = [];
 
             if (!empty($nouveauNom) && $nouveauNom !== $caisse['Nom']) {
@@ -169,7 +207,6 @@ class BoxController
                 }
             }
 
-            // Mise à jour du contenu
             if ($objetsIds !== null && is_array($objetsIds)) {
                 $this->itemModel->freeFromBox($caisse['id']);
                 foreach ($objetsIds as $objetId) {
@@ -193,6 +230,12 @@ class BoxController
         }
     }
 
+    /**
+     * Supprime une caisse et libère son contenu.
+     * Entrée POST : `id` ou `nom` (au moins un requis).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function destroy(): void
     {
         try {

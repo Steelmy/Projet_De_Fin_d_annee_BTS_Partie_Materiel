@@ -1,17 +1,26 @@
 <?php
 
+/**
+ * Modèle d'accès à la table `commentaires` et liaison avec `objets.id_com`.
+ */
 class Comment
 {
+    /** @var PDO Connexion PDO active. */
     private PDO $conn;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     */
     public function __construct(PDO $conn)
     {
         $this->conn = $conn;
     }
 
     /**
-     * Récupère le commentaire lié à un objet via son id.
-     * Retourne null si l'objet n'a pas de commentaire (id_com IS NULL).
+     * Récupère le commentaire lié à un objet via `objets.id_com`.
+     *
+     * @param int $objetId Identifiant de l'objet.
+     * @return array{id:int, com_user:string, com_admin:string, created_at:string}|null Commentaire ou null si l'objet n'en a pas.
      */
     public function getByObjetId(int $objetId): ?array
     {
@@ -26,8 +35,10 @@ class Comment
     }
 
     /**
-     * Crée un nouveau commentaire avec le texte admin.
-     * Retourne l'id du commentaire créé.
+     * Crée une ligne `commentaires` avec un texte admin (com_user vide).
+     *
+     * @param string $comAdmin Texte du commentaire admin.
+     * @return int Identifiant du commentaire créé.
      */
     public function create(string $comAdmin): int
     {
@@ -40,7 +51,11 @@ class Comment
     }
 
     /**
-     * Lie un commentaire à un objet via id_com.
+     * Lie un commentaire à un objet en renseignant `objets.id_com`.
+     *
+     * @param int $objetId Identifiant de l'objet.
+     * @param int $commentId Identifiant du commentaire.
+     * @return void
      */
     public function linkToObjet(int $objetId, int $commentId): void
     {
@@ -51,7 +66,11 @@ class Comment
     }
 
     /**
-     * Met à jour le commentaire admin.
+     * Met à jour le texte du commentaire admin.
+     *
+     * @param int $id Identifiant commentaire.
+     * @param string $comAdmin Nouveau texte admin.
+     * @return void
      */
     public function updateAdminComment(int $id, string $comAdmin): void
     {
@@ -62,7 +81,10 @@ class Comment
     }
 
     /**
-     * Vide le commentaire élève (com_user → '').
+     * Vide le texte du commentaire élève (com_user → '').
+     *
+     * @param int $id Identifiant commentaire.
+     * @return void
      */
     public function clearUserComment(int $id): void
     {
@@ -73,7 +95,10 @@ class Comment
     }
 
     /**
-     * Vide le commentaire admin (com_admin → '').
+     * Vide le texte du commentaire admin (com_admin → '').
+     *
+     * @param int $id Identifiant commentaire.
+     * @return void
      */
     public function clearAdminComment(int $id): void
     {
@@ -84,7 +109,10 @@ class Comment
     }
 
     /**
-     * Récupère un commentaire par son id.
+     * Récupère un commentaire par son identifiant.
+     *
+     * @param int $id Identifiant commentaire.
+     * @return array{id:int, com_user:string, com_admin:string}|null Commentaire ou null.
      */
     public function getById(int $id): ?array
     {
@@ -96,7 +124,10 @@ class Comment
     }
 
     /**
-     * Délie un commentaire de son objet (id_com → NULL).
+     * Délie un commentaire de tous les objets (objets.id_com → NULL).
+     *
+     * @param int $commentId Identifiant commentaire.
+     * @return void
      */
     public function unlinkFromObjet(int $commentId): void
     {
@@ -107,7 +138,10 @@ class Comment
     }
 
     /**
-     * Supprime une ligne de la table commentaires.
+     * Supprime une ligne `commentaires` par identifiant.
+     *
+     * @param int $id Identifiant commentaire.
+     * @return void
      */
     public function delete(int $id): void
     {
@@ -118,9 +152,11 @@ class Comment
     }
 
     /**
-     * Vérifie si com_user ET com_admin sont vides.
-     * Si oui, délie l'objet et supprime la ligne commentaire.
-     * Retourne true si la ligne a été supprimée.
+     * Supprime le commentaire si com_user et com_admin sont tous deux vides
+     * et délie l'objet associé.
+     *
+     * @param int $commentId Identifiant commentaire à inspecter.
+     * @return bool true si la ligne a été supprimée, false sinon.
      */
     public function cleanupIfEmpty(int $commentId): bool
     {

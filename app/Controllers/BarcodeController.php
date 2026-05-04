@@ -2,15 +2,29 @@
 
 require_once __DIR__ . '/../Models/Item.php';
 
+/**
+ * Contrôleur des opérations sur les codes-barres
+ * (vérification d'unicité, listing pour le générateur).
+ */
 class BarcodeController
 {
+    /** @var Item Modèle d'accès aux objets. */
     private Item $model;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     */
     public function __construct(PDO $conn)
     {
         $this->model = new Item($conn);
     }
 
+    /**
+     * Vérifie si un code-barres est déjà utilisé en base.
+     * Entrée GET : `code_barre`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function check(): void
     {
         try {
@@ -29,8 +43,11 @@ class BarcodeController
     }
 
     /**
-     * Liste les codes-barres existants en BDD avec filtrage optionnel.
-     * Utilisé par le générateur pour la réimpression.
+     * Liste les codes-barres existants en BDD avec filtrage optionnel
+     * (utilisé par le générateur pour la réimpression).
+     * Entrée GET : `type`, `sous_type`, `nom` (tous optionnels).
+     *
+     * @return void Réponse JSON via ApiResponse.
      */
     public function listAll(): void
     {

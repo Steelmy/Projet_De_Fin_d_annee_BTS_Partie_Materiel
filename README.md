@@ -168,17 +168,20 @@ Le monitoring génère des alertes automatiques si :
 - Plus de 10 erreurs détectées dans la dernière heure → statut `degraded`
 - Espace disque > 90% utilisé → warning
 
-## Statelessness
+## Sécurité et Gestion des Droits
 
-L'application est **sans état** (stateless) :
+### Authentification & Autorisation Centralisées
 
-- Aucune session PHP (`$_SESSION`) utilisée
-- Chaque requête HTTP est indépendante
-- La connexion BDD est créée par requête, pas partagée entre requêtes
-- Pas de fichiers temporaires côté serveur (sauf logs)
-- Toutes les données transitent via l'API JSON
+La sécurisation des accès intervient dès le point d'entrée de l'API (`php/core/bootstrap.php`). 
+Avant même d'exécuter la logique d'un contrôleur, le bootstrap appelle le script `IHM_admin/auth_check.php`.
+- **Mécanisme :** Vérification de la présence et de la validité de la session d'administration. (Expiration de la session après 15 minutes d'inactivité).
+- **Résultat :** Si la session est invalide, l'accès est bloqué et l'utilisateur est redirigé (ou reçoit une erreur HTTP). Seuls les utilisateurs authentifiés peuvent exécuter la logique métier.
+- **Principe DRY :** Grâce à ce filtre globalisé, les Contrôleurs n'ont pas besoin de refaire des vérifications de rôles individuelles.
 
-Cela facilite le **passage à l'échelle** : l'application peut être déployée derrière un load balancer sans problème de synchronisation d'état.
+### Sécurité Base de Données (PDO)
+
+Toutes les interactions avec la base de données (situées dans `app/Models/`) utilisent exclusivement **PDO** (PHP Data Objects).
+Pour prévenir toute faille par injection SQL, l'application utilise systématiquement des **requêtes préparées**. Les données dynamiques (saisies utilisateurs) ne sont jamais concaténées directement dans les requêtes SQL.
 
 ## API Endpoints
 
@@ -189,14 +192,27 @@ Cela facilite le **passage à l'échelle** : l'application peut être déployée
 | POST    | `php/addItem.php`                      | Ajouter du matériel         |
 | POST    | `php/updateItem.php`                   | Modifier un matériel        |
 | POST    | `php/deleteItem.php`                   | Supprimer un matériel       |
+| POST    | `php/restituteItem.php`                | Restituer un matériel       |
 | GET     | `php/getAllBoxes.php`                   | Liste toutes les caisses    |
 | GET     | `php/getBoxDetails.php?nom=X`          | Détails d'une caisse        |
 | POST    | `php/addBox.php`                        | Ajouter une caisse          |
 | POST    | `php/updateBox.php`                     | Modifier une caisse         |
 | POST    | `php/deleteBox.php`                     | Supprimer une caisse        |
+| GET     | `php/getReferencesList.php`            | Liste des références        |
+| GET     | `php/getReferenceTree.php`             | Arborescence des références |
+| POST    | `php/addReference.php`                 | Ajouter une référence       |
+| POST    | `php/updateReference.php`              | Modifier une référence      |
+| POST    | `php/deleteReferences.php`             | Supprimer une référence     |
 | GET     | `php/searchUniversal.php?type=X&query=Y`   | Recherche universelle       |
 | GET     | `php/searchBarcodes.php?query=X`       | Recherche codes-barres      |
+| GET     | `php/getIds.php`                       | Recherche d'IDs par type/nom|
 | GET     | `php/getAvailableObjects.php`             | Objets disponibles          |
 | GET     | `php/getUsers.php`                  | Liste des utilisateurs      |
 | GET     | `php/checkBarcode.php?code_barre=X`        | Vérifier unicité code-barre |
+| GET     | `php/generateBarcode.php`              | Générer des codes-barres    |
+| GET     | `php/generateInventoryPdf.php`         | Générer l'inventaire en PDF |
+| GET     | `php/getComment.php`                   | Récupérer les commentaires  |
+| POST    | `php/saveComment.php`                  | Ajouter un commentaire      |
+| POST    | `php/deleteUserComment.php`            | Supprimer com. (utilisateur)|
+| POST    | `php/deleteAdminComment.php`           | Supprimer com. (admin)      |
 | GET     | `php/monitor.php`                           | Health check                |

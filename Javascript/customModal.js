@@ -1,14 +1,14 @@
 /**
- * customModal.js — Système de modales personnalisées
- * Remplace les alert() et confirm() natifs du navigateur.
+ * customModal.js — Modales d'alerte et de confirmation personnalisées.
+ *
+ * Remplace `alert()` et `confirm()` natifs par des modales stylisées.
  *
  * Usage :
- *   await showAlert("Message", "success");   // types: success, error, warning, info
- *   const ok = await showConfirm("Message"); // renvoie true/false
+ *   await showAlert("Message", "success");      // types: success, error, warning, info
+ *   const ok = await showConfirm("Message");    // renvoie true/false
  */
 
 (function () {
-  // ── Styles injectés une seule fois ──
   const style = document.createElement("style");
   style.textContent = `
     .custom-modal-overlay {
@@ -66,7 +66,7 @@
   `;
   document.head.appendChild(style);
 
-  // ── Couleurs par type ──
+  /** @type {Object<string, {bg:string, iconBg:string, icon:string, btnBg:string}>} */
   const THEME = {
     success: { bg: "#ecfdf5", iconBg: "#10b981", icon: "✓", btnBg: "#10b981" },
     error:   { bg: "#fef2f2", iconBg: "#ef4444", icon: "✕", btnBg: "#ef4444" },
@@ -74,23 +74,45 @@
     info:    { bg: "#eff6ff", iconBg: "#3b82f6", icon: "i", btnBg: "#3b82f6" },
   };
 
-  // ── Helpers ──
+  /**
+   * Crée le div overlay racine d'une modale.
+   *
+   * @returns {HTMLDivElement} Élément overlay non encore attaché au DOM.
+   */
   function createOverlay() {
     const overlay = document.createElement("div");
     overlay.className = "custom-modal-overlay";
     return overlay;
   }
 
+  /**
+   * Insère un overlay dans le `<body>`.
+   *
+   * @param {HTMLElement} overlay - Overlay à attacher.
+   * @returns {void}
+   */
   function animateIn(overlay) {
     document.body.appendChild(overlay);
   }
 
+  /**
+   * Retire l'overlay du DOM.
+   *
+   * @param {HTMLElement} overlay - Overlay à supprimer.
+   * @returns {Promise<void>} Résolue quand le retrait est effectué.
+   */
   function animateOut(overlay) {
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     return Promise.resolve();
   }
 
-  // ── showAlert ──
+  /**
+   * Affiche une modale d'alerte avec un seul bouton OK.
+   *
+   * @param {string} message - Texte affiché (les retours à la ligne sont préservés).
+   * @param {"success"|"error"|"warning"|"info"} [type="info"] - Thème visuel.
+   * @returns {Promise<void>} Résolue quand l'utilisateur clique OK ou presse Echap.
+   */
   window.showAlert = function (message, type = "info") {
     const t = THEME[type] || THEME.info;
 
@@ -113,7 +135,6 @@
         resolve();
       });
 
-      // Fermer avec Escape
       const onKey = (e) => {
         if (e.key === "Escape") {
           document.removeEventListener("keydown", onKey);
@@ -127,7 +148,16 @@
     });
   };
 
-  // ── showConfirm ──
+  /**
+   * Affiche une modale de confirmation avec deux boutons.
+   *
+   * @param {string} message - Texte affiché (les retours à la ligne sont préservés).
+   * @param {object} [options] - Options de personnalisation.
+   * @param {string} [options.confirmText="Confirmer"] - Libellé du bouton de confirmation.
+   * @param {string} [options.cancelText="Annuler"] - Libellé du bouton d'annulation.
+   * @param {"success"|"error"|"warning"|"info"} [options.type="warning"] - Thème visuel.
+   * @returns {Promise<boolean>} true si confirmé, false sinon (annulation ou Echap).
+   */
   window.showConfirm = function (message, options = {}) {
     const {
       confirmText = "Confirmer",
@@ -163,7 +193,6 @@
         resolve(true);
       });
 
-      // Fermer avec Escape = annuler
       const onKey = (e) => {
         if (e.key === "Escape") {
           document.removeEventListener("keydown", onKey);
@@ -177,6 +206,12 @@
     });
   };
 
+  /**
+   * Échappe les caractères HTML d'une chaîne pour insertion via innerHTML.
+   *
+   * @param {*} str - Valeur à échapper (convertie en chaîne).
+   * @returns {string} Chaîne sécurisée pour innerHTML.
+   */
   function escapeHtml(str) {
     return (str || "").toString()
       .replace(/&/g, "&amp;")

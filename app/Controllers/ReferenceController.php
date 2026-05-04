@@ -2,17 +2,34 @@
 
 require_once __DIR__ . '/../Models/Reference.php';
 
+/**
+ * Contrôleur du catalogue de références (types/sous-types/noms).
+ *
+ * Les opérations create/update encadrent l'appel modèle d'une transaction
+ * pour garantir l'atomicité de la cascade Type → Sous-type → Nom.
+ */
 class ReferenceController
 {
+    /** @var Reference Modèle d'accès au catalogue. */
     private Reference $model;
+
+    /** @var PDO Connexion PDO active (utilisée pour les transactions). */
     private PDO $conn;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     */
     public function __construct(PDO $conn)
     {
         $this->model = new Reference($conn);
         $this->conn = $conn;
     }
 
+    /**
+     * Renvoie l'arbre complet du catalogue (Type → Sous-type → liste de noms).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function tree(): void
     {
         try {
@@ -23,6 +40,12 @@ class ReferenceController
         }
     }
 
+    /**
+     * Ajoute une référence au catalogue (find-or-create en cascade).
+     * Méthode HTTP : POST. Entrée JSON : `type`, `sous_type`, `nom`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function store(): void
     {
         try {
@@ -82,6 +105,11 @@ class ReferenceController
         }
     }
 
+    /**
+     * Renvoie la liste plate des références (id, Type, Sous_type, Nom).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function getAll(): void
     {
         try {
@@ -92,6 +120,12 @@ class ReferenceController
         }
     }
 
+    /**
+     * Supprime une liste de références (et nettoie en cascade les sous-types/types vides).
+     * Méthode HTTP : POST. Entrée JSON : `ids` (liste d'identifiants `noms_references`).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function delete(): void
     {
         try {
@@ -124,6 +158,13 @@ class ReferenceController
         }
     }
 
+    /**
+     * Met à jour une référence (rattachement Type/Sous-type, renommage)
+     * et propage le nouveau nom sur les objets liés.
+     * Méthode HTTP : POST ou PUT. Entrée JSON : `id`, `type`, `sous_type`, `nom`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function update(): void
     {
         try {

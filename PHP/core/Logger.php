@@ -1,41 +1,53 @@
 <?php
+
 /**
- * Logger — Système de logging avec rotation quotidienne
- * 
- * Principe SOLID : Single Responsibility — ne fait que du logging.
- * Principe KISS : Écriture fichier simple, pas de dépendance externe.
- * 
- * Niveaux : DEBUG, INFO, WARNING, ERROR
- * Format : [YYYY-MM-DD HH:MM:SS] [LEVEL] [endpoint] message {contexte JSON}
+ * Logger applicatif fichier avec rotation quotidienne.
+ *
+ * Niveaux : `DEBUG`, `INFO`, `WARNING`, `ERROR`.
+ * Format : `[YYYY-MM-DD HH:MM:SS] [LEVEL] [endpoint] message {contexte JSON}`.
+ * Fichier cible : `<logDir>/app-YYYY-MM-DD.log`.
  */
 class Logger
 {
+    /** @var array<string, int> Niveaux ordonnés (gravité croissante). */
     private const LEVELS = ['DEBUG' => 0, 'INFO' => 1, 'WARNING' => 2, 'ERROR' => 3];
 
+    /** @var string Dossier où sont écrits les fichiers de log. */
     private string $logDir;
+
+    /** @var string Niveau minimum (en majuscules) à écrire. */
     private string $minLevel;
+
+    /** @var string Nom du script appelant, ajouté à chaque ligne. */
     private string $endpoint;
 
+    /**
+     * @param string $logDir Dossier de logs (créé automatiquement s'il n'existe pas).
+     * @param string $minLevel Niveau minimum à écrire (`DEBUG|INFO|WARNING|ERROR`).
+     */
     public function __construct(string $logDir, string $minLevel = 'INFO')
     {
         $this->logDir = rtrim($logDir, '/');
         $this->minLevel = strtoupper($minLevel);
         $this->endpoint = basename($_SERVER['SCRIPT_NAME'] ?? 'cli');
 
-        // Créer le dossier de logs si nécessaire
         if (!is_dir($this->logDir)) {
             mkdir($this->logDir, 0755, true);
         }
     }
 
     /**
-     * Log un message avec un niveau donné
+     * Écrit une ligne de log si le niveau atteint le seuil minimum.
+     *
+     * @param string $level Niveau du message (`DEBUG|INFO|WARNING|ERROR`).
+     * @param string $message Message à journaliser.
+     * @param array<string, mixed> $context Contexte JSON-encodé en suffixe.
+     * @return void
      */
     public function log(string $level, string $message, array $context = []): void
     {
         $level = strtoupper($level);
 
-        // Vérifier le niveau minimum
         if (!isset(self::LEVELS[$level]) || self::LEVELS[$level] < self::LEVELS[$this->minLevel]) {
             return;
         }
@@ -48,28 +60,60 @@ class Logger
         file_put_contents($logFile, $logLine, FILE_APPEND | LOCK_EX);
     }
 
+    /**
+     * Log de niveau DEBUG.
+     *
+     * @param string $message Message.
+     * @param array<string, mixed> $context Contexte additionnel.
+     * @return void
+     */
     public function debug(string $message, array $context = []): void
     {
         $this->log('DEBUG', $message, $context);
     }
 
+    /**
+     * Log de niveau INFO.
+     *
+     * @param string $message Message.
+     * @param array<string, mixed> $context Contexte additionnel.
+     * @return void
+     */
     public function info(string $message, array $context = []): void
     {
         $this->log('INFO', $message, $context);
     }
 
+    /**
+     * Log de niveau WARNING.
+     *
+     * @param string $message Message.
+     * @param array<string, mixed> $context Contexte additionnel.
+     * @return void
+     */
     public function warning(string $message, array $context = []): void
     {
         $this->log('WARNING', $message, $context);
     }
 
+    /**
+     * Log de niveau ERROR.
+     *
+     * @param string $message Message.
+     * @param array<string, mixed> $context Contexte additionnel.
+     * @return void
+     */
     public function error(string $message, array $context = []): void
     {
         $this->log('ERROR', $message, $context);
     }
 
     /**
-     * Retourne le nombre d'erreurs dans les logs récents (monitoring)
+     * Compte les occurrences `[ERROR]` dans le log du jour
+     * dont le timestamp est dans la fenêtre `$minutes` la plus récente.
+     *
+     * @param int $minutes Largeur de la fenêtre temporelle, en minutes.
+     * @return int Nombre d'erreurs récentes.
      */
     public function countRecentErrors(int $minutes = 60): int
     {
@@ -83,7 +127,6 @@ class Logger
         foreach ($lines as $line) {
             if (strpos($line, '[ERROR]') === false) continue;
 
-            // Extraire le timestamp
             preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/', $line, $matches);
             if (!empty($matches[1]) && strtotime($matches[1]) >= $threshold) {
                 $count++;
@@ -94,7 +137,9 @@ class Logger
     }
 
     /**
-     * Retourne le chemin du répertoire de logs
+     * Retourne le dossier de logs configuré.
+     *
+     * @return string Chemin absolu du dossier.
      */
     public function getLogDir(): string
     {

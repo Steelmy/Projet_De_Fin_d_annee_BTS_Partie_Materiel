@@ -1,11 +1,21 @@
+/**
+ * universalAutocompleteBarcode.js — Autocomplete dédié aux codes-barres
+ * avec filtres en cascade (type/sous-type/nom) et options d'état/disponibilité.
+ *
+ * Le conteneur de suggestions est attaché au `<body>` pour éviter les
+ * problèmes de z-index / overflow avec les modales.
+ */
 class UniversalAutocompleteBarcode {
   /**
-   * @param {string} inputId - ID du champ code-barre
-   * @param {string} containerId - ID du conteneur de suggestions (optionnel)
-   * @param {string} typeInputId - ID du champ Type (pour filtre)
-   * @param {string} sousTypeInputId - ID du champ Sous-Type (pour filtre)
-   * @param {string} nomInputId - ID du champ Nom (pour filtre)
-   * @param {function} onSelectCallback - Fonction appelée après sélection
+   * @param {string} inputId - ID du champ code-barre.
+   * @param {string|null} containerId - ID d'un conteneur existant, ou null pour création auto.
+   * @param {string|null} [typeInputId=null] - ID du champ Type (filtre dynamique).
+   * @param {string|null} [sousTypeInputId=null] - ID du champ Sous-type (filtre dynamique).
+   * @param {string|null} [nomInputId=null] - ID du champ Nom (filtre dynamique).
+   * @param {(item: object) => void} [onSelectCallback=null] - Callback après sélection (reçoit l'item complet).
+   * @param {string|null} [etatFilter=null] - Filtre d'état exact côté serveur.
+   * @param {boolean} [disponibleOnly=false] - Restreint aux objets disponibles hors caisse.
+   * @param {boolean} [nonDisponibleOnly=false] - Restreint aux objets emprunté/réservé hors caisse.
    */
   constructor(
     inputId,
@@ -31,7 +41,6 @@ class UniversalAutocompleteBarcode {
     this.debounceTimer = null;
     this.containerClass = "autocomplete-suggestions";
 
-    // Création/Récupération Container
     this.container = containerId ? document.getElementById(containerId) : null;
     if (!this.container) {
       this.initContainer();
@@ -42,8 +51,12 @@ class UniversalAutocompleteBarcode {
     console.log(`UniversalAutocompleteBarcode initialized on #${inputId}`);
   }
 
+  /**
+   * Crée (si besoin) et déplace le conteneur de suggestions dans `<body>`.
+   *
+   * @returns {void}
+   */
   initContainer() {
-    // On utilise le body pour éviter les problèmes de z-index/overflow
     let container = document.querySelector(
       `#${this.input.id}_autocomplete_container`,
     );
@@ -54,10 +67,8 @@ class UniversalAutocompleteBarcode {
       container.className = this.containerClass;
     }
 
-    // Force styles & position in BODY (même si existant)
     container.style.display = "none";
 
-    // S'assurer qu'il est dans le body
     if (container.parentNode !== document.body) {
       document.body.appendChild(container);
     }
@@ -65,6 +76,11 @@ class UniversalAutocompleteBarcode {
     this.container = container;
   }
 
+  /**
+   * Recalcule la position absolue du conteneur sous l'input.
+   *
+   * @returns {void}
+   */
   updatePosition() {
     if (!this.container || !this.input) return;
 
@@ -78,8 +94,12 @@ class UniversalAutocompleteBarcode {
     this.container.style.width = `${rect.width}px`;
   }
 
+  /**
+   * Câble les événements de saisie, focus et clic extérieur.
+   *
+   * @returns {void}
+   */
   initEvents() {
-    // 1. Force Numeric
     this.input.addEventListener("keypress", (e) => {
       const charCode = e.which ? e.which : e.keyCode;
       if (charCode > 31 && (charCode < 48 || charCode > 57)) {
@@ -91,12 +111,10 @@ class UniversalAutocompleteBarcode {
       this.handleInput();
     });
 
-    // 2. Focus (Click) -> Search (même vide)
     this.input.addEventListener("focus", () => {
       this.search(this.input.value);
     });
 
-    // 3. Click Outside -> Hide
     document.addEventListener("click", (e) => {
       if (e.target !== this.input && e.target !== this.container) {
         this.hide();
@@ -104,6 +122,11 @@ class UniversalAutocompleteBarcode {
     });
   }
 
+  /**
+   * Déclenche une recherche debouncée à la saisie.
+   *
+   * @returns {void}
+   */
   handleInput() {
     clearTimeout(this.debounceTimer);
     const query = this.input.value.trim();
@@ -112,8 +135,13 @@ class UniversalAutocompleteBarcode {
     }, 300);
   }
 
+  /**
+   * Construit l'URL avec les filtres dynamiques et appelle searchBarcodes.php.
+   *
+   * @param {string} query - Préfixe de code-barres.
+   * @returns {Promise<void>}
+   */
   async search(query) {
-    // Récupération des filtres
     const typeVal = this.typeInput ? this.typeInput.value.trim() : "";
     const sousTypeVal = this.sousTypeInput ? this.sousTypeInput.value.trim() : "";
     const nomVal = this.nomInput ? this.nomInput.value.trim() : "";
@@ -141,8 +169,14 @@ class UniversalAutocompleteBarcode {
     }
   }
 
+  /**
+   * Construit le DOM des suggestions et le repositionne sous l'input.
+   *
+   * @param {Array<{Code_bar:string, Type:string, Sous_type:string, Nom:string}>} items - Lignes renvoyées par l'API.
+   * @returns {void}
+   */
   displayResults(items) {
-    this.updatePosition(); // Recalculer la position à l'affichage
+    this.updatePosition();
     this.container.innerHTML = "";
     this.container.style.display = "block";
 
@@ -160,18 +194,28 @@ class UniversalAutocompleteBarcode {
     });
   }
 
+  /**
+   * Applique la sélection : remplit l'input avec le code-barres, déclenche le callback.
+   *
+   * @param {{Code_bar:string, Type:string, Sous_type:string, Nom:string}} item - Item sélectionné.
+   * @returns {void}
+   */
   select(item) {
     this.input.value = item.Code_bar;
     this.hide();
     if (this.onSelectCallback) {
-      this.onSelectCallback(item); // Passe tout l'objet (Code_bar, Type, Nom)
+      this.onSelectCallback(item);
     }
   }
 
+  /**
+   * Masque le conteneur de suggestions.
+   *
+   * @returns {void}
+   */
   hide() {
     this.container.style.display = "none";
   }
 }
 
-// Export global pour utilisation directe
 window.UniversalAutocompleteBarcode = UniversalAutocompleteBarcode;

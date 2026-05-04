@@ -1,10 +1,9 @@
-// ===== GESTION DU FORMULAIRE DE MODIFICATION ET SUPPRESSION DU MATERIEL =====
-// Remplace l'ancien script avec les bons IDs et la logique adaptée aux inputs
+/**
+ * updateItem.js — Soumission du formulaire de modification d'un objet
+ * (changement d'état + utilisateur emprunteur).
+ */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // -------------------------------------------------------------------------
-  // 1. GESTION MODIFICATION
-  // -------------------------------------------------------------------------
   const formModification = document.getElementById("form_modification");
   const etatSelect = document.getElementById("etat");
   const reserveurEmprunteurInput = document.getElementById(
@@ -14,27 +13,21 @@ document.addEventListener("DOMContentLoaded", () => {
     "reserveur_emprunteur_id",
   );
 
-  // Champs à reset
   const idModifInput = document.getElementById("id_materiel");
 
-  // Label
-  const labelReserveurEmprunteur = document.getElementById(
-    "label_reserveur_emprunteur",
-  );
-
-  if (etatSelect) {
-    etatSelect.addEventListener("change", toggleReserveurEmprunteur);
-    // Initialiser l'état
-    toggleReserveurEmprunteur();
-  }
-
+  /**
+   * Active/désactive et configure le placeholder du champ utilisateur
+   * en fonction de l'état sélectionné. L'état `disponible` vide les champs.
+   *
+   * @returns {void}
+   */
   function toggleReserveurEmprunteur() {
     if (!etatSelect || !reserveurEmprunteurInput) return;
 
     const etat = etatSelect.value;
     if (etat === "disponible") {
       reserveurEmprunteurInput.value = "";
-      reserveurEmprunteurIdInput.value = ""; // On peut reset l'ID si dispo
+      reserveurEmprunteurIdInput.value = "";
       reserveurEmprunteurInput.disabled = true;
       reserveurEmprunteurInput.placeholder = "Utilisateur... (Non applicable)";
       reserveurEmprunteurInput.style.backgroundColor = "#e9ecef";
@@ -52,6 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  if (etatSelect) {
+    etatSelect.addEventListener("change", toggleReserveurEmprunteur);
+    toggleReserveurEmprunteur();
+  }
+
   if (formModification) {
     formModification.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -62,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ? reserveurEmprunteurIdInput.value
         : "";
 
-      // Validation
       if (!id) {
         await showAlert(
           "Veuillez sélectionner un matériel à modifier (code-barre manquant)",
@@ -88,8 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("etat", etat);
 
         if (etat === "disponible") {
-          formData.append("reserveur_emprunteur", "0"); // 0 ou NULL selon la logique PHP (souvent 0 pour aucun)
-          // Note: updateItem.php attend souvent un ID user
+          formData.append("reserveur_emprunteur", "0");
         } else {
           formData.append("reserveur_emprunteur", reserveur_id);
         }
@@ -104,7 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
           await showAlert(data.message, "success");
 
-          // Reset fields
           if (idModifInput) idModifInput.value = "";
 
           if (etatSelect) {
@@ -112,7 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
             toggleReserveurEmprunteur();
           }
 
-          // Refresh inventory
           if (window.refreshInventory) window.refreshInventory();
         } else {
           await showAlert("Erreur: " + data.message, "error");
@@ -123,10 +117,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  // -------------------------------------------------------------------------
-  // 2. GESTION SUPPRESSION (Initialisation simple si nécessaire)
-  // -------------------------------------------------------------------------
-  // La suppression est probablement gérée par deleteItem.js
-  // On s'assure juste ici de ne pas interférer.
 });

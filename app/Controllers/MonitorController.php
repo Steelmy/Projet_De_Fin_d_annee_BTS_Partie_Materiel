@@ -1,16 +1,36 @@
 <?php
 
+/**
+ * Contrôleur de health check : agrège l'état de la BDD, du disque,
+ * du nombre d'erreurs récentes et de la taille du log courant.
+ */
 class MonitorController
 {
+    /** @var PDO Connexion PDO active. */
     private PDO $conn;
+
+    /** @var Logger Logger applicatif partagé. */
     private Logger $logger;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     * @param Logger $logger Logger applicatif partagé.
+     */
     public function __construct(PDO $conn, Logger $logger)
     {
         $this->conn = $conn;
         $this->logger = $logger;
     }
 
+    /**
+     * Calcule et renvoie l'état de santé de l'application.
+     *
+     * Statut global :
+     *   - `ok` par défaut
+     *   - `degraded` si la BDD est en erreur ou si > 10 erreurs sur la dernière heure
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function health(): void
     {
         $health = [
@@ -19,7 +39,6 @@ class MonitorController
             'checks' => []
         ];
 
-        // Vérification connexion BDD
         try {
             $this->conn->query("SELECT 1");
             $health['checks']['database'] = ['status' => 'ok', 'message' => 'Connexion active'];
@@ -28,7 +47,6 @@ class MonitorController
             $health['checks']['database'] = ['status' => 'error', 'message' => $e->getMessage()];
         }
 
-        // Espace disque
         $freeSpace = disk_free_space('/');
         $totalSpace = disk_total_space('/');
         $usedPercent = round((1 - $freeSpace / $totalSpace) * 100, 1);
@@ -38,7 +56,6 @@ class MonitorController
             'free_gb' => round($freeSpace / (1024 * 1024 * 1024), 2)
         ];
 
-        // Erreurs recentes
         $recentErrors = $this->logger->countRecentErrors(60);
         $health['checks']['errors'] = [
             'status' => $recentErrors > 10 ? 'warning' : 'ok',
@@ -50,7 +67,6 @@ class MonitorController
             $health['alerts'] = ["$recentErrors erreurs détectées dans la dernière heure"];
         }
 
-        // Taille des logs
         $logDir = $this->logger->getLogDir();
         $logFile = $logDir . '/app-' . date('Y-m-d') . '.log';
         $health['checks']['logs'] = [

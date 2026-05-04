@@ -1,18 +1,25 @@
 /**
- * commentManager.js — Gestion des commentaires sur les objets
+ * commentManager.js — Modale de gestion des commentaires sur un objet.
  *
- * Ouvre une modale pour ajouter/voir/modifier/supprimer les commentaires
- * liés à un objet du tableau d'inventaire.
+ * Permet à l'admin de visualiser le commentaire élève (`com_user`),
+ * de saisir/modifier son propre commentaire (`com_admin`) et de supprimer
+ * indépendamment chaque champ. Quand les deux deviennent vides,
+ * le serveur supprime la ligne et délie l'objet automatiquement.
  */
 
-// État interne de la modale
+/** @type {number|null} ID de l'objet en cours d'édition. */
 let currentCommentObjetId = null;
+
+/** @type {number|null} ID du commentaire courant (null s'il n'existe pas encore). */
 let currentCommentId = null;
 
 /**
- * Ouvre la modale de commentaire pour un objet donné.
- * @param {number} objetId - L'id de l'objet dans la table objets
- * @param {boolean} hasComment - true si l'objet a déjà un commentaire (id_com non null)
+ * Ouvre la modale de commentaire pour un objet donné, et charge
+ * le commentaire existant si `hasComment` est vrai.
+ *
+ * @param {number} objetId - Identifiant de l'objet (table `objets`).
+ * @param {boolean} hasComment - true si l'objet a déjà un commentaire (id_com non null).
+ * @returns {Promise<void>}
  */
 async function openCommentModal(objetId, hasComment) {
   currentCommentObjetId = objetId;
@@ -26,7 +33,6 @@ async function openCommentModal(objetId, hasComment) {
   const btnDeleteAdmin = document.getElementById("btn-delete-admin-comment");
   const messageDiv = document.getElementById("comment-message");
 
-  // Reset
   userSection.classList.add("hidden");
   userText.textContent = "";
   adminTextarea.value = "";
@@ -35,7 +41,6 @@ async function openCommentModal(objetId, hasComment) {
   messageDiv.textContent = "";
 
   if (hasComment) {
-    // Charger le commentaire existant
     title.textContent = "Commentaire";
 
     try {
@@ -48,13 +53,11 @@ async function openCommentModal(objetId, hasComment) {
         const comment = data.comment;
         currentCommentId = comment.id;
 
-        // Afficher com_user si non vide
         if (comment.com_user && comment.com_user.trim() !== "") {
           userSection.classList.remove("hidden");
           userText.textContent = comment.com_user;
         }
 
-        // Pré-remplir com_admin et afficher le bouton supprimer si non vide
         adminTextarea.value = comment.com_admin || "";
         if (comment.com_admin && comment.com_admin.trim() !== "") {
           btnDeleteAdmin.classList.remove("hidden");
@@ -67,14 +70,15 @@ async function openCommentModal(objetId, hasComment) {
     title.textContent = "Ajouter un commentaire";
   }
 
-  // Afficher la modale
   modal.classList.remove("hidden");
   modal.classList.add("flex");
   adminTextarea.focus();
 }
 
 /**
- * Ferme la modale de commentaire.
+ * Ferme la modale de commentaire et réinitialise l'état interne.
+ *
+ * @returns {void}
  */
 function closeCommentModal() {
   const modal = document.getElementById("comment-modal");
@@ -85,7 +89,9 @@ function closeCommentModal() {
 }
 
 /**
- * Sauvegarde le commentaire admin (création ou mise à jour).
+ * Sauvegarde le commentaire admin (création ou mise à jour selon `currentCommentId`).
+ *
+ * @returns {Promise<void>}
  */
 async function saveComment() {
   const adminTextarea = document.getElementById("comment-admin-textarea");
@@ -118,7 +124,6 @@ async function saveComment() {
     if (data.success) {
       showCommentMessage(data.message || "Commentaire enregistré.", "success");
 
-      // Rafraîchir l'inventaire après un court délai
       setTimeout(() => {
         closeCommentModal();
         if (window.refreshInventory) {
@@ -135,8 +140,10 @@ async function saveComment() {
 }
 
 /**
- * Supprime le commentaire élève (vide com_user).
- * Si les deux champs sont vides, la ligne est supprimée côté serveur.
+ * Vide le commentaire élève (`com_user`).
+ * Si les deux champs deviennent vides, la ligne est supprimée côté serveur.
+ *
+ * @returns {Promise<void>}
  */
 async function deleteUserComment() {
   if (!currentCommentId) {
@@ -163,14 +170,12 @@ async function deleteUserComment() {
 
     if (data.success) {
       if (data.row_deleted) {
-        // La ligne a été supprimée (les deux champs étaient vides)
         showCommentMessage(data.message || "Commentaire supprimé.", "success");
         setTimeout(() => {
           closeCommentModal();
           if (window.refreshInventory) window.refreshInventory();
         }, 800);
       } else {
-        // Seul com_user a été vidé
         document.getElementById("comment-user-section").classList.add("hidden");
         document.getElementById("comment-user-text").textContent = "";
         showCommentMessage(
@@ -191,8 +196,10 @@ async function deleteUserComment() {
 }
 
 /**
- * Supprime le commentaire admin (vide com_admin).
- * Si les deux champs sont vides, la ligne est supprimée côté serveur.
+ * Vide le commentaire admin (`com_admin`).
+ * Si les deux champs deviennent vides, la ligne est supprimée côté serveur.
+ *
+ * @returns {Promise<void>}
  */
 async function deleteAdminComment() {
   if (!currentCommentId) {
@@ -219,14 +226,12 @@ async function deleteAdminComment() {
 
     if (data.success) {
       if (data.row_deleted) {
-        // La ligne a été supprimée (les deux champs étaient vides)
         showCommentMessage(data.message || "Commentaire supprimé.", "success");
         setTimeout(() => {
           closeCommentModal();
           if (window.refreshInventory) window.refreshInventory();
         }, 800);
       } else {
-        // Seul com_admin a été vidé, com_user existe encore
         document.getElementById("comment-admin-textarea").value = "";
         document.getElementById("btn-delete-admin-comment").classList.add("hidden");
         showCommentMessage(
@@ -247,7 +252,11 @@ async function deleteAdminComment() {
 }
 
 /**
- * Affiche un message dans la modale commentaire.
+ * Affiche un message coloré dans la modale commentaire.
+ *
+ * @param {string} text - Texte du message.
+ * @param {"success"|"error"} type - Catégorie qui définit la couleur.
+ * @returns {void}
  */
 function showCommentMessage(text, type) {
   const messageDiv = document.getElementById("comment-message");
@@ -258,7 +267,6 @@ function showCommentMessage(text, type) {
   );
 }
 
-// Exposer globalement pour les onclick inline
 window.openCommentModal = openCommentModal;
 window.closeCommentModal = closeCommentModal;
 window.saveComment = saveComment;

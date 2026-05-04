@@ -2,18 +2,27 @@
 
 require_once __DIR__ . '/../Models/Comment.php';
 
+/**
+ * Contrôleur des commentaires admin/élève associés aux objets.
+ */
 class CommentController
 {
+    /** @var Comment Modèle d'accès aux commentaires. */
     private Comment $model;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     */
     public function __construct(PDO $conn)
     {
         $this->model = new Comment($conn);
     }
 
     /**
-     * Récupère le commentaire d'un objet.
-     * GET : ?objet_id=XX
+     * Récupère le commentaire associé à un objet.
+     * Entrée GET : `objet_id`.
+     *
+     * @return void Réponse JSON via ApiResponse.
      */
     public function show(): void
     {
@@ -35,7 +44,9 @@ class CommentController
 
     /**
      * Crée ou met à jour le commentaire admin d'un objet.
-     * POST : objet_id, com_admin, [comment_id] (si mise à jour)
+     * Entrée POST : `objet_id`, `com_admin`, `comment_id` (optionnel : si fourni → update).
+     *
+     * @return void Réponse JSON via ApiResponse.
      */
     public function save(): void
     {
@@ -52,11 +63,9 @@ class CommentController
             }
 
             if ($commentId > 0) {
-                // Mise à jour d'un commentaire existant
                 $this->model->updateAdminComment($commentId, $comAdmin);
                 ApiResponse::success([], 'Commentaire modifié avec succès');
             } else {
-                // Création d'un nouveau commentaire + liaison à l'objet
                 $newId = $this->model->create($comAdmin);
                 $this->model->linkToObjet($objetId, $newId);
                 ApiResponse::success([
@@ -69,9 +78,11 @@ class CommentController
     }
 
     /**
-     * Supprime le commentaire élève (vide com_user).
-     * Si com_admin est aussi vide après suppression, supprime la ligne et remet id_com à NULL.
-     * POST : comment_id
+     * Vide le commentaire élève (com_user).
+     * Si le commentaire admin est aussi vide, supprime la ligne et délie l'objet.
+     * Entrée POST : `comment_id`.
+     *
+     * @return void Réponse JSON via ApiResponse.
      */
     public function deleteUserComment(): void
     {
@@ -82,8 +93,6 @@ class CommentController
             }
 
             $this->model->clearUserComment($commentId);
-
-            // Vérifier si les deux champs sont vides → suppression complète
             $deleted = $this->model->cleanupIfEmpty($commentId);
 
             ApiResponse::success([
@@ -95,9 +104,11 @@ class CommentController
     }
 
     /**
-     * Supprime le commentaire admin (vide com_admin).
-     * Si com_user est aussi vide après suppression, supprime la ligne et remet id_com à NULL.
-     * POST : comment_id
+     * Vide le commentaire admin (com_admin).
+     * Si le commentaire élève est aussi vide, supprime la ligne et délie l'objet.
+     * Entrée POST : `comment_id`.
+     *
+     * @return void Réponse JSON via ApiResponse.
      */
     public function deleteAdminComment(): void
     {
@@ -108,8 +119,6 @@ class CommentController
             }
 
             $this->model->clearAdminComment($commentId);
-
-            // Vérifier si les deux champs sont vides → suppression complète
             $deleted = $this->model->cleanupIfEmpty($commentId);
 
             ApiResponse::success([

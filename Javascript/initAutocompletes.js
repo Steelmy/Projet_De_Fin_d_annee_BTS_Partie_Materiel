@@ -1,10 +1,11 @@
-// Initialisation centralisée des autocomplétions restantes (Codes-barres et Utilisateurs)
-// Les menus déroulants (Type/Sous-type/Nom) sont gérés par javascript/dynamicSelects.js
+/**
+ * initAutocompletes.js — Câblage des autocomplétions restantes
+ * (utilisateurs et codes-barres). Les selects en cascade Type/Sous-type/Nom
+ * sont gérés par dynamicSelects.js.
+ */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // --- Formulaire Modification de Matériel ---
   if (document.getElementById("id_materiel")) {
-    // Utilisateur pour modification matériel (champ reserveur_emprunteur)
     if (document.getElementById("reserveur_emprunteur")) {
       const hiddenId = document.getElementById("reserveur_emprunteur_id");
       new UniversalAutocomplete("reserveur_emprunteur", "user", (item) => {
@@ -22,9 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- Consultation (Filtres) ---
   if (document.getElementById("type_materiel_consultation")) {
-    // Autocomplétion Code-Barre Consultation (Avec Cascade Selects)
     if (document.getElementById("code_barre_consultation")) {
       new UniversalAutocompleteBarcode(
         "code_barre_consultation",
@@ -33,22 +32,18 @@ document.addEventListener("DOMContentLoaded", () => {
         "sous_type_materiel_consultation",
         "nom_materiel_consultation",
         (item) => {
-          // Remplissage Cascade via select
           if (window.setSelectCascadeValues) {
              window.setSelectCascadeValues('consultation', item.Type, item.Sous_type, item.Nom);
           }
-          // Trigger refresh is handled inside setSelectCascadeValues via dispatchChangeEvent on nomSelect
         },
       );
     }
   }
 
-  // --- Barcodes Spécifiques (Cascade) ---
-  // Suppression
   if (document.getElementById("id_materiel_suppr")) {
     new UniversalAutocompleteBarcode(
       "id_materiel_suppr",
-      null, // containerId est recréé dynamiquement dans le body pour éviter les problèmes de z-index
+      null,
       "type_materiel_suppr",
       "sous_type_materiel_suppr",
       "nom_materiel_suppr",
@@ -57,15 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
              window.setSelectCascadeValues('suppr', item.Type, item.Sous_type, item.Nom);
           }
       },
-      null, // etatFilter
-      true, // disponibleOnly
+      null,
+      true,
     );
   }
 
-
-
-  // --- INITIALISATION GÉNÉRIQUE DE SECOURS ---
-  // Pour tous les champs dans .autocomplete-container-code-barre qui n'ont pas été init
+  // Fallback : autocomplete générique pour tout input non encore initialisé
   const genericBarcodes = document.querySelectorAll(
     ".autocomplete-container-code-barre input",
   );
@@ -76,4 +68,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-

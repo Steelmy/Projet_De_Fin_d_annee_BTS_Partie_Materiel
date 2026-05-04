@@ -5,15 +5,32 @@ require_once __DIR__ . '/../Models/User.php';
 require_once __DIR__ . '/../Models/Box.php';
 require_once __DIR__ . '/../Models/Item.php';
 
+/**
+ * Contrôleur des recherches (autocomplete) sur utilisateurs, caisses,
+ * références hiérarchiques et codes-barres.
+ *
+ * N'effectue aucune SQL : délègue aux modèles puis convertit les lignes
+ * en format autocomplete `{id, label, value, meta}`.
+ */
 class SearchController
 {
     private const AUTOCOMPLETE_LIMIT = 10;
 
+    /** @var Reference Modèle d'accès au catalogue de références. */
     private Reference $referenceModel;
+
+    /** @var User Modèle d'accès aux utilisateurs. */
     private User $userModel;
+
+    /** @var Box Modèle d'accès aux caisses. */
     private Box $boxModel;
+
+    /** @var Item Modèle d'accès aux objets. */
     private Item $itemModel;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     */
     public function __construct(PDO $conn)
     {
         $this->referenceModel = new Reference($conn);
@@ -22,6 +39,15 @@ class SearchController
         $this->itemModel = new Item($conn);
     }
 
+    /**
+     * Routeur d'autocomplete universel : choisit le modèle à interroger
+     * selon `type`, puis renvoie un tableau `{id, label, value, meta}`.
+     *
+     * Entrée GET : `type` (`user|caisse|materiel_type|materiel_sous_type|materiel_nom|materiel_code`),
+     * `query`, plus filtres contextuels (`filter`, `filter_sous_type`, `filter_type`, `filter_nom`).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function universal(): void
     {
         try {
@@ -66,6 +92,15 @@ class SearchController
         }
     }
 
+    /**
+     * Recherche dédiée aux codes-barres avec filtres étendus
+     * (état, disponibilité). Renvoie les lignes brutes du modèle.
+     *
+     * Entrée GET : `query`, `type`, `sous_type`, `nom`, `etat`,
+     * `disponible_only` ('1'), `non_disponible_only` ('1').
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function barcodes(): void
     {
         try {
@@ -94,6 +129,12 @@ class SearchController
         }
     }
 
+    /**
+     * Convertit les lignes utilisateurs en items d'autocomplete.
+     *
+     * @param array<int, array{id:int, Nom:string, Prénom:string}> $rows
+     * @return array<int, array{id:int, label:string, value:string, meta:array<string, mixed>}>
+     */
     private function formatUserResults(array $rows): array
     {
         $results = [];
@@ -108,6 +149,12 @@ class SearchController
         return $results;
     }
 
+    /**
+     * Convertit les lignes caisses en items d'autocomplete.
+     *
+     * @param array<int, array{id:int, Nom:string, Etat:string}> $rows
+     * @return array<int, array{id:int, label:string, value:string, meta:array<string, mixed>}>
+     */
     private function formatCaisseResults(array $rows): array
     {
         $results = [];
@@ -122,6 +169,12 @@ class SearchController
         return $results;
     }
 
+    /**
+     * Convertit les lignes objets (recherche par code) en items d'autocomplete.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array{id:int, label:string, value:string, meta:array<string, mixed>}>
+     */
     private function formatMaterielCodeResults(array $rows): array
     {
         $results = [];
@@ -136,6 +189,14 @@ class SearchController
         return $results;
     }
 
+    /**
+     * Convertit les lignes du catalogue de références en items d'autocomplete
+     * en sélectionnant la colonne pertinente selon le niveau interrogé.
+     *
+     * @param string $type Niveau interrogé (`materiel_type|materiel_sous_type|materiel_nom`).
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array{id:string, label:string, value:string, meta:array<string, mixed>}>
+     */
     private function formatReferenceResults(string $type, array $rows): array
     {
         $results = [];

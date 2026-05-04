@@ -2,17 +2,35 @@
 
 require_once __DIR__ . '/../Models/Item.php';
 
+/**
+ * Contrôleur des opérations sur les objets (matériel).
+ *
+ * Couvre la création multiple, la consultation, la mise à jour d'état,
+ * la suppression, la restitution et l'introspection (par type/nom, disponibles…).
+ */
 class ItemController
 {
+    /** @var Item Modèle d'accès aux objets. */
     private Item $model;
+
+    /** @var Logger Logger applicatif partagé. */
     private Logger $logger;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     * @param Logger $logger Logger applicatif partagé.
+     */
     public function __construct(PDO $conn, Logger $logger)
     {
         $this->model = new Item($conn);
         $this->logger = $logger;
     }
 
+    /**
+     * Liste tous les matériels avec leurs métadonnées.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function index(): void
     {
         try {
@@ -26,6 +44,12 @@ class ItemController
         }
     }
 
+    /**
+     * Récupère le détail d'un objet à partir de son code-barres.
+     * Entrée GET : `code_barre`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function show(): void
     {
         try {
@@ -68,49 +92,49 @@ class ItemController
     }
 
     /**
-     * Gère la création de nouveaux matériels (action "store").
-     * Cette méthode est appelée lors de la soumission du formulaire d'ajout.
+     * Crée plusieurs objets identiques en série.
+     * Entrée POST : `type_materiel`, `sous_type_materiel`, `nom_materiel`, `nombre`.
+     *
+     * @return void Réponse JSON via ApiResponse contenant les IDs et codes-barres générés.
      */
     public function store(): void
     {
         try {
-            // 1. Récupération et nettoyage des données envoyées par le client (méthode POST)
             $type = isset($_POST['type_materiel']) ? trim($_POST['type_materiel']) : '';
             $sousType = isset($_POST['sous_type_materiel']) ? trim($_POST['sous_type_materiel']) : '';
             $nom = isset($_POST['nom_materiel']) ? trim($_POST['nom_materiel']) : '';
             $nombre = isset($_POST['nombre']) ? intval($_POST['nombre']) : 0;
 
-            // 2. Validation des données : arrêt du processus si les champs sont invalides
             if (empty($type) || empty($nom) || $nombre <= 0) {
                 ApiResponse::error('Tous les champs sont requis et le nombre doit être supérieur à 0');
             }
 
             $resultats = [];
-
-            // 3. Boucle d'insertion : on crée autant d'objets en base qu'indiqué par '$nombre'
             for ($i = 0; $i < $nombre; $i++) {
-                // Le modèle exécute la requête SQL INSERT et retourne les infos du nouvel objet (id, code_bar)
                 $resultats[] = $this->model->create($type, $sousType, $nom);
             }
 
-            // 4. Extraction des colonnes spécifiques pour préparer la réponse
             $idsAjoutes = array_column($resultats, 'id');
             $codesGeneres = array_column($resultats, 'code_bar');
 
-            // 5. Inscription de l'action dans le journal d'activité (logs) du serveur
             $this->logger->info("Matériel ajouté", ['type' => $type, 'sous_type' => $sousType, 'nom' => $nom, 'nombre' => $nombre]);
-            
-            // 6. Envoi de la réponse formatée en JSON au client pour qu'il la traite (ex: afficher les codes à imprimer)
+
             ApiResponse::success([
                 'ids_ajoutes' => $idsAjoutes,
                 'codes_barres_generes' => $codesGeneres
             ], "$nombre matériel(s) ajouté(s) avec succès");
         } catch (PDOException $e) {
-            // Interception des erreurs de la base de données pour éviter de "planter" et renvoyer une erreur JSON propre
             ApiResponse::exception($e);
         }
     }
 
+    /**
+     * Met à jour l'état (et l'éventuel emprunteur) d'un objet.
+     * Refuse l'opération si l'objet est dans une caisse.
+     * Entrée POST : `code_barre`, `etat`, `reserveur_emprunteur` (requis hors `disponible`).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function update(): void
     {
         try {
@@ -157,6 +181,12 @@ class ItemController
         }
     }
 
+    /**
+     * Supprime un objet, sous réserve qu'il soit `disponible` et hors caisse.
+     * Entrée POST : `code_barre`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function destroy(): void
     {
         try {
@@ -193,6 +223,11 @@ class ItemController
         }
     }
 
+    /**
+     * Liste les objets actuellement disponibles (et hors caisse).
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function available(): void
     {
         try {
@@ -206,6 +241,12 @@ class ItemController
         }
     }
 
+    /**
+     * Liste les objets correspondant à un couple (type, nom de référence).
+     * Entrée GET : `type`, `nom`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function ids(): void
     {
         try {
@@ -225,11 +266,18 @@ class ItemController
         }
     }
 
+    /**
+     * Restitue un objet emprunté/réservé : remet à disponible et clôture son historique.
+     * Refuse si l'objet est en caisse ou déjà disponible.
+     * Entrée POST : `code_barre`.
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
     public function restitute(): void
     {
         try {
             $codeBarre = isset($_POST['code_barre']) ? trim($_POST['code_barre']) : '';
-            
+
             if (empty($codeBarre)) {
                 ApiResponse::error('Le code-barre est requis pour la restitution');
             }

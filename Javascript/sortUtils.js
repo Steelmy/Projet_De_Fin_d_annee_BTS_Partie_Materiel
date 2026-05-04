@@ -1,27 +1,25 @@
 /**
- * sortUtils.js — Utilitaire de tri centralisé
+ * sortUtils.js — Comparateur de tri locale partagé.
  *
- * Principe DRY : Remplace la logique de tri dupliquée dans
- * filterConsultation.js, addBox.js, et updateBox.js.
- *
- * Gère : accents français via localeCompare('fr'),
- *        valeurs vides en fin (asc) ou début (desc),
- *        colonne "Utilisateur" combinée (Prénom + Nom).
+ * Centralise la logique de tri auparavant dupliquée dans
+ * filterConsultation.js, addBox.js et updateBox.js.
+ * Gère les accents français via localeCompare('fr'), les valeurs vides
+ * (placées en fin pour asc, en début pour desc) et la colonne combinée
+ * "Utilisateur" (Prénom + Nom_utilisateur).
  */
 
 /**
- * Comparateur de tri locale pour les tableaux
+ * Comparateur de tri pour `Array.prototype.sort` sur des objets.
  *
- * @param {Object} a - Premier objet à comparer
- * @param {Object} b - Second objet à comparer
- * @param {string} column - Nom de la colonne de tri
- * @param {string} direction - 'asc' ou 'desc'
- * @returns {number} Résultat de la comparaison
+ * @param {object} a - Premier objet à comparer.
+ * @param {object} b - Second objet à comparer.
+ * @param {string} column - Nom de la colonne de tri (clé d'objet ou "Utilisateur").
+ * @param {"asc"|"desc"} direction - Sens du tri.
+ * @returns {number} Résultat de comparaison (-1, 0 ou 1).
  */
 window.localeSortComparator = function (a, b, column, direction) {
   let valA, valB;
 
-  // Gestion spéciale de la colonne "Utilisateur" (Prénom + Nom combinés)
   if (column === "Utilisateur") {
     valA =
       (a.Prénom ? a.Prénom : "") +
@@ -36,11 +34,9 @@ window.localeSortComparator = function (a, b, column, direction) {
     valB = b[column] ? String(b[column]).toLowerCase() : "";
   }
 
-  // Valeurs vides : en fin pour asc, en début pour desc
   if (valA === "" && valB !== "") return direction === "asc" ? 1 : -1;
   if (valB === "" && valA !== "") return direction === "asc" ? -1 : 1;
 
-  // Comparaison locale française (gère les accents)
   const comparison = valA.localeCompare(valB, "fr");
   return direction === "asc" ? comparison : -comparison;
 };

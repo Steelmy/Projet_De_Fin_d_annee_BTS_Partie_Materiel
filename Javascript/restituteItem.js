@@ -1,6 +1,9 @@
 /**
- * restituteItem.js
- * Gère la modale de restitution d'objet et la logique de scan/soumission.
+ * restituteItem.js — Modale de restitution d'un objet emprunté/réservé.
+ *
+ * Le scan ou la saisie d'un code-barres déclenche un lookup ; si l'objet
+ * est éligible (réservé/emprunté, hors caisse), un bouton de soumission
+ * appelle `php/restituteItem.php`.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,26 +14,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitBtn = document.getElementById("btn_restitution_submit");
   const messageDiv = document.getElementById("restitution_message");
 
-  // Info fields
   const typeSpan = document.getElementById("restitution_type");
   const sousTypeSpan = document.getElementById("restitution_sous_type");
   const nomSpan = document.getElementById("restitution_nom");
   const etatSpan = document.getElementById("restitution_etat");
   const utilisateurSpan = document.getElementById("restitution_utilisateur");
 
-  // Currently selected object data
+  /** @type {object|null} Objet courant en attente de restitution. */
   let selectedItem = null;
 
-  // -------------------------------------------------------------------------
-  // 1. TOGGLE MODALE
-  // -------------------------------------------------------------------------
+  /**
+   * Ouvre ou ferme la modale de restitution.
+   *
+   * @param {boolean} show - true pour ouvrir, false pour fermer.
+   * @returns {void}
+   */
   window.toggleRestitutionModal = (show) => {
     if (!modal) return;
     if (show) {
       modal.classList.remove("hidden");
       modal.classList.add("flex");
       resetRestitutionForm();
-      // Focus on barcode input after modal opens
       setTimeout(() => barcodeInput?.focus(), 100);
     } else {
       modal.classList.add("hidden");
@@ -39,27 +43,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // -------------------------------------------------------------------------
-  // 2. AUTOCOMPLETE BARCODE (réservé/emprunté, pas dans une caisse)
-  // -------------------------------------------------------------------------
   if (barcodeInput) {
     new UniversalAutocompleteBarcode(
       "restitution_code_barre",
-      null, // containerId (will be created dynamically)
-      null, // typeInputId
-      null, // sousTypeInputId
-      null, // nomInputId
+      null,
+      null,
+      null,
+      null,
       (item) => {
-        // Callback after selecting a barcode from autocomplete
         barcodeInput.value = item.Code_bar;
         lookupBarcode(item.Code_bar);
       },
-      null, // etatFilter - we use custom param
-      false, // disponibleOnly
-      true   // nonDisponibleOnly
+      null,
+      false,
+      true
     );
 
-    // Also handle manual entry (paste or scanner)
     let lookupTimer = null;
     barcodeInput.addEventListener("input", () => {
       clearTimeout(lookupTimer);
@@ -71,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Handle Enter key from scanner
     barcodeInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -81,9 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // -------------------------------------------------------------------------
-  // 3. LOOKUP BARCODE DETAILS
-  // -------------------------------------------------------------------------
+  /**
+   * Récupère les détails d'un objet et vérifie son éligibilité à la restitution.
+   * Affiche un message d'erreur si l'objet est dans une caisse ou déjà disponible.
+   *
+   * @param {string} codeBarre - Code-barres à interroger.
+   * @returns {Promise<void>}
+   */
   async function lookupBarcode(codeBarre) {
     try {
       const response = await fetch(
@@ -94,8 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success && data.materiel) {
         const mat = data.materiel;
 
-        // Vérifier que l'objet est éligible à la restitution
-        // (réservé ou emprunté, pas dans une caisse)
         if (mat.etat === "disponible") {
           showMessage("Cet objet est déjà disponible. Il n'a pas besoin d'être restitué.", "warning");
           hideInfo();
@@ -108,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // Objet éligible
         selectedItem = mat;
         typeSpan.textContent = mat.type_materiel || "-";
         sousTypeSpan.textContent = mat.sous_type_materiel || "-";
@@ -132,9 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // 4. SOUMISSION RESTITUTION
-  // -------------------------------------------------------------------------
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -178,9 +174,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // -------------------------------------------------------------------------
-  // 5. HELPERS
-  // -------------------------------------------------------------------------
+  /**
+   * Vide le formulaire et masque le panneau d'info.
+   *
+   * @returns {void}
+   */
   function resetRestitutionForm() {
     if (barcodeInput) barcodeInput.value = "";
     hideInfo();
@@ -189,12 +187,24 @@ document.addEventListener("DOMContentLoaded", () => {
     if (submitBtn) submitBtn.disabled = true;
   }
 
+  /**
+   * Masque le panneau d'information et désactive la soumission.
+   *
+   * @returns {void}
+   */
   function hideInfo() {
     if (infoPanel) infoPanel.classList.add("hidden");
     if (submitBtn) submitBtn.disabled = true;
     selectedItem = null;
   }
 
+  /**
+   * Affiche un message contextuel dans la modale.
+   *
+   * @param {string} text - Texte du message.
+   * @param {"error"|"warning"|"success"} type - Catégorie qui définit la couleur.
+   * @returns {void}
+   */
   function showMessage(text, type) {
     if (!messageDiv) return;
     messageDiv.textContent = text;
@@ -208,6 +218,11 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDiv.classList.remove("hidden");
   }
 
+  /**
+   * Masque et vide le message contextuel.
+   *
+   * @returns {void}
+   */
   function hideMessage() {
     if (messageDiv) {
       messageDiv.classList.add("hidden");

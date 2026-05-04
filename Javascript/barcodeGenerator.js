@@ -1,5 +1,12 @@
+/**
+ * barcodeGenerator.js — Modale de génération/réimpression de codes-barres EAN-13.
+ *
+ * Présente l'inventaire complet sous forme de tableau filtrable et paginé.
+ * L'utilisateur coche les objets à imprimer ; les SVG sont générés via JsBarcode
+ * et envoyés à l'imprimante via une iframe.
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Éléments du DOM
   const btnOpenBarcode = document.getElementById("btn-open-barcode");
   const modal = document.getElementById("barcode-modal");
   const closeModal = document.getElementById("close-barcode-modal");
@@ -11,43 +18,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterSousType = document.getElementById("barcode-filter-sous-type");
   const filterNom = document.getElementById("barcode-filter-nom");
 
+  /** @type {Set<number>} IDs d'objets dont le code-barres est dans la zone d'impression. */
   let codesToPrint = new Set();
   let barcodeIndex = 0;
-  
-  // Variables pour le tableau filtrable
+
+  /** @type {Array<object>} Inventaire complet chargé pour le tableau. */
   let allInventoryBarcode = [];
   let barcodeCurrentPage = 1;
   const barcodeItemsPerPage = 10;
   let barcodeSortColumn = null;
   let barcodeSortDirection = "asc";
-  let barcodeSelectedItems = new Map(); // id -> item
+  /** @type {Map<number, object>} Items cochés pour impression (id → objet). */
+  let barcodeSelectedItems = new Map();
 
   if (!btnOpenBarcode || !modal || !printZone || !btnPrint) return;
 
-  // === Ouverture de la modale ===
   btnOpenBarcode.addEventListener("click", () => {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
     document.body.style.overflow = "hidden";
 
-
-    // Reset filtres
     filterSousType.disabled = true;
     filterNom.disabled = true;
     codesToPrint.clear();
-    barcodeSelectedItems.clear(); // Reset sélection tableau
+    barcodeSelectedItems.clear();
     printZone.innerHTML = "";
     printZone.style.display = "none";
     btnPrint.style.display = "none";
     barcodeIndex = 0;
     if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
 
-    // Charger les types disponibles et l'inventaire
     chargerFiltreTypes();
     loadAllInventoryBarcode();
   });
 
-  // === Fermeture ===
   if (closeModal) {
     closeModal.addEventListener("click", fermerModale);
   }
@@ -55,6 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.target === modal) fermerModale();
   });
 
+  /**
+   * Ferme la modale et réinitialise l'état.
+   *
+   * @returns {void}
+   */
   function fermerModale() {
     modal.style.display = "none";
     modal.classList.add("hidden");
@@ -62,7 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
     resetBarcode();
   }
 
-  // === Charger tout l'inventaire pour le tableau ===
+  /**
+   * Charge l'inventaire complet pour le tableau du sélecteur.
+   *
+   * @returns {Promise<void>}
+   */
   async function loadAllInventoryBarcode() {
     try {
       const response = await fetch("php/getAllItems.php");
@@ -76,7 +89,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // === Charger les types dans le filtre ===
+  /**
+   * Peuple la liste déroulante des types disponibles.
+   *
+   * @returns {Promise<void>}
+   */
   async function chargerFiltreTypes() {
     try {
       const res = await fetch(
@@ -97,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // === Cascade des filtres ===
   filterType.addEventListener("change", async () => {
     const type = filterType.value;
     filterSousType.innerHTML =
@@ -127,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("Erreur chargement sous-types:", e);
     }
-    
+
     applyBarcodeFilters();
   });
 
@@ -158,15 +174,19 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("Erreur chargement noms:", e);
     }
-    
+
     applyBarcodeFilters();
   });
-  
+
   filterNom.addEventListener("change", () => {
     applyBarcodeFilters();
   });
 
-  // === Tout réinitialiser (filtres + zone d'impression) ===
+  /**
+   * Réinitialise filtres, sélection et zone d'impression.
+   *
+   * @returns {void}
+   */
   function resetBarcode() {
     codesToPrint.clear();
     barcodeSelectedItems.clear();
@@ -175,14 +195,12 @@ document.addEventListener("DOMContentLoaded", () => {
     printZone.style.display = "none";
     btnPrint.style.display = "none";
 
-    // Reset filtres
     filterType.value = "";
     filterSousType.innerHTML = '<option value="">Tous les sous-types</option>';
     filterSousType.disabled = true;
     filterNom.innerHTML = '<option value="">Tous les noms</option>';
     filterNom.disabled = true;
 
-    // Uncheck all checkboxes in the table
     document.querySelectorAll(".bc-checkbox").forEach((cb) => {
       cb.checked = false;
     });
@@ -191,17 +209,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
 
-    // Réappliquer les filtres pour réafficher tout l'inventaire
     barcodeCurrentPage = 1;
     applyBarcodeFilters();
   }
 
-  // === Vider la liste d'impression ===
   if (btnClear) {
     btnClear.addEventListener("click", resetBarcode);
   }
 
-  // === Fonction de Filtrage Local pour le Tableau ===
+  /**
+   * Applique les filtres de type/sous-type/nom + tri courant
+   * et déclenche le rendu du tableau.
+   *
+   * @returns {void}
+   */
   function applyBarcodeFilters() {
     const typeValue = filterType.value.trim();
     const sousTypeValue = filterSousType.value.trim();
@@ -213,7 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (sousTypeValue) filtered = filtered.filter((item) => item.Sous_type === sousTypeValue);
     if (nomValue) filtered = filtered.filter((item) => item.Nom === nomValue);
 
-    // Tri (utilise sortUtils.js si dispo, ou tri basique)
     if (barcodeSortColumn) {
       if (window.localeSortComparator) {
         filtered.sort((a, b) => window.localeSortComparator(a, b, barcodeSortColumn, barcodeSortDirection));
@@ -231,7 +251,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBarcodeTable(filtered);
   }
 
-  // === Rendu du Tableau avec Checkboxes ===
+  /**
+   * Construit le tableau (avec checkboxes + pagination) pour la liste filtrée.
+   *
+   * @param {Array<object>} filtered - Items à afficher (toutes pages confondues).
+   * @returns {void}
+   */
   function renderBarcodeTable(filtered) {
     const container = document.getElementById("barcode_table_container");
     if (!container) return;
@@ -289,8 +314,8 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `
           <tr class="cursor-pointer" onclick="document.getElementById('bc_cb_${objet.id}').click()">
             <td class="p-3 text-center border-r border-gray-100" onclick="event.stopPropagation()">
-              <input type="checkbox" id="bc_cb_${objet.id}" 
-                     class="bc-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary" 
+              <input type="checkbox" id="bc_cb_${objet.id}"
+                     class="bc-checkbox rounded border-gray-300 text-custom-primary focus:ring-custom-primary"
                      data-objet='${objetJson}'
                      ${isSelected ? "checked" : ""} />
             </td>
@@ -306,15 +331,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     html += `</tbody></table>`;
 
-    // Pagination
     html += `
       <div class="p-3 flex justify-between items-center text-slate-500 text-sm border border-t-0 border-gray-200 mt-0 bg-gray-50 rounded-b-lg shadow-input">
-        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
                 onclick="window.changeBarcodePage(-1)" ${barcodeCurrentPage === 1 ? "disabled" : ""}>
           &larr; Précédent
         </button>
         <span class="font-medium">Page ${barcodeCurrentPage} / ${totalPages} <span class="text-xs ml-2">(Total: ${totalItems})</span></span>
-        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50" 
+        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
                 onclick="window.changeBarcodePage(1)" ${barcodeCurrentPage === totalPages ? "disabled" : ""}>
           Suivant &rarr;
         </button>
@@ -323,7 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.innerHTML = html;
 
-    // Gérer sélection multiple "Select All" de tout le tableau
     const selectAll = document.getElementById("bc_select_all");
     if (selectAll) {
       const allSelected = filtered.length > 0 && filtered.every((objet) => barcodeSelectedItems.has(objet.id));
@@ -353,7 +376,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Checkbox individuelle
     document.querySelectorAll(".bc-checkbox").forEach((cb) => {
       cb.addEventListener("change", (e) => {
         const objet = JSON.parse(e.target.dataset.objet.replace(/&apos;/g, "'"));
@@ -373,12 +395,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Helpers de pagination & tri (rendus globaux pour le HTML) ---
+  /**
+   * Change la page courante du tableau.
+   *
+   * @param {number} delta - +1 pour suivante, -1 pour précédente.
+   * @returns {void}
+   */
   window.changeBarcodePage = function (delta) {
     barcodeCurrentPage += delta;
     applyBarcodeFilters();
   };
 
+  /**
+   * Trie le tableau sur la colonne donnée (toggle asc/desc si déjà active).
+   *
+   * @param {string} column - Nom de la propriété à trier.
+   * @returns {void}
+   */
   window.sortBarcodeTable = function (column) {
     if (barcodeSortColumn === column) {
       barcodeSortDirection = barcodeSortDirection === "asc" ? "desc" : "asc";
@@ -390,17 +423,23 @@ document.addEventListener("DOMContentLoaded", () => {
     applyBarcodeFilters();
   };
 
-  // === Gérer la zone d'impression dynamiquement ===
+  /**
+   * Ajoute ou retire un objet de la zone d'impression et génère son SVG.
+   * Bascule en CODE128 si la génération EAN-13 échoue.
+   *
+   * @param {object} item - Objet inventaire (doit contenir id, Code_bar, Type, Sous_type, Nom).
+   * @param {boolean} add - true = ajouter, false = retirer.
+   * @returns {void}
+   */
   function toggleBarcodeInPrintZone(item, add) {
     if (add) {
       if (!codesToPrint.has(item.id)) {
         codesToPrint.add(item.id);
-        
+
         const container = document.createElement("div");
         container.className = "barcode-item flex flex-col items-center p-2 border border-gray-100 rounded bg-white shadow-sm";
         container.id = "barcode-item-container-" + item.id;
 
-        // Label catégoriel au-dessus du code-barre
         const label = document.createElement("p");
         label.className = "text-xs text-center text-gray-500 mb-2 truncate max-w-[200px]";
         label.textContent = [item.Type, item.Sous_type, item.Nom]
@@ -454,6 +493,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /**
+   * Met à jour la visibilité de la zone d'impression et le compteur affiché.
+   *
+   * @returns {void}
+   */
   function updatePrintZoneVisibility() {
     if (codesToPrint.size > 0) {
       printZone.style.display = "flex";
@@ -467,7 +511,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // === Impression ===
   btnPrint.addEventListener("click", () => {
     const printContent = printZone.innerHTML;
 

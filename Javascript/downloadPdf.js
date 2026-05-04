@@ -1,4 +1,10 @@
-// Gestion du téléchargement du PDF
+/**
+ * downloadPdf.js — Bouton de téléchargement de l'inventaire PDF.
+ *
+ * Demande confirmation puis redirige vers `php/generateInventoryPdf.php`
+ * qui force le download via FPDF.
+ */
+
 const btnDownloadPDF = document.getElementById("btn_download_pdf");
 
 if (btnDownloadPDF) {
@@ -9,7 +15,6 @@ if (btnDownloadPDF) {
     );
 
     if (confirmation) {
-      // Rediriger vers le script PHP qui génère le PDF
       window.location.href = "php/generateInventoryPdf.php";
     }
   });

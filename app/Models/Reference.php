@@ -1,14 +1,29 @@
 <?php
 
+/**
+ * Modèle d'accès au catalogue de références : tables `types`, `sous_types`, `noms_references`.
+ *
+ * Plusieurs opérations effectuent un find-or-create en cascade
+ * (type → sous-type → nom de référence) pour garantir l'unicité des entrées.
+ */
 class Reference
 {
+    /** @var PDO Connexion PDO active. */
     private PDO $conn;
 
+    /**
+     * @param PDO $conn Connexion PDO active.
+     */
     public function __construct(PDO $conn)
     {
         $this->conn = $conn;
     }
 
+    /**
+     * Construit l'arbre type → sous-type → liste de noms de références.
+     *
+     * @return array<string, array<string, list<string>>> Arbre indexé par Type puis Sous_type.
+     */
     public function getTree(): array
     {
         $stmt = $this->conn->prepare("
@@ -39,9 +54,17 @@ class Reference
         return $tree;
     }
 
+    /**
+     * Find-or-create d'une référence (type/sous-type/nom).
+     * Le sous-type vide est normalisé en `Non défini`.
+     *
+     * @param string $type Nom du type.
+     * @param string $sousType Nom du sous-type (vide accepté).
+     * @param string $nom Nom de la référence.
+     * @return bool true si une nouvelle référence a été insérée, false si elle existait déjà.
+     */
     public function create(string $type, string $sousType, string $nom): bool
     {
-        // 1. Chercher ou créer Type
         $stmtType = $this->conn->prepare("SELECT id FROM types WHERE nom_type = ?");
         $stmtType->execute([$type]);
         $typeId = $stmtType->fetchColumn();
@@ -50,7 +73,6 @@ class Reference
             $typeId = $this->conn->lastInsertId();
         }
 
-        // 2. Chercher ou créer Sous_type
         if (empty($sousType)) $sousType = 'Non défini';
         $stmtSousType = $this->conn->prepare("SELECT id FROM sous_types WHERE nom_sous_type = ? AND id_type = ?");
         $stmtSousType->execute([$sousType, $typeId]);
@@ -60,7 +82,6 @@ class Reference
             $sousTypeId = $this->conn->lastInsertId();
         }
 
-        // 3. Chercher ou créer Nom_reference
         $stmtNom = $this->conn->prepare("SELECT id FROM noms_references WHERE nom_reference = ? AND id_sous_type = ?");
         $stmtNom->execute([$nom, $sousTypeId]);
         $nomRefId = $stmtNom->fetchColumn();
@@ -72,6 +93,15 @@ class Reference
         return false;
     }
 
+    /**
+     * Recherche autocomplete sur l'un des trois niveaux de référence.
+     *
+     * @param string $type Niveau de recherche : `materiel_type`, `materiel_sous_type` ou `materiel_nom`.
+     * @param string $query Préfixe de recherche.
+     * @param string $filter Filtre type parent (sous_type/nom uniquement).
+     * @param string $filterSousType Filtre sous-type parent (nom uniquement).
+     * @return array<int, array<string, mixed>> Lignes correspondantes (max 10).
+     */
     public function search(string $type, string $query, string $filter = '', string $filterSousType = ''): array
     {
         $params = [];
@@ -139,6 +169,11 @@ class Reference
         return $stmt->fetchAll();
     }
 
+    /**
+     * Liste plate de toutes les références (id, Type, Sous_type, Nom).
+     *
+     * @return array<int, array{id:int, Type:string, Sous_type:string, Nom:string}>
+     */
     public function getAllFlat(): array
     {
         $stmt = $this->conn->prepare("
@@ -152,19 +187,24 @@ class Reference
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Supprime des références si elles ne sont plus utilisées par aucun objet.
+     * Nettoie en cascade les sous-types et types devenus vides.
+     *
+     * @param array<int, int> $ids Identifiants `noms_references` à supprimer.
+     * @return array{success:bool, deleted:int, errors:list<string>} Bilan de l'opération.
+     */
     public function delete(array $ids): array
     {
         $errors = [];
         $deleted = 0;
 
         foreach ($ids as $id) {
-            // Check if there are objects using this reference
             $checkStmt = $this->conn->prepare("SELECT COUNT(*) FROM objets WHERE id_nom_reference = ?");
             $checkStmt->execute([$id]);
             $count = $checkStmt->fetchColumn();
 
             if ($count > 0) {
-                // Get the reference name for the error message
                 $nameStmt = $this->conn->prepare("SELECT nom_reference FROM noms_references WHERE id = ?");
                 $nameStmt->execute([$id]);
                 $refName = $nameStmt->fetchColumn();
@@ -173,18 +213,15 @@ class Reference
                 continue;
             }
 
-            // Get sous_type id to check for later cleanup
             $stStmt = $this->conn->prepare("SELECT id_sous_type FROM noms_references WHERE id = ?");
             $stStmt->execute([$id]);
             $sousTypeId = $stStmt->fetchColumn();
 
             if ($sousTypeId) {
-                // Delete the reference
                 $delStmt = $this->conn->prepare("DELETE FROM noms_references WHERE id = ?");
                 $delStmt->execute([$id]);
                 $deleted++;
 
-                // Cleanup: Check if sous_type is now empty
                 $checkSt = $this->conn->prepare("SELECT COUNT(*) FROM noms_references WHERE id_sous_type = ?");
                 $checkSt->execute([$sousTypeId]);
                 if ($checkSt->fetchColumn() == 0) {
@@ -196,7 +233,6 @@ class Reference
                     $delSt->execute([$sousTypeId]);
 
                     if ($typeId) {
-                        // Cleanup: Check if type is now empty
                         $checkT = $this->conn->prepare("SELECT COUNT(*) FROM sous_types WHERE id_type = ?");
                         $checkT->execute([$typeId]);
                         if ($checkT->fetchColumn() == 0) {
@@ -211,9 +247,18 @@ class Reference
         return ['success' => count($errors) === 0, 'deleted' => $deleted, 'errors' => $errors];
     }
 
+    /**
+     * Met à jour une référence (find-or-create du type/sous-type associé)
+     * et propage le nouveau nom sur les objets liés.
+     *
+     * @param int $id Identifiant `noms_references` à modifier.
+     * @param string $type Nouveau type (créé s'il n'existe pas).
+     * @param string $sousType Nouveau sous-type (créé s'il n'existe pas).
+     * @param string $nom Nouveau nom de référence.
+     * @return bool true si la mise à jour a été effectuée, false si la combinaison existe déjà sur une autre ligne.
+     */
     public function update(int $id, string $type, string $sousType, string $nom): bool
     {
-        // 1. Chercher ou créer Type
         $stmtType = $this->conn->prepare("SELECT id FROM types WHERE nom_type = ?");
         $stmtType->execute([$type]);
         $typeId = $stmtType->fetchColumn();
@@ -222,7 +267,6 @@ class Reference
             $typeId = $this->conn->lastInsertId();
         }
 
-        // 2. Chercher ou créer Sous_type
         if (empty($sousType)) $sousType = 'Non défini';
         $stmtSousType = $this->conn->prepare("SELECT id FROM sous_types WHERE nom_sous_type = ? AND id_type = ?");
         $stmtSousType->execute([$sousType, $typeId]);
@@ -232,18 +276,15 @@ class Reference
             $sousTypeId = $this->conn->lastInsertId();
         }
 
-        // Check if another reference with same name and same sous-type exists (and is not our current one)
         $stmtCheck = $this->conn->prepare("SELECT id FROM noms_references WHERE nom_reference = ? AND id_sous_type = ? AND id != ?");
         $stmtCheck->execute([$nom, $sousTypeId, $id]);
         if ($stmtCheck->fetchColumn()) {
-            return false; // Already exists
+            return false;
         }
 
-        // Update the reference
         $stmtUpdateRef = $this->conn->prepare("UPDATE noms_references SET nom_reference = ?, id_sous_type = ? WHERE id = ?");
         $stmtUpdateRef->execute([$nom, $sousTypeId, $id]);
 
-        // Update objects with the new reference name
         $stmtUpdateObj = $this->conn->prepare("UPDATE objets SET Nom = ? WHERE id_nom_reference = ?");
         $stmtUpdateObj->execute([$nom, $id]);
 

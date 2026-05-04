@@ -1,15 +1,22 @@
 /**
- * sessionGuard.js — Détecte l'expiration de session PHP
+ * sessionGuard.js — Détection de l'expiration de la session admin PHP.
  *
- * Intercepte les réponses fetch() : si le serveur redirige vers admin.php
- * (session absente ou expirée), affiche une popup et redirige l'utilisateur.
+ * Wrappe `window.fetch` : si une réponse a suivi une redirection vers
+ * `admin.php` (page de login servie par auth_check.php), affiche un avertissement
+ * via showAlert puis redirige le navigateur vers la page de connexion.
  *
- * Dépendance : customModal.js (showAlert)
+ * Dépendance : customModal.js (showAlert).
  */
 (function () {
   const originalFetch = window.fetch;
   let sessionExpired = false;
 
+  /**
+   * Remplacement de window.fetch qui intercepte les redirections d'auth.
+   *
+   * @param {...*} args - Arguments d'origine de fetch (input, init).
+   * @returns {Promise<Response>} Réponse fetch standard, ou rejet si session expirée.
+   */
   window.fetch = async function (...args) {
     const response = await originalFetch.apply(this, args);
 
@@ -17,8 +24,6 @@
       throw new Error("Session expirée");
     }
 
-    // auth_check.php redirige vers admin.php — fetch suit la redirection
-    // silencieusement, donc on vérifie l'URL finale de la réponse
     if (response.redirected && response.url.includes("admin.php")) {
       sessionExpired = true;
 

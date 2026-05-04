@@ -1,17 +1,22 @@
 <?php
+
 /**
- * Database — Gestion de la connexion PDO
- * 
- * Principe SOLID : Single Responsibility — ne gère que la connexion BDD.
- * Principe KISS : Une seule méthode statique pour obtenir la connexion.
- * Statelessness : Chaque requête HTTP recrée la connexion, pas de persistance entre requêtes.
+ * Gestion de la connexion PDO MySQL.
+ *
+ * La connexion est mémoïsée pour la durée de la requête HTTP courante :
+ * elle n'est pas partagée entre requêtes (philosophie stateless).
  */
 class Database
 {
+    /** @var PDO|null Connexion PDO partagée pour la requête courante. */
     private static ?PDO $connection = null;
 
     /**
-     * Retourne une connexion PDO configurée via les variables d'environnement
+     * Retourne la connexion PDO, en l'instanciant lors du premier appel.
+     * Les paramètres sont lus depuis l'environnement (.env) via EnvLoader.
+     *
+     * @return PDO Connexion configurée en mode exception et fetch assoc.
+     * @throws PDOException Si la connexion échoue.
      */
     public static function getConnection(): PDO
     {
@@ -34,7 +39,9 @@ class Database
     }
 
     /**
-     * Ferme la connexion (appelé en fin de requête si nécessaire)
+     * Ferme explicitement la connexion mémoïsée.
+     *
+     * @return void
      */
     public static function close(): void
     {

@@ -1,19 +1,25 @@
-// javascript/dynamicSelects.js
-// Gère la logique des listes déroulantes en cascade pour (Type -> Sous-type -> Nom)
+/**
+ * dynamicSelects.js — Selects en cascade Type → Sous-type → Nom.
+ *
+ * Charge l'arbre des références une fois et expose `referenceTree` en global.
+ * Utilisé par les formulaires d'ajout, de consultation et de suppression.
+ */
 
 window.referenceTree = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadReferenceTree();
 
-  // Initialiser les écouteurs sur les formulaires
   initCascadeSelects("ajout");
-  initCascadeSelects("consultation", true); // true = mode filtre (ajoute "Tous les...")
-  initCascadeSelects("suppr", false, false); // disabled a été enlevé pour permettre le choix manuel
+  initCascadeSelects("consultation", true);
+  initCascadeSelects("suppr", false, false);
 });
 
 /**
- * Charge l'arbre complet des références depuis le serveur
+ * Charge l'arbre complet des références depuis le serveur,
+ * peuple les selects existants et rafraîchit `window.referenceTree`.
+ *
+ * @returns {Promise<boolean>} true si le chargement a réussi.
  */
 window.loadReferenceTree = async function () {
   try {
@@ -23,10 +29,8 @@ window.loadReferenceTree = async function () {
     if (data.success) {
       referenceTree = data.tree;
 
-      // Re-remplir les selects 'Type' initiaux existants sur la page
       populateTypes("ajout");
       populateTypes("consultation", true);
-      // Pour la suppression, on est souvent readonly/disabled mais on popule quand même les options pour pouvoir sélectionner dynamiquement via JS (scan barcode)
       populateTypes("suppr", false);
 
       console.log("✅ Arbre des références chargé :", referenceTree);
@@ -45,7 +49,13 @@ window.loadReferenceTree = async function () {
 };
 
 /**
- * Initialise les écouteurs de cascade pour un formulaire spécifique
+ * Câble les écouteurs de cascade sur les trois selects (Type/Sous-type/Nom)
+ * d'un formulaire identifié par son préfixe (`ajout`, `consultation`, `suppr`).
+ *
+ * @param {string} formPrefix - Préfixe des IDs des selects (ex: `type_materiel_<prefix>`).
+ * @param {boolean} [isFilterMode=false] - Ajoute des options "Tous les..." pour filtrage.
+ * @param {boolean} [isDisabled=false] - Force les selects à rester désactivés (mode lecture seule).
+ * @returns {void}
  */
 function initCascadeSelects(
   formPrefix,
@@ -60,16 +70,13 @@ function initCascadeSelects(
 
   if (!typeSelect || !sousTypeSelect || !nomSelect) return;
 
-  // Au changement du Type
   typeSelect.addEventListener("change", () => {
     const selectedType = typeSelect.value;
 
-    // Vider les sous-listes
     sousTypeSelect.innerHTML = "";
     nomSelect.innerHTML = "";
 
     if (!selectedType) {
-      // Option vide ou "Tous"
       addDefaultOption(
         sousTypeSelect,
         isFilterMode ? "Tous les sous-types" : "Sélectionner un sous-type",
@@ -81,11 +88,9 @@ function initCascadeSelects(
       sousTypeSelect.disabled = true;
       nomSelect.disabled = true;
     } else {
-      // Remplir Sous-types
       const sousTypes = Object.keys(referenceTree[selectedType] || {});
 
       if (sousTypes.length === 1 && sousTypes[0] === "") {
-        // Aucun sous-type distinct pour ce type
         addDefaultOption(
           sousTypeSelect,
           isFilterMode ? "Tous les sous-types" : "(Aucun sous-type)",
@@ -107,7 +112,6 @@ function initCascadeSelects(
         if (!isDisabled) sousTypeSelect.disabled = false;
       }
 
-      // On laisse l'événement 'change' sur sousTypeSelect peupler les Noms
       addDefaultOption(
         nomSelect,
         isFilterMode ? "Tous les noms" : "Sélectionner un nom",
@@ -115,11 +119,9 @@ function initCascadeSelects(
       nomSelect.disabled = true;
     }
 
-    // Déclencher events potentiels liés
     dispatchChangeEvent(sousTypeSelect);
   });
 
-  // Au changement du Sous-type
   sousTypeSelect.addEventListener("change", () => {
     const selectedType = typeSelect.value;
     const selectedSousType = sousTypeSelect.value;
@@ -139,12 +141,12 @@ function initCascadeSelects(
     let isPlaceholderSelected = false;
     const sousTypes = Object.keys(referenceTree[selectedType] || {});
     if (sousTypes.length === 1 && sousTypes[0] === "") {
-      isPlaceholderSelected = false; // Seule option valide
+      isPlaceholderSelected = false;
     } else if (
       sousTypeSelect.selectedIndex === 0 ||
       sousTypeSelect.value === ""
     ) {
-      isPlaceholderSelected = true; // "Sélectionner un..." ou "Tous les..." est choisi
+      isPlaceholderSelected = true;
     }
 
     if (isPlaceholderSelected) {
@@ -190,18 +192,18 @@ function initCascadeSelects(
 }
 
 /**
- * Remplit le select "Type" avec les clés de l'arbre
+ * Remplit le select "Type" avec les clés racines de `referenceTree`
+ * et préserve la valeur courante si elle existe encore.
+ *
+ * @param {string} formPrefix - Préfixe des IDs (ex: `ajout`).
+ * @param {boolean} [isFilterMode=false] - Ajoute une option "Tous les types".
+ * @returns {void}
  */
 function populateTypes(formPrefix, isFilterMode = false) {
   const typeSelect = document.getElementById(`type_materiel_${formPrefix}`);
-  const sousTypeSelect = document.getElementById(
-    `sous_type_materiel_${formPrefix}`,
-  );
-  const nomSelect = document.getElementById(`nom_materiel_${formPrefix}`);
 
   if (!typeSelect) return;
 
-  // Conserver la sélection actuelle si possible
   const currentVal = typeSelect.value;
 
   typeSelect.innerHTML = "";
@@ -221,12 +223,15 @@ function populateTypes(formPrefix, isFilterMode = false) {
     typeSelect.value = currentVal;
   }
 
-  // Si on vient de recharger, on relance la cascade
   dispatchChangeEvent(typeSelect);
 }
 
 /**
- * Construit l'option par défaut d'un select
+ * Insère une option `value=""` (placeholder ou "Tous les...") dans un select.
+ *
+ * @param {HTMLSelectElement} selectConfig - Select cible.
+ * @param {string} text - Libellé affiché.
+ * @returns {void}
  */
 function addDefaultOption(selectConfig, text) {
   const option = document.createElement("option");
@@ -235,6 +240,12 @@ function addDefaultOption(selectConfig, text) {
   selectConfig.appendChild(option);
 }
 
+/**
+ * Émet un événement `change` synthétique sur un élément.
+ *
+ * @param {Element} element - Élément cible.
+ * @returns {void}
+ */
 function dispatchChangeEvent(element) {
   if ("createEvent" in document) {
     var evt = document.createEvent("HTMLEvents");
@@ -246,8 +257,17 @@ function dispatchChangeEvent(element) {
 }
 
 /**
- * Utilisé principalement par le scan de code-barre pour
- * définir dynamiquement les 3 valeurs d'un coup
+ * Définit en une fois les trois valeurs Type/Sous-type/Nom d'un formulaire,
+ * typiquement utilisée après scan d'un code-barres.
+ *
+ * Les setTimeout permettent à chaque cascade de peupler ses options
+ * avant que la suivante n'essaie d'y sélectionner une valeur.
+ *
+ * @param {string} formPrefix - Préfixe des IDs de selects.
+ * @param {string} typeVal - Valeur Type à appliquer.
+ * @param {string|null} sousTypeVal - Valeur Sous-type (null/'' = Aucun sous-type).
+ * @param {string} nomVal - Valeur Nom à appliquer.
+ * @returns {void}
  */
 window.setSelectCascadeValues = function (
   formPrefix,
@@ -263,22 +283,19 @@ window.setSelectCascadeValues = function (
 
   if (!typeSelect || !sousTypeSelect || !nomSelect) return;
 
-  // Set Type
   if (typeVal && referenceTree[typeVal]) {
     typeSelect.value = typeVal;
-    dispatchChangeEvent(typeSelect); // Remplit les sous-types
+    dispatchChangeEvent(typeSelect);
 
-    // Timeout pour laisser le temps au script de peupler
     setTimeout(() => {
-      const stVal = sousTypeVal || ""; // Si null, utilise "" (Aucun sous-type)
+      const stVal = sousTypeVal || "";
       if (referenceTree[typeVal][stVal]) {
         sousTypeSelect.value = stVal;
-        dispatchChangeEvent(sousTypeSelect); // Remplit les noms
+        dispatchChangeEvent(sousTypeSelect);
 
         setTimeout(() => {
           if (nomVal) {
             nomSelect.value = nomVal;
-            // On dispatch le change pour que les vues (comme consultation) se mettent à jour si besoin
             dispatchChangeEvent(nomSelect);
           }
         }, 10);

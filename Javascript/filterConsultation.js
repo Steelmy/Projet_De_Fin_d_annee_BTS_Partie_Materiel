@@ -1,10 +1,17 @@
-// Gestion du filtrage de l'inventaire dans la section consultation
-// Utilise autocomplete_types_noms.js pour les champs Type et Nom
+/**
+ * filterConsultation.js — Filtres + tri + pagination de la vue de consultation,
+ * et bascule entre la vue tableau et la vue groupée par caisse.
+ *
+ * Charge tout l'inventaire en mémoire au démarrage et applique les filtres
+ * en local (pas de requête au serveur à chaque saisie).
+ */
 
-let allInventory = []; // Stockage de tous les objets
-let isCaissesViewActive = false; // État de la vue caisses
+/** @type {Array<object>} Inventaire complet chargé une fois. */
+let allInventory = [];
 
-// Sélecteurs
+/** @type {boolean} true quand la vue groupée par caisses est active. */
+let isCaissesViewActive = false;
+
 const typeConsultation = document.getElementById("type_materiel_consultation");
 const sousTypeConsultation = document.getElementById(
   "sous_type_materiel_consultation",
@@ -27,10 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("✅ Initialisation filtres consultation");
 
-  // Charger l'inventaire complet
   loadAllInventory();
 
-  // Listener pour la checkbox "Voir uniquement les caisses"
   const toggleCaisseCheckbox = document.getElementById(
     "toggle_caisse_consultation",
   );
@@ -45,27 +50,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Écouter changement de Type → filtrer
   typeConsultation.addEventListener("change", () => {
     applyFilters();
   });
 
-  // Écouter changement de Sous-type → filtrer
   sousTypeConsultation.addEventListener("change", () => {
     applyFilters();
   });
 
-  // Écouter changement de Nom → filtrer
   nomConsultation.addEventListener("change", () => {
     applyFilters();
   });
 
-  // Écouter saisie Code-barre → filtrer
   codeBarreConsultation.addEventListener("input", () => {
     applyFilters();
   });
 
-  // Gestion Entrée pour scan rapide
   codeBarreConsultation.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -74,9 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// AUTO-REMPLIR type + nom depuis le code-barre (comme dans deleteItem.js)
-// Cette fonction n'est plus appelée directement par les listeners de codeBarreConsultation
-// mais pourrait être utile si un autre mécanisme la déclenche.
+/**
+ * Auto-remplit Type et Nom à partir d'un code-barres scanné, puis filtre.
+ * Conservée comme helper externe (pas câblée par défaut sur l'input).
+ *
+ * @param {string} code - Code-barres EAN-13.
+ * @returns {Promise<void>}
+ */
 async function updateConsultationFields(code) {
   if (!code) {
     applyFilters();
@@ -94,15 +98,11 @@ async function updateConsultationFields(code) {
 
       console.log("📦 Objet trouvé:", mat);
 
-      // Remplir Type
       typeConsultation.value = mat.type_materiel;
-      // Déclencher change pour que autocomplete mette à jour
       typeConsultation.dispatchEvent(new Event("change", { bubbles: true }));
 
-      // Remplir Nom
       nomConsultation.value = mat.nom_materiel;
 
-      // Appliquer les filtres
       applyFilters();
     } else {
       console.log("⚠️ Aucun objet trouvé pour ce code-barre");
@@ -114,7 +114,11 @@ async function updateConsultationFields(code) {
   }
 }
 
-// Charger tout l'inventaire
+/**
+ * Charge tout l'inventaire depuis le serveur et déclenche un premier rendu.
+ *
+ * @returns {Promise<void>}
+ */
 async function loadAllInventory() {
   console.log("📦 Chargement inventaire...");
 
@@ -127,7 +131,7 @@ async function loadAllInventory() {
     if (data.success && data.data) {
       allInventory = data.data;
       console.log("✅ Inventaire chargé:", allInventory.length, "objets");
-      applyFilters(); // Afficher tout initialement
+      applyFilters();
     } else {
       console.error("❌ Pas de données");
     }
@@ -136,7 +140,11 @@ async function loadAllInventory() {
   }
 }
 
-// Afficher la vue groupée des caisses
+/**
+ * Construit et affiche la vue groupée par caisse (un mini-tableau par caisse).
+ *
+ * @returns {Promise<void>}
+ */
 async function displayCaissesView() {
   console.log("📦 Chargement vue caisses...");
 
@@ -154,8 +162,6 @@ async function displayCaissesView() {
 
     const caisses = data.data;
 
-    // Masquer les filtres et tableau normal, afficher conteneur caisses
-    const filterSection = document.getElementById("filters_consultation");
     const inventoryDiv = document.getElementById("full_inventory");
     const caissesView = document.getElementById("caisses_view");
 
@@ -174,7 +180,6 @@ async function displayCaissesView() {
     }
 
     caisses.forEach((caisse) => {
-      // Le PHP a déjà décodé le JSON, donc Contenu est déjà un tableau
       const objets = Array.isArray(caisse.Contenu) ? caisse.Contenu : [];
 
       const caisseDiv = document.createElement("div");
@@ -223,10 +228,9 @@ async function displayCaissesView() {
       if (objets.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="text-center p-5 text-gray-400 italic text-sm border-t border-gray-100">Aucun objet dans cette caisse</td></tr>`;
       } else {
-        objets.forEach((objet, index) => {
+        objets.forEach((objet) => {
           const tr = document.createElement("tr");
 
-          // Couleurs pour états
           let etatStyle = "text-green-600 font-medium";
           if (objet.Etat && objet.Etat.toLowerCase() === "réservé") {
             etatStyle = "text-orange-500 font-semibold";
@@ -259,30 +263,34 @@ async function displayCaissesView() {
   }
 }
 
-// Restaurer la vue normale (tableau + filtres)
+/**
+ * Restaure la vue tableau (et masque la vue groupée par caisses).
+ *
+ * @returns {void}
+ */
 function restoreNormalView() {
   console.log("🔄 Restauration vue normale...");
 
-  const filterSection = document.getElementById("filters_consultation");
   const inventoryDiv = document.getElementById("full_inventory");
   const caissesView = document.getElementById("caisses_view");
-  const modeSelector = document.getElementById("modeSelector");
 
-  // Afficher tableau, masquer caisses
   if (inventoryDiv) inventoryDiv.style.display = "block";
   if (caissesView) caissesView.style.display = "none";
 
-  // Recharger les données du tableau
   applyFilters();
 }
 
-// Pagination & Tri globaux pour l'inventaire complet
 let currentPage = 1;
 const itemsPerPage = 15;
 let currentSortColumn = null;
 let currentSortDirection = "asc";
 
-// FONCTION PRINCIPALE : Appliquer les filtres
+/**
+ * Filtre `allInventory` selon les champs courants, applique le tri,
+ * pagine et envoie la page courante au tableau d'inventaire.
+ *
+ * @returns {void}
+ */
 function applyFilters() {
   const typeValue = typeConsultation.value.trim();
   const sousTypeValue = sousTypeConsultation.value.trim();
@@ -291,29 +299,24 @@ function applyFilters() {
 
   let filtered = [...allInventory];
 
-  // Priorité 1 : Code-barre (recherche partielle)
   if (codeBarreValue) {
     filtered = filtered.filter((item) =>
       item.Code_bar.toLowerCase().includes(codeBarreValue.toLowerCase()),
     );
   }
 
-  // Priorité 2 : Type
   if (typeValue) {
     filtered = filtered.filter((item) => item.Type === typeValue);
   }
 
-  // Priorité 3 : Sous-type
   if (sousTypeValue) {
     filtered = filtered.filter((item) => item.Sous_type === sousTypeValue);
   }
 
-  // Priorité 4 : Nom
   if (nomValue) {
     filtered = filtered.filter((item) => item.Nom === nomValue);
   }
 
-  // TRI (DRY : utilise sortUtils.js)
   if (currentSortColumn) {
     filtered.sort((a, b) =>
       window.localeSortComparator(
@@ -325,7 +328,6 @@ function applyFilters() {
     );
   }
 
-  // Update icons
   const sortColumns = ["Type", "Sous_type", "Nom", "Etat", "Utilisateur", "Nom_caisse", "created_at"];
   sortColumns.forEach((col) => {
     const iconSpan = document.getElementById(`sort_icon_${col}`);
@@ -342,7 +344,6 @@ function applyFilters() {
 
   console.log("✅ Résultats filtrés:", filtered.length);
 
-  // PAGINATION
   const totalItems = filtered.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
@@ -354,10 +355,8 @@ function applyFilters() {
   const endIndex = startIndex + itemsPerPage;
   const paginatedItems = filtered.slice(startIndex, endIndex);
 
-  // Mettre à jour le tableau avec la page courante
   updateInventoryTable(paginatedItems);
 
-  // Mettre à jour la pagination
   const btnPrev = document.getElementById("btn_prev_page");
   const btnNext = document.getElementById("btn_next_page");
   const pageInfo = document.getElementById("page_info");
@@ -368,17 +367,27 @@ function applyFilters() {
     btnNext.disabled = currentPage === totalPages;
   }
 
-  // Mettre à jour le compteur global
   updateResultsCounter(filtered.length, allInventory.length);
 }
 
-// Changer de page (+1 ou -1)
+/**
+ * Change la page courante du tableau de consultation.
+ *
+ * @param {number} delta - +1 pour suivante, -1 pour précédente.
+ * @returns {void}
+ */
 window.changePage = function (delta) {
   currentPage += delta;
   applyFilters();
 };
 
-// Trier l'inventaire au clic sur l'en-tête
+/**
+ * Trie le tableau de consultation sur la colonne donnée
+ * (toggle asc/desc si déjà active, retour à la page 1).
+ *
+ * @param {string} column - Nom de la propriété à trier.
+ * @returns {void}
+ */
 window.sortInventory = function (column) {
   if (currentSortColumn === column) {
     currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
@@ -386,11 +395,16 @@ window.sortInventory = function (column) {
     currentSortColumn = column;
     currentSortDirection = "asc";
   }
-  currentPage = 1; // Retour page 1 au tri
+  currentPage = 1;
   applyFilters();
 };
 
-// Mettre à jour le tableau d'inventaire
+/**
+ * Réécrit le `<tbody>` du tableau d'inventaire avec les items fournis.
+ *
+ * @param {Array<object>} data - Items à afficher (page courante).
+ * @returns {void}
+ */
 function updateInventoryTable(data) {
   const tbody = document.querySelector("#inventory_table tbody");
   if (!tbody) {
@@ -414,7 +428,6 @@ function updateInventoryTable(data) {
     compteurLignes++;
     const tr = document.createElement("tr");
 
-    // Construire le nom complet utilisateur (Prénom + Nom_utilisateur)
     let utilisateur = "-";
     if (item.Prénom && item.Nom_utilisateur) {
       utilisateur = `${item.Prénom} ${item.Nom_utilisateur}`;
@@ -424,9 +437,7 @@ function updateInventoryTable(data) {
       utilisateur = item.Nom_utilisateur;
     }
 
-    // Déterminer la couleur selon l'état
     let etatColor = "text-green-600 font-medium";
-
     if (item.Etat.toLowerCase() === "réservé") {
       etatColor = "text-orange-500 font-bold";
     } else if (item.Etat.toLowerCase() === "emprunté") {
@@ -442,7 +453,6 @@ function updateInventoryTable(data) {
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom}</td>
       <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${item.Etat}</td>
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
-      <!-- <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom_caisse || "-"}</td> -->
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : "-"}</td>
       <td class="p-4.5 text-center text-sm align-middle">
         <button
@@ -459,7 +469,13 @@ function updateInventoryTable(data) {
   console.log("✅ Tableau rempli:", compteurLignes, "lignes insérées");
 }
 
-// Mettre à jour le compteur de résultats
+/**
+ * Met à jour le badge "X sur Y" du nombre de résultats affichés.
+ *
+ * @param {number} filtered - Nombre d'items après filtrage.
+ * @param {number} total - Nombre total d'items chargés.
+ * @returns {void}
+ */
 function updateResultsCounter(filtered, total) {
   const counterSpan = document.getElementById("inventory_total");
   if (counterSpan) {
@@ -471,35 +487,40 @@ function updateResultsCounter(filtered, total) {
   }
 }
 
-// Réinitialiser tous les filtres
+/**
+ * Réinitialise les filtres, le tri et la pagination de la consultation.
+ *
+ * @returns {void}
+ */
 function resetFiltersConsultation() {
   codeBarreConsultation.value = "";
   typeConsultation.value = "";
   sousTypeConsultation.value = "";
   nomConsultation.value = "";
 
-  // Réinitialiser la pagination et le tri
   currentPage = 1;
   currentSortColumn = null;
   currentSortDirection = "asc";
 
-  // Déclencher l'événement 'change' sur le type pour réinitialiser
-  // les options des listes déroulantes sous-type et nom via la cascade
   typeConsultation.dispatchEvent(new Event("change"));
 }
 
-// Remplir automatiquement le type depuis le nom sélectionné
+/**
+ * Pré-remplit le filtre Type quand on sélectionne un Nom seul,
+ * en cherchant un objet inventaire qui porte ce nom.
+ *
+ * @param {string} nomValue - Nom de référence sélectionné.
+ * @returns {Promise<void>}
+ */
 async function autoFillTypeFromNom(nomValue) {
   if (!nomValue || !allInventory.length) return;
 
-  // Chercher un objet avec ce nom
   const objet = allInventory.find((item) => item.Nom === nomValue);
 
   if (objet && objet.Type) {
     console.log("🔄 Remplissage auto Type depuis Nom:", objet.Type);
     typeConsultation.value = objet.Type;
 
-    // Recharger les noms pour ce type via l'autocomplete
     if (window.nomAutocompleteConsult) {
       window.nomAutocompleteConsult.dataFetcher = async () => {
         const response = await fetch(
@@ -513,8 +534,13 @@ async function autoFillTypeFromNom(nomValue) {
   }
 }
 
-// Exposer pour utilisation externe
 window.resetFiltersConsultation = resetFiltersConsultation;
+
+/**
+ * Recharge l'inventaire depuis le serveur et rafraîchit la vue active.
+ *
+ * @returns {Promise<void>}
+ */
 window.refreshInventory = async function () {
   await loadAllInventory();
   if (isCaissesViewActive) {

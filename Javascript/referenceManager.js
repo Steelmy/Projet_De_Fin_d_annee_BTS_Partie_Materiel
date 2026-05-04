@@ -1,18 +1,32 @@
+/**
+ * referenceManager.js — Modale "Gestion des références" (catalogue Type/Sous-type/Nom).
+ *
+ * Deux onglets :
+ *   - "Ajouter une référence" : formulaire create/update avec selects + option "+ Nouveau...".
+ *   - "Liste" : tableau avec sélection multiple (suppression) et édition à l'unité.
+ *
+ * Les selects Type et Sous-type partagent un placeholder spécial NEW_VALUE
+ * qui révèle un input texte pour saisir une nouvelle valeur.
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     const refModal = document.getElementById('reference-modal');
     const refForm = document.getElementById('form_create_reference');
     const refMessage = document.getElementById('ref_message');
 
-    // Sélecteurs Type/Sous-type avec option "+ Nouveau..."
     const typeSelect = document.getElementById('ref_type_select');
     const typeNewInput = document.getElementById('ref_type_new');
     const sousTypeSelect = document.getElementById('ref_sous_type_select');
     const sousTypeNewInput = document.getElementById('ref_sous_type_new');
 
+    /** Marqueur de l'option "+ Nouveau..." dans les selects Type/Sous-type. */
     const NEW_VALUE = '__new__';
 
     /**
-     * Peuple le select Type depuis referenceTree (global, chargé par dynamicSelects.js)
+     * Peuple le select Type depuis `window.referenceTree`
+     * (chargé par dynamicSelects.js) et ajoute l'option "+ Nouveau type...".
+     *
+     * @returns {void}
      */
     function populateRefTypeSelect() {
         if (!typeSelect) return;
@@ -27,14 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         typeSelect.appendChild(createOption(NEW_VALUE, '+ Nouveau type...'));
 
-        // Reset sous-type
         resetSousTypeSelect();
         typeNewInput.classList.add('hidden');
         typeNewInput.value = '';
     }
 
     /**
-     * Peuple le select Sous-type en cascade depuis le type sélectionné
+     * Peuple le select Sous-type pour le type sélectionné.
+     *
+     * @param {string} selectedType - Type parent.
+     * @returns {void}
      */
     function populateRefSousTypeSelect(selectedType) {
         if (!sousTypeSelect) return;
@@ -53,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const sousTypes = Object.keys(tree[selectedType]);
 
         if (sousTypes.length === 1 && sousTypes[0] === '') {
-            // Pas de sous-types pour ce type
             sousTypeSelect.appendChild(createOption('', '(Aucun sous-type)'));
             sousTypeSelect.disabled = true;
         } else {
@@ -67,6 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sousTypeSelect.appendChild(createOption(NEW_VALUE, '+ Nouveau sous-type...'));
     }
 
+    /**
+     * Réinitialise le select Sous-type à son placeholder par défaut.
+     *
+     * @returns {void}
+     */
     function resetSousTypeSelect() {
         if (!sousTypeSelect) return;
         sousTypeSelect.innerHTML = '';
@@ -76,6 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sousTypeNewInput.value = '';
     }
 
+    /**
+     * Crée un élément `<option>` configuré.
+     *
+     * @param {string} value - Attribut value.
+     * @param {string} text - Texte affiché.
+     * @returns {HTMLOptionElement}
+     */
     function createOption(value, text) {
         const opt = document.createElement('option');
         opt.value = value;
@@ -83,14 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return opt;
     }
 
-    // --- Listeners sur les selects ---
     if (typeSelect) {
         typeSelect.addEventListener('change', () => {
             const val = typeSelect.value;
             if (val === NEW_VALUE) {
                 typeNewInput.classList.remove('hidden');
                 typeNewInput.focus();
-                // Quand on crée un nouveau type, le sous-type est libre aussi
                 resetSousTypeSelect();
                 sousTypeSelect.disabled = false;
                 sousTypeSelect.innerHTML = '';
@@ -117,7 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Retourne la valeur effective d'un champ select+input new
+     * Renvoie la valeur effective d'un couple (select, input) :
+     * texte du nouvel input si "+ Nouveau..." est sélectionné, sinon valeur du select.
+     *
+     * @param {HTMLSelectElement} select - Select source.
+     * @param {HTMLInputElement} newInput - Input "nouvelle valeur" associé.
+     * @returns {string} Valeur effective trimée.
      */
     function getEffectiveValue(select, newInput) {
         if (select.value === NEW_VALUE) {
@@ -126,7 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return select.value;
     }
 
-    // Make reset function available globally
+    /**
+     * Réinitialise le formulaire d'ajout/édition de référence
+     * et restaure les libellés par défaut (mode création).
+     *
+     * @returns {void}
+     */
     window.resetReferenceForm = function() {
         if (refForm) refForm.reset();
 
@@ -150,7 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Make toggle function available globally
+    /**
+     * Ouvre ou ferme la modale de gestion des références.
+     *
+     * @param {boolean} show - true pour ouvrir, false pour fermer.
+     * @returns {void}
+     */
     window.toggleReferenceModal = function(show) {
         if (!refModal) return;
 
@@ -159,17 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
             refModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
-            // Peupler les selects avec les données à jour
             populateRefTypeSelect();
 
-            // Clear previous messages
             if (refMessage) {
                 refMessage.classList.add('hidden');
                 refMessage.className = 'text-sm text-center mt-2 hidden font-medium';
                 refMessage.textContent = '';
             }
 
-            // Focus first select
             setTimeout(() => {
                 if (typeSelect) typeSelect.focus();
             }, 100);
@@ -183,14 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Close on escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && refModal && !refModal.classList.contains('hidden')) {
             window.toggleReferenceModal(false);
         }
     });
 
-    // Handle form submission
     if (refForm) {
         refForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -206,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Disable button and show loading state
                 const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="opacity-70">Enregistrement...</span>';
@@ -237,18 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     showMessage(data.message || 'Référence ajoutée avec succès !', 'success');
 
-                    // Reset form
                     refForm.reset();
 
-                    // Force refresh of selects by pulling the updated tree
                     if (window.loadReferenceTree) {
                         await window.loadReferenceTree();
                     }
 
-                    // Re-peupler les selects du modal avec l'arbre mis à jour
                     populateRefTypeSelect();
 
-                    // Close modal after short delay
                     setTimeout(() => {
                         window.toggleReferenceModal(false);
                     }, 1500);
@@ -261,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Erreur:', error);
                 showMessage('Erreur de connexion avec le serveur.', 'error');
             } finally {
-                // Re-enable button
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Enregistrer';
                 submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
@@ -269,6 +298,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /**
+     * Affiche un message coloré dans la modale d'ajout/édition.
+     *
+     * @param {string} msg - Texte du message.
+     * @param {"success"|"error"} type - Catégorie qui définit la couleur.
+     * @returns {void}
+     */
     function showMessage(msg, type) {
         if (!refMessage) return;
 
@@ -282,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LOGIQUE ONGLETS & LISTE ---
     const viewAdd = document.getElementById('ref-view-add');
     const viewList = document.getElementById('ref-view-list');
     const tabAdd = document.getElementById('tab-ref-add');
@@ -293,6 +328,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedCountSpan = document.getElementById('ref-selected-count');
     const listMessage = document.getElementById('ref-list-message');
 
+    /**
+     * Bascule entre les onglets "Ajouter" et "Liste" de la modale.
+     *
+     * @param {"add"|"list"} tabName - Onglet cible.
+     * @returns {void}
+     */
     window.switchReferenceTab = function(tabName) {
         if (tabName === 'add') {
             viewAdd.classList.remove('hidden');
@@ -303,9 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tabList.classList.remove('border-b-2', 'border-custom-brandLight', 'text-custom-brandLight');
             tabList.classList.add('text-gray-500', 'hover:text-gray-800');
-            
-            // If we're an explicit click on the "Ajouter" tab and had an edit ID set, reset the form
-            // Or if the tab name is literally "Ajouter..." we don't necessarily reset unless needed, but we check if we were in edit mode
+
             const editId = document.getElementById('ref_edit_id');
             if (editId && editId.value && event && event.target && event.target.id === 'tab-ref-add') {
                 window.resetReferenceForm();
@@ -324,6 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    /**
+     * Charge la liste plate des références depuis le serveur et la rend.
+     *
+     * @returns {Promise<void>}
+     */
     window.loadReferencesList = async function() {
         if (!tableBody) return;
         tableBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Chargement des références...</td></tr>';
@@ -346,6 +390,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    /**
+     * Construit le tableau HTML des références.
+     *
+     * @param {Array<{id:number, Type:string, Sous_type:string, Nom:string}>} refs - Lignes à afficher.
+     * @returns {void}
+     */
     function renderReferencesTable(refs) {
         if (refs.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Aucune référence trouvée.</td></tr>';
@@ -362,6 +412,12 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    /**
+     * Échappe les caractères HTML pour insertion sécurisée via innerHTML.
+     *
+     * @param {*} unsafe - Valeur à échapper.
+     * @returns {string}
+     */
     function escapeHtml(unsafe) {
         return (unsafe || '').toString()
              .replace(/&/g, "&amp;")
@@ -371,12 +427,24 @@ document.addEventListener('DOMContentLoaded', () => {
              .replace(/'/g, "&#039;");
     }
 
+    /**
+     * Coche/décoche toutes les références listées en suivant l'état d'une checkbox source.
+     *
+     * @param {HTMLInputElement} source - Checkbox "tout sélectionner".
+     * @returns {void}
+     */
     window.toggleAllReferences = function(source) {
         const checkboxes = document.querySelectorAll('.ref-checkbox');
         checkboxes.forEach(cb => cb.checked = source.checked);
         updateDeleteButtonState();
     };
 
+    /**
+     * Met à jour le compteur de sélection et l'état des boutons d'action
+     * (Supprimer toujours, Modifier seulement si une seule ligne est cochée).
+     *
+     * @returns {void}
+     */
     window.updateDeleteButtonState = function() {
         if (!selectedCountSpan || !btnDelete) return;
         const checkboxes = document.querySelectorAll('.ref-checkbox:checked');
@@ -402,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnEdit.disabled = false;
                 btnEdit.classList.remove('hidden', 'cursor-not-allowed');
                 btnEdit.classList.add('cursor-pointer');
-                btnEdit.style.backgroundColor = '#fbbf24'; // Yellow-ish
+                btnEdit.style.backgroundColor = '#fbbf24';
             } else {
                 btnEdit.disabled = true;
                 btnEdit.classList.add('hidden', 'cursor-not-allowed');
@@ -412,6 +480,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    /**
+     * Supprime les références cochées (avec confirmation).
+     * Recharge la liste et l'arbre des références en cas de succès partiel ou total.
+     *
+     * @returns {Promise<void>}
+     */
     window.deleteSelectedReferences = async function() {
         const checkboxes = document.querySelectorAll('.ref-checkbox:checked');
         const ids = Array.from(checkboxes).map(cb => cb.value);
@@ -460,6 +534,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    /**
+     * Affiche un message coloré sous le tableau de la liste des références.
+     *
+     * @param {string} msg - Texte du message.
+     * @param {"success"|"error"} type - Catégorie qui définit la couleur.
+     * @returns {void}
+     */
     function showListMessage(msg, type) {
         if (!listMessage) return;
         listMessage.textContent = msg;
@@ -472,6 +553,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Masque et vide le message contextuel sous le tableau.
+     *
+     * @returns {void}
+     */
     function hideListMessage() {
         if (listMessage) {
             listMessage.classList.add('hidden');
@@ -479,36 +565,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Bascule sur l'onglet "Ajouter" en mode édition pour la référence cochée.
+     * Pré-remplit les selects (en bascule "+ Nouveau..." si la valeur n'existe plus).
+     *
+     * @returns {void}
+     */
     window.editSelectedReference = function() {
         const checkboxes = document.querySelectorAll('.ref-checkbox:checked');
         if (checkboxes.length !== 1) return;
-        
+
         const activeRefId = checkboxes[0].value;
         const tr = checkboxes[0].closest('tr');
         const type = tr.children[1].textContent.trim();
         const sousType = tr.children[2].textContent.trim() === '-' ? '' : tr.children[2].textContent.trim();
         const nom = tr.children[3].textContent.trim();
 
-        // Bascule vers l'onglet Add pour l'éditer
         window.switchReferenceTab('add');
-        
+
         document.getElementById('ref_edit_id').value = activeRefId;
-        
+
         const tabAdd = document.getElementById('tab-ref-add');
         if (tabAdd) tabAdd.textContent = 'Modifier la référence';
 
         const descAdd = document.getElementById('ref-view-add-desc');
         if (descAdd) descAdd.textContent = "Modifiez les informations de cette référence. Tous les objets matériels associés seront mis à jour avec le nouveau nom.";
 
-        // Remplir les champs avec un petit délai pour être sûr que l'UI est prête
+        // Léger délai : laisse l'UI se stabiliser après le switch d'onglet avant de remplir les selects
         setTimeout(() => {
             if (typeSelect) {
-                // Cherche si l'option existe, sinon on met "Nouveau..."
                 let typeExists = false;
                 Array.from(typeSelect.options).forEach(opt => {
                     if (opt.value === type) typeExists = true;
                 });
-                
+
                 if (typeExists) {
                     typeSelect.value = type;
                     typeNewInput.classList.add('hidden');
@@ -518,12 +608,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     typeNewInput.classList.remove('hidden');
                     typeNewInput.value = type;
                 }
-                
-                // Déclencher le handle de cascade manuellement
+
                 if (typeSelect.value !== NEW_VALUE) {
                     populateRefSousTypeSelect(typeSelect.value);
                 } else {
-                    // Si on a dû forcer en + Nouveau... la cascade doit être vide
                     if (sousTypeSelect) {
                         sousTypeSelect.disabled = false;
                         sousTypeSelect.innerHTML = '';

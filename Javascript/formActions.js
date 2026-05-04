@@ -1,10 +1,12 @@
 /**
- * formActions.js
- * Gère les actions de réinitialisation des formulaires et le nettoyage des champs dépendants.
+ * formActions.js — Boutons "Réinitialiser" des formulaires
+ * et nettoyage des champs dépendants quand le code-barres est vidé.
+ *
+ * Conserve l'état de la checkbox "Caisse" pendant le reset
+ * pour ne pas perdre la sélection du panneau actif.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // --- 1. Gestion du bouton Réinitialiser ---
   const resetButtons = document.querySelectorAll(".btn-reset");
 
   resetButtons.forEach((btn) => {
@@ -19,8 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  /**
+   * Réinitialise un formulaire en préservant la checkbox "Caisse" associée
+   * et en nettoyant les sous-formulaires de caisse correspondants.
+   *
+   * @param {HTMLFormElement} form - Formulaire à réinitialiser.
+   * @returns {void}
+   */
   function resetForm(form) {
-    // 1. Sauvegarder l'état de la checkbox Caisse si elle existe
     let toggleCaisse = null;
     let wasChecked = false;
 
@@ -33,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
       wasChecked = toggleCaisse.checked;
     }
 
-    // 2. Reset standard HTML
     form.reset();
 
     const typeSelect = form.querySelector('select[id^="type_materiel_"]');
@@ -41,14 +48,11 @@ document.addEventListener("DOMContentLoaded", () => {
       typeSelect.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
-    // 3. Restaurer l'état de la checkbox
     if (toggleCaisse) {
       toggleCaisse.checked = wasChecked;
-      // Trigger change event to ensure UI updates (show/hide panels)
       toggleCaisse.dispatchEvent(new Event("change"));
     }
 
-    // 4. Custom logic based on the specific form being reset
     if (
       form.id === "form_ajout_caisse" ||
       (wasChecked && form.id === "form_ajout")
@@ -76,9 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-
-
-    // 4.5 Si c'est un formulaire principal ET une caisse était cochée, on reset le formulaire caisse aussi
     if (wasChecked) {
       let crateFormId = null;
       if (form.id === "form_ajout") crateFormId = "form_ajout_caisse";
@@ -89,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const crateForm = document.getElementById(crateFormId);
         if (crateForm) {
           crateForm.reset();
-          // Clear hidden inputs in crate form too
           const crateHidden = crateForm.querySelectorAll(
             "input[type='hidden']",
           );
@@ -98,28 +98,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // 5. Clear visual autocomplete suggestions
     const suggestions = document.querySelectorAll(".autocomplete-suggestions");
     suggestions.forEach((s) => (s.style.display = "none"));
 
-    // 6. Clear hidden ID fields in main form
     const hiddenInputs = form.querySelectorAll("input[type='hidden']");
     hiddenInputs.forEach((input) => (input.value = ""));
-
-
   }
 
-  // --- 2. Nettoyage des champs dépendants quand le Code-barre est vidé ---
-
-
-
-  // B. Suppression
   const idSuppr = document.getElementById("id_materiel_suppr");
   if (idSuppr) {
     idSuppr.addEventListener("input", () => {
       if (idSuppr.value.trim() === "") {
-        console.log("Code-barre (Suppr) vidé : nettoyage dépendances.");
-
         const typeSuppr = document.getElementById("type_materiel_suppr");
         const nomSuppr = document.getElementById("nom_materiel_suppr");
         const nomCaisse = document.getElementById("nom_caisse_suppr");

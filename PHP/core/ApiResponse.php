@@ -1,14 +1,19 @@
 <?php
+
 /**
- * ApiResponse — Réponses JSON standardisées
- * 
- * Principe SOLID : Single Responsibility — ne fait que formater les réponses API.
- * Principe DRY : Remplace les dizaines de json_encode() dupliqués dans chaque endpoint.
+ * Réponses JSON standardisées pour l'API.
+ *
+ * Toutes les méthodes terminent l'exécution par `exit` après envoi de la réponse,
+ * pour éviter qu'un code en aval ne réécrive accidentellement la sortie.
  */
 class ApiResponse
 {
     /**
-     * Réponse de succès
+     * Envoie une réponse de succès `{success: true, ...$data}`.
+     *
+     * @param array<string, mixed> $data Charges utiles à fusionner dans la réponse.
+     * @param string $message Message optionnel ajouté sous la clé `message`.
+     * @return never
      */
     public static function success(array $data = [], string $message = ''): void
     {
@@ -23,7 +28,11 @@ class ApiResponse
     }
 
     /**
-     * Réponse d'erreur
+     * Envoie une réponse d'erreur métier `{success: false, message}`.
+     *
+     * @param string $message Message lisible décrivant l'erreur.
+     * @param int $httpCode Code HTTP à émettre (par défaut 400).
+     * @return never
      */
     public static function error(string $message, int $httpCode = 400): void
     {
@@ -39,7 +48,10 @@ class ApiResponse
     }
 
     /**
-     * Réponse d'exception (logging automatique)
+     * Envoie une réponse 500 pour exception non gérée et journalise via `$GLOBALS['logger']`.
+     *
+     * @param Throwable $e Exception à signaler.
+     * @return never
      */
     public static function exception(Throwable $e): void
     {
