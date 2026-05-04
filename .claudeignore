@@ -2,6 +2,10 @@
 
 Gestion du matériel.pdf
 
+phpDocumentor.phar
+.phpdoc/
+docs/
+
 node_modules
 
 playwright-report

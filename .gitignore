@@ -1,6 +1,10 @@
 .DS_Store
 CLAUDE.md
 
+phpDocumentor.phar
+.phpdoc/
+docs/
+
 Gestion du matériel.pdf
 
 node_modules
