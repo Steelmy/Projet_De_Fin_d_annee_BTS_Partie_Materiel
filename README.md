@@ -35,15 +35,12 @@ graph TD
     Endpoints -- "Initialisation" --> BootstrapAPI
     BootstrapAPI -- "Config/DB/Logs" --> BootstrapBase
     BootstrapBase -- "Connexion" --> DB
-    
+
     Endpoints -- "Instancie" --> Controllers
     Controllers -- "Composants de données" --> Models
     Models -- "Requêtes SQL" --> DB
     Controllers -- "Réponse JSON" --> JS
 ```
-
-> [!TIP]
-> Pour plus de détails sur le fonctionnement interne, consultez le document [Architecture et Fonctionnement](app_data_dir/brain/3f25eb71-2eb4-4a78-87c5-c23b44c06e0d/architecture_overview.md).
 
 ## Structure des fichiers
 
@@ -79,7 +76,7 @@ graph TD
 
 ### Prérequis
 
-- XAMPP (Apache + MySQL/MariaDB + PHP 8.0+)
+- XAMPP ou autres (Apache + MySQL/MariaDB + PHP 8.0+)
 - Node.js (pour Tailwind CSS, optionnel)
 
 ### Configuration
@@ -172,8 +169,9 @@ Le monitoring génère des alertes automatiques si :
 
 ### Authentification & Autorisation Centralisées
 
-La sécurisation des accès intervient dès le point d'entrée de l'API (`php/core/bootstrap.php`). 
+La sécurisation des accès intervient dès le point d'entrée de l'API (`php/core/bootstrap.php`).
 Avant même d'exécuter la logique d'un contrôleur, le bootstrap appelle le script `IHM_admin/auth_check.php`.
+
 - **Mécanisme :** Vérification de la présence et de la validité de la session d'administration. (Expiration de la session après 15 minutes d'inactivité).
 - **Résultat :** Si la session est invalide, l'accès est bloqué et l'utilisateur est redirigé (ou reçoit une erreur HTTP). Seuls les utilisateurs authentifiés peuvent exécuter la logique métier.
 - **Principe DRY :** Grâce à ce filtre globalisé, les Contrôleurs n'ont pas besoin de refaire des vérifications de rôles individuelles.
@@ -185,34 +183,29 @@ Pour prévenir toute faille par injection SQL, l'application utilise systématiq
 
 ## API Endpoints
 
-| Méthode | Endpoint                                    | Description                 |
-| ------- | ------------------------------------------- | --------------------------- |
-| GET     | `php/getAllItems.php`                  | Liste tous les matériels    |
-| GET     | `php/getItemDetails.php?code_barre=X` | Détails d'un matériel       |
-| POST    | `php/addItem.php`                      | Ajouter du matériel         |
-| POST    | `php/updateItem.php`                   | Modifier un matériel        |
-| POST    | `php/deleteItem.php`                   | Supprimer un matériel       |
-| POST    | `php/restituteItem.php`                | Restituer un matériel       |
-| GET     | `php/getAllBoxes.php`                   | Liste toutes les caisses    |
-| GET     | `php/getBoxDetails.php?nom=X`          | Détails d'une caisse        |
-| POST    | `php/addBox.php`                        | Ajouter une caisse          |
-| POST    | `php/updateBox.php`                     | Modifier une caisse         |
-| POST    | `php/deleteBox.php`                     | Supprimer une caisse        |
-| GET     | `php/getReferencesList.php`            | Liste des références        |
-| GET     | `php/getReferenceTree.php`             | Arborescence des références |
-| POST    | `php/addReference.php`                 | Ajouter une référence       |
-| POST    | `php/updateReference.php`              | Modifier une référence      |
-| POST    | `php/deleteReferences.php`             | Supprimer une référence     |
-| GET     | `php/searchUniversal.php?type=X&query=Y`   | Recherche universelle       |
-| GET     | `php/searchBarcodes.php?query=X`       | Recherche codes-barres      |
-| GET     | `php/getIds.php`                       | Recherche d'IDs par type/nom|
-| GET     | `php/getAvailableObjects.php`             | Objets disponibles          |
-| GET     | `php/getUsers.php`                  | Liste des utilisateurs      |
-| GET     | `php/checkBarcode.php?code_barre=X`        | Vérifier unicité code-barre |
-| GET     | `php/generateBarcode.php`              | Générer des codes-barres    |
-| GET     | `php/generateInventoryPdf.php`         | Générer l'inventaire en PDF |
-| GET     | `php/getComment.php`                   | Récupérer les commentaires  |
-| POST    | `php/saveComment.php`                  | Ajouter un commentaire      |
-| POST    | `php/deleteUserComment.php`            | Supprimer com. (utilisateur)|
-| POST    | `php/deleteAdminComment.php`           | Supprimer com. (admin)      |
-| GET     | `php/monitor.php`                           | Health check                |
+| Méthode | Endpoint                                 | Description                  |
+| ------- | ---------------------------------------- | ---------------------------- |
+| GET     | `php/getAllItems.php`                    | Liste tous les matériels     |
+| GET     | `php/getItemDetails.php?code_barre=X`    | Détails d'un matériel        |
+| POST    | `php/addItem.php`                        | Ajouter du matériel          |
+| POST    | `php/updateItem.php`                     | Modifier un matériel         |
+| POST    | `php/deleteItem.php`                     | Supprimer un matériel        |
+| POST    | `php/restituteItem.php`                  | Restituer un matériel        |
+| GET     | `php/getReferencesList.php`              | Liste des références         |
+| GET     | `php/getReferenceTree.php`               | Arborescence des références  |
+| POST    | `php/addReference.php`                   | Ajouter une référence        |
+| POST    | `php/updateReference.php`                | Modifier une référence       |
+| POST    | `php/deleteReferences.php`               | Supprimer une référence      |
+| GET     | `php/searchUniversal.php?type=X&query=Y` | Recherche universelle        |
+| GET     | `php/searchBarcodes.php?query=X`         | Recherche codes-barres       |
+| GET     | `php/getIds.php`                         | Recherche d'IDs par type/nom |
+| GET     | `php/getAvailableObjects.php`            | Objets disponibles           |
+| GET     | `php/getUsers.php`                       | Liste des utilisateurs       |
+| GET     | `php/checkBarcode.php?code_barre=X`      | Vérifier unicité code-barre  |
+| GET     | `php/generateBarcode.php`                | Générer des codes-barres     |
+| GET     | `php/generateInventoryPdf.php`           | Générer l'inventaire en PDF  |
+| GET     | `php/getComment.php`                     | Récupérer les commentaires   |
+| POST    | `php/saveComment.php`                    | Ajouter un commentaire       |
+| POST    | `php/deleteUserComment.php`              | Supprimer com. (utilisateur) |
+| POST    | `php/deleteAdminComment.php`             | Supprimer com. (admin)       |
+| GET     | `php/monitor.php`                        | Health check                 |
