@@ -17,18 +17,13 @@ class BoxController
     /** @var Item Modèle d'accès aux objets. */
     private Item $itemModel;
 
-    /** @var Logger Logger applicatif partagé. */
-    private Logger $logger;
-
     /**
      * @param PDO $conn Connexion PDO active.
-     * @param Logger $logger Logger applicatif partagé.
      */
-    public function __construct(PDO $conn, Logger $logger)
+    public function __construct(PDO $conn)
     {
         $this->boxModel = new Box($conn);
         $this->itemModel = new Item($conn);
-        $this->logger = $logger;
     }
 
     /**
@@ -141,7 +136,7 @@ class BoxController
 
             $objets = $this->itemModel->getByCaisseId($caisseId);
 
-            $this->logger->info("Caisse ajoutée", ['nom' => $nom, 'id' => $caisseId, 'objets' => count($objets)]);
+
             ApiResponse::success([
                 'caisse' => [
                     'id' => $caisseId,
@@ -220,7 +215,7 @@ class BoxController
 
             $this->boxModel->commit();
 
-            $this->logger->info("Caisse modifiée", ['id' => $caisse['id'], 'nom' => $nouveauNom ?: $caisse['Nom']]);
+
             ApiResponse::success([
                 'updated' => ['id' => $caisse['id'], 'nom' => $nouveauNom ?: $caisse['Nom']]
             ], 'Caisse modifiée avec succès');
@@ -261,7 +256,7 @@ class BoxController
 
             $this->boxModel->commit();
 
-            $this->logger->info("Caisse supprimée", ['id' => $caisse['id'], 'nom' => $caisse['Nom']]);
+
             ApiResponse::success([
                 'deleted' => ['id' => $caisse['id'], 'nom' => $caisse['Nom']]
             ], 'Caisse supprimée avec succès');

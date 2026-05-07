@@ -48,21 +48,14 @@ class ApiResponse
     }
 
     /**
-     * Envoie une réponse 500 pour exception non gérée et journalise via `$GLOBALS['logger']`.
+     * Envoie une réponse 500 pour exception non gérée.
      *
      * @param Throwable $e Exception à signaler.
      * @return never
      */
     public static function exception(Throwable $e): void
     {
-        global $logger;
-        if ($logger) {
-            $logger->error('Exception non gérée', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
-        }
+
 
         http_response_code(500);
         echo json_encode([

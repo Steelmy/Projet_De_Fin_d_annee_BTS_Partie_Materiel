@@ -27,13 +27,12 @@ graph TD
 
     subgraph Infrastructure
         DB["Base de Données (MySQL)"]
-        Logger["logs/"]
     end
 
     %% Interactions
     JS -- "Requêtes AJAX (fetch)" --> Endpoints
     Endpoints -- "Initialisation" --> BootstrapAPI
-    BootstrapAPI -- "Config/DB/Logs" --> BootstrapBase
+    BootstrapAPI -- "Config/DB" --> BootstrapBase
     BootstrapBase -- "Connexion" --> DB
 
     Endpoints -- "Instancie" --> Controllers
@@ -65,11 +64,9 @@ graph TD
 │   ├── addItem.js / addBox.js  # Gestions des formulaires
 │   └── ...                     # Scripts interactifs divers
 ├── php/
-│   ├── core/                    # Infrastructure commune (Bootstrap, DB, Logger)
+│   ├── core/                    # Infrastructure commune (Bootstrap, DB)
 │   ├── addItem.php / addBox.php # Points d'entrée API (Actions)
-│   ├── monitor.php              # Health check & monitoring
 │   └── ...                      # Endpoints API divers
-└── logs/                        # Logs applicatifs (rotation quotidienne)
 ```
 
 ## Installation
@@ -100,7 +97,6 @@ graph TD
 
 - **Single Responsibility** : Chaque classe PHP a une responsabilité unique
   - `EnvLoader` → chargement des variables d'environnement
-  - `Logger` → logging applicatif
   - `Database` → connexion BDD
   - `ApiResponse` → formatage des réponses API
 
@@ -128,42 +124,6 @@ DB_PASS=motdepasse_ici
 ```
 
 Le fichier `.env` est dans `.gitignore`. Un template `.env.example` est fourni.
-
-## Logging & Monitoring
-
-### Logs applicatifs
-
-Les logs sont écrits dans `logs/app-YYYY-MM-DD.log` avec rotation quotidienne.
-
-**Format** : `[timestamp] [LEVEL] [endpoint] message {contexte JSON}`
-
-**Niveaux** : `DEBUG`, `INFO`, `WARNING`, `ERROR` (configurable via `LOG_LEVEL` dans `.env`)
-
-**Exemple** :
-
-```
-[2026-03-05 14:30:00] [INFO] [addItem.php] Matériel ajouté {"type":"Casque","nom":"Audio Pro","nombre":3}
-[2026-03-05 14:31:12] [ERROR] [deleteItem.php] Exception non gérée {"message":"SQLSTATE[...]"}
-```
-
-### Monitoring (Health Check)
-
-Endpoint : `php/monitor.php`
-
-Retourne en JSON :
-
-- **database** : statut de la connexion BDD
-- **disk** : espace disque utilisé/libre
-- **errors** : nombre d'erreurs dans la dernière heure
-- **logs** : taille du fichier de log du jour
-- **alerts** : alertes si trop d'erreurs détectées
-
-### Alerting
-
-Le monitoring génère des alertes automatiques si :
-
-- Plus de 10 erreurs détectées dans la dernière heure → statut `degraded`
-- Espace disque > 90% utilisé → warning
 
 ## Sécurité et Gestion des Droits
 
@@ -208,4 +168,3 @@ Pour prévenir toute faille par injection SQL, l'application utilise systématiq
 | POST    | `php/saveComment.php`                    | Ajouter un commentaire       |
 | POST    | `php/deleteUserComment.php`              | Supprimer com. (utilisateur) |
 | POST    | `php/deleteAdminComment.php`             | Supprimer com. (admin)       |
-| GET     | `php/monitor.php`                        | Health check                 |

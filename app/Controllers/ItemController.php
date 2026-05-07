@@ -13,17 +13,14 @@ class ItemController
     /** @var Item Modèle d'accès aux objets. */
     private Item $model;
 
-    /** @var Logger Logger applicatif partagé. */
-    private Logger $logger;
+
 
     /**
      * @param PDO $conn Connexion PDO active.
-     * @param Logger $logger Logger applicatif partagé.
      */
-    public function __construct(PDO $conn, Logger $logger)
+    public function __construct(PDO $conn)
     {
         $this->model = new Item($conn);
-        $this->logger = $logger;
     }
 
     /**
@@ -117,7 +114,7 @@ class ItemController
             $idsAjoutes = array_column($resultats, 'id');
             $codesGeneres = array_column($resultats, 'code_bar');
 
-            $this->logger->info("Matériel ajouté", ['type' => $type, 'sous_type' => $sousType, 'nom' => $nom, 'nombre' => $nombre]);
+
 
             ApiResponse::success([
                 'ids_ajoutes' => $idsAjoutes,
@@ -167,7 +164,7 @@ class ItemController
 
             $this->model->updateState($codeBarre, $etat, $emprunteurIdFinal);
 
-            $this->logger->info("Matériel modifié", ['code_barre' => $codeBarre, 'etat' => $etat]);
+
             ApiResponse::success([
                 'updated' => [
                     'code_barre' => $codeBarre,
@@ -210,7 +207,7 @@ class ItemController
 
             $this->model->delete($codeBarre);
 
-            $this->logger->info("Matériel supprimé", ['code_barre' => $codeBarre, 'type' => $objet['Type'], 'nom' => $objet['Nom']]);
+
             ApiResponse::success([
                 'deleted' => [
                     'code_barre' => $objet['Code_bar'],
@@ -297,7 +294,7 @@ class ItemController
 
             $this->model->restitute($codeBarre);
 
-            $this->logger->info("Matériel restitué", ['code_barre' => $codeBarre]);
+
             ApiResponse::success([
                 'restituted' => [
                     'code_barre' => $codeBarre
