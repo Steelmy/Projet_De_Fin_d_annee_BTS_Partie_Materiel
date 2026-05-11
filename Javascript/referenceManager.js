@@ -279,10 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     populateRefTypeSelect();
 
-                    setTimeout(() => {
-                        window.toggleReferenceModal(false);
-                    }, 1500);
-
                 } else {
                     showMessage(data.error || 'Une erreur est survenue lors de l\'ajout.', 'error');
                 }
@@ -509,7 +505,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 showListMessage(data.message || 'Références supprimées !', 'success');
                 window.loadReferencesList();
-                if (window.loadReferenceTree) window.loadReferenceTree();
+                if (window.loadReferenceTree) {
+                    await window.loadReferenceTree();
+                    populateRefTypeSelect();
+                }
             } else {
                 let errorMsg = data.error || 'Erreur lors de la suppression.';
                 if (data.errors && data.errors.length > 0) {
@@ -519,7 +518,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (data.deleted_count > 0) {
                     window.loadReferencesList();
-                    if (window.loadReferenceTree) window.loadReferenceTree();
+                    if (window.loadReferenceTree) {
+                        await window.loadReferenceTree();
+                        populateRefTypeSelect();
+                    }
                 }
             }
         } catch (error) {
