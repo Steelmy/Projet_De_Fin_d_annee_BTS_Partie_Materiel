@@ -27,7 +27,14 @@ class PdfController
     public function inventory(): void
     {
         try {
-            $materiels = $this->fetchMaterials();
+            $filters = [
+                'code_barre' => isset($_GET['code_barre']) ? trim((string) $_GET['code_barre']) : '',
+                'type'       => isset($_GET['type'])       ? trim((string) $_GET['type'])       : '',
+                'sous_type'  => isset($_GET['sous_type'])  ? trim((string) $_GET['sous_type'])  : '',
+                'nom'        => isset($_GET['nom'])        ? trim((string) $_GET['nom'])        : '',
+            ];
+
+            $materiels = $this->fetchMaterials($filters);
 
             $pdf = new PDF_MC_Table();
             $pdf->AddPage();
@@ -37,6 +44,23 @@ class PdfController
             $pdf->Cell(0, 10, utf8_decode('Inventaire du Matériel'), 0, 1, 'C');
             $pdf->SetFont('Arial', '', 10);
             $pdf->Cell(0, 10, utf8_decode('Généré le: ' . date('d/m/Y à H:i')), 0, 1, 'C');
+
+            $activeFilters = array_filter($filters, fn($v) => $v !== '');
+            if (!empty($activeFilters)) {
+                $labels = [
+                    'code_barre' => 'Code-barre',
+                    'type'       => 'Type',
+                    'sous_type'  => 'Sous-type',
+                    'nom'        => 'Nom',
+                ];
+                $parts = [];
+                foreach ($activeFilters as $key => $value) {
+                    $parts[] = $labels[$key] . ' : ' . $value;
+                }
+                $pdf->SetFont('Arial', 'I', 9);
+                $pdf->Cell(0, 6, utf8_decode('Filtres appliqués — ' . implode(' | ', $parts)), 0, 1, 'C');
+            }
+
             $pdf->Ln(5);
 
             $this->renderMainTable($pdf, $materiels, $maxPageWidth);
@@ -54,12 +78,36 @@ class PdfController
     }
 
     /**
-     * Récupère tous les matériels avec leurs métadonnées (type, utilisateur, caisse) pour l'export.
+     * Récupère les matériels avec leurs métadonnées (type, utilisateur, caisse) pour l'export.
+     * Applique les filtres de la consultation si fournis (code_barre LIKE, type/sous_type/nom égalité stricte).
      *
+     * @param array{code_barre?:string, type?:string, sous_type?:string, nom?:string} $filters
      * @return array<int, array<string, mixed>>
      */
-    private function fetchMaterials(): array
+    private function fetchMaterials(array $filters = []): array
     {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['code_barre'])) {
+            $where[] = 'o.Code_bar LIKE ?';
+            $params[] = '%' . $filters['code_barre'] . '%';
+        }
+        if (!empty($filters['type'])) {
+            $where[] = 't.nom_type = ?';
+            $params[] = $filters['type'];
+        }
+        if (!empty($filters['sous_type'])) {
+            $where[] = 'st.nom_sous_type = ?';
+            $params[] = $filters['sous_type'];
+        }
+        if (!empty($filters['nom'])) {
+            $where[] = 'nr.nom_reference = ?';
+            $params[] = $filters['nom'];
+        }
+
+        $whereClause = $where ? ' WHERE ' . implode(' AND ', $where) : '';
+
         $stmt = $this->conn->prepare("
             SELECT o.Code_bar, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom, o.Etat,
                    u.Prénom, u.Nom AS Nom_utilisateur, c.Nom AS Nom_Caisse
@@ -69,9 +117,10 @@ class PdfController
             LEFT JOIN types t ON st.id_type = t.id
             LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
             LEFT JOIN caisses c ON o.Caisse_id = c.id
+            $whereClause
             ORDER BY t.nom_type, nr.nom_reference
         ");
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

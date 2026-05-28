@@ -1,15 +1,39 @@
 /**
  * sessionGuard.js — Détection de l'expiration de la session admin PHP.
  *
- * Wrappe `window.fetch` : si une réponse a suivi une redirection vers
- * `admin.php` (page de login servie par auth_check.php), affiche un avertissement
- * via showAlert puis redirige le navigateur vers la page de connexion.
+ * 1) Wrappe `window.fetch` : si une réponse a suivi une redirection vers
+ *    `admin.php` (page de login servie par auth_check.php), affiche un
+ *    avertissement via showAlert puis redirige le navigateur.
+ * 2) Heartbeat : un poll toutes les 15 s sur `php/checkSession.php`
+ *    (endpoint passif qui NE prolonge PAS la session) permet de détecter
+ *    l'expiration des 15 minutes d'inactivité côté serveur sans attendre
+ *    une action utilisateur.
  *
  * Dépendance : customModal.js (showAlert).
  */
 (function () {
   const originalFetch = window.fetch;
   let sessionExpired = false;
+
+  /**
+   * Déclenche la popup d'expiration et redirige vers la page de login.
+   * Idempotent : une fois `sessionExpired = true`, les appels suivants ne
+   * réaffichent pas la modale.
+   *
+   * @param {string} redirectUrl - URL de la page de connexion à charger.
+   * @returns {Promise<void>}
+   */
+  async function triggerExpiration(redirectUrl) {
+    if (sessionExpired) return;
+    sessionExpired = true;
+
+    await showAlert(
+      "Votre session a expiré en raison d'une période d'inactivité.\nVous allez être redirigé vers la page de connexion.",
+      "warning"
+    );
+
+    window.location.href = redirectUrl;
+  }
 
   /**
    * Remplacement de window.fetch qui intercepte les redirections d'auth.
@@ -25,17 +49,23 @@
     }
 
     if (response.redirected && response.url.includes("admin.php")) {
-      sessionExpired = true;
-
-      await showAlert(
-        "Votre session a expiré en raison d'une période d'inactivité.\nVous allez être redirigé vers la page de connexion.",
-        "warning"
-      );
-
-      window.location.href = response.url;
+      await triggerExpiration(response.url);
       throw new Error("Session expirée");
     }
 
     return response;
   };
+
+  /**
+   * Heartbeat passif : interroge `php/checkSession.php` toutes les 15 s.
+   * L'endpoint redirige vers `admin.php` quand la session est expirée,
+   * ce qui est détecté par l'intercepteur ci-dessus.
+   */
+  const HEARTBEAT_MS = 15000;
+  setInterval(() => {
+    if (sessionExpired) return;
+    window.fetch("php/checkSession.php", { cache: "no-store" }).catch(() => {
+      /* l'intercepteur a déjà géré l'expiration ou il s'agit d'une erreur réseau */
+    });
+  }, HEARTBEAT_MS);
 })();
