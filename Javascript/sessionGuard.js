@@ -29,7 +29,7 @@
 
     await showAlert(
       "Votre session a expiré en raison d'une période d'inactivité.\nVous allez être redirigé vers la page de connexion.",
-      "warning"
+      "warning",
     );
 
     window.location.href = redirectUrl;
@@ -57,15 +57,21 @@
   };
 
   /**
-   * Heartbeat passif : interroge `php/checkSession.php` toutes les 15 s.
-   * L'endpoint redirige vers `admin.php` quand la session est expirée,
+   * Heartbeat passif : interroge `auth_check.php` toutes les 15 s.
+   * L'en-tête X-Session-Guard empêche la mise à jour de l'activité.
+   * En cas d'expiration, auth_check.php redirige vers `admin.php`,
    * ce qui est détecté par l'intercepteur ci-dessus.
    */
   const HEARTBEAT_MS = 15000;
   setInterval(() => {
     if (sessionExpired) return;
-    window.fetch("php/checkSession.php", { cache: "no-store" }).catch(() => {
-      /* l'intercepteur a déjà géré l'expiration ou il s'agit d'une erreur réseau */
-    });
+    window
+      .fetch("/php/checkSession.php", {
+        headers: { "X-Session-Guard": "1" },
+        cache: "no-store",
+      })
+      .catch(() => {
+        /* l'intercepteur a déjà géré l'expiration ou il s'agit d'une erreur réseau */
+      });
   }, HEARTBEAT_MS);
 })();

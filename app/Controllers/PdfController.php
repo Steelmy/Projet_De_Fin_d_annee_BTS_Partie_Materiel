@@ -118,7 +118,7 @@ class PdfController
             LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
             LEFT JOIN caisses c ON o.Caisse_id = c.id
             $whereClause
-            ORDER BY t.nom_type, nr.nom_reference
+            ORDER BY t.nom_type ASC, st.nom_sous_type ASC, nr.nom_reference ASC
         ");
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -242,7 +242,7 @@ class PdfController
             LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
             LEFT JOIN sous_types st ON nr.id_sous_type = st.id
             LEFT JOIN types t ON st.id_type = t.id
-            WHERE o.Caisse_id = ? ORDER BY t.nom_type, nr.nom_reference
+            WHERE o.Caisse_id = ? ORDER BY t.nom_type ASC, st.nom_sous_type ASC, nr.nom_reference ASC
         ");
 
         foreach ($caisses as $caisse) {
