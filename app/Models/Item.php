@@ -32,13 +32,15 @@ class Item
                 t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom,
                 u.Prénom, u.Nom AS Nom_utilisateur,
                 c.Nom AS Nom_caisse,
-                o.created_at
+                o.created_at,
+                cm.com_user, cm.com_admin
             FROM objets o
             LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
             LEFT JOIN sous_types st ON nr.id_sous_type = st.id
             LEFT JOIN types t ON st.id_type = t.id
             LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
             LEFT JOIN caisses c ON o.Caisse_id = c.id
+            LEFT JOIN commentaires cm ON o.id_com = cm.id
             ORDER BY t.nom_type, st.nom_sous_type, nr.nom_reference
         ");
         $stmt->execute();

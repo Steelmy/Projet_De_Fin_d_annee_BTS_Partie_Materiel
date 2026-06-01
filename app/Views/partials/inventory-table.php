@@ -12,13 +12,25 @@
       >Vue Caisses</label
     >
     -->
-    <button
-      onclick="if(window.refreshInventory) window.refreshInventory();"
-      class="ml-auto px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input flex items-center gap-2 cursor-pointer"
-      title="Rafraîchir les données"
-    >
-      <i data-lucide="rotate-cw"></i> Rafraîchir
-    </button>
+    <div class="ml-auto flex items-center gap-2">
+      <button
+        id="btn_new_comments"
+        onclick="if(window.commentNotifications) window.commentNotifications.openNewCommentsModal();"
+        class="hidden px-4 py-2 border-2 border-red-200 bg-red-50 text-red-600 rounded-lg font-semibold text-sm shadow-input flex items-center gap-2 cursor-pointer"
+        title="Voir les nouveaux commentaires"
+      >
+        <i data-lucide="message-circle"></i>
+        Nouveaux commentaires
+        <span id="new_comments_counter" class="bg-red-500 text-white rounded-full px-2 py-0.5 text-xs">0</span>
+      </button>
+      <button
+        onclick="if(window.refreshInventory) window.refreshInventory();"
+        class="px-4 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-lg font-semibold text-sm shadow-input flex items-center gap-2 cursor-pointer"
+        title="Rafraîchir les données"
+      >
+        <i data-lucide="rotate-cw"></i> Rafraîchir
+      </button>
+    </div>
   </div>
   <div id="full_inventory">
     <table id="inventory_table" class="w-full border-collapse bg-white mt-[15px]">

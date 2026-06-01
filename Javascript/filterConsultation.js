@@ -130,6 +130,7 @@ async function loadAllInventory() {
 
     if (data.success && data.data) {
       allInventory = data.data;
+      window.allInventory = allInventory;
       console.log("✅ Inventaire chargé:", allInventory.length, "objets");
       applyFilters();
     } else {
@@ -457,7 +458,9 @@ function updateInventoryTable(data) {
       <td class="p-4.5 text-center text-sm align-middle">
         <button
           onclick="openCommentModal(${item.id}, ${item.id_com ? 'true' : 'false'})"
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold border ${item.id_com ? 'border-custom-brandLight text-custom-brandLight' : 'border-gray-300 text-gray-500'}"
+          data-comment-btn="1"
+          data-id-com="${item.id_com || ''}"
+          class="relative px-3 py-1.5 rounded-lg text-xs font-semibold border ${item.id_com ? 'border-custom-brandLight text-custom-brandLight' : 'border-gray-300 text-gray-500'}"
         >
           ${item.id_com ? 'Voir le commentaire' : 'Ajouter un commentaire'}
         </button>
@@ -465,6 +468,10 @@ function updateInventoryTable(data) {
     `;
     tbody.appendChild(tr);
   });
+
+  if (window.commentNotifications) {
+    window.commentNotifications.applyBadges();
+  }
 
   console.log("✅ Tableau rempli:", compteurLignes, "lignes insérées");
 }

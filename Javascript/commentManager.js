@@ -62,6 +62,15 @@ async function openCommentModal(objetId, hasComment) {
         if (comment.com_admin && comment.com_admin.trim() !== "") {
           btnDeleteAdmin.classList.remove("hidden");
         }
+
+        if (window.commentNotifications) {
+          window.commentNotifications.markSeenByContent(
+            comment.id,
+            comment.com_user,
+            comment.com_admin
+          );
+          window.commentNotifications.applyBadges();
+        }
       }
     } catch (error) {
       console.error("❌ Erreur chargement commentaire:", error);
@@ -124,6 +133,17 @@ async function saveComment() {
     if (data.success) {
       showCommentMessage(data.message || "Commentaire enregistré.", "success");
 
+      if (window.commentNotifications) {
+        const commentId = currentCommentId || data.comment_id;
+        const userText =
+          document.getElementById("comment-user-text").textContent || "";
+        window.commentNotifications.markSeenByContent(
+          commentId,
+          userText,
+          comAdmin
+        );
+      }
+
       setTimeout(() => {
         closeCommentModal();
         if (window.refreshInventory) {
@@ -178,6 +198,15 @@ async function deleteUserComment() {
       } else {
         document.getElementById("comment-user-section").classList.add("hidden");
         document.getElementById("comment-user-text").textContent = "";
+        if (window.commentNotifications) {
+          const adminVal =
+            document.getElementById("comment-admin-textarea").value || "";
+          window.commentNotifications.markSeenByContent(
+            currentCommentId,
+            "",
+            adminVal
+          );
+        }
         showCommentMessage(
           data.message || "Commentaire élève supprimé.",
           "success"
@@ -234,6 +263,15 @@ async function deleteAdminComment() {
       } else {
         document.getElementById("comment-admin-textarea").value = "";
         document.getElementById("btn-delete-admin-comment").classList.add("hidden");
+        if (window.commentNotifications) {
+          const userVal =
+            document.getElementById("comment-user-text").textContent || "";
+          window.commentNotifications.markSeenByContent(
+            currentCommentId,
+            userVal,
+            ""
+          );
+        }
         showCommentMessage(
           data.message || "Commentaire admin supprimé.",
           "success"
