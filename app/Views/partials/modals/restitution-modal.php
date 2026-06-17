@@ -17,7 +17,7 @@
     >
     <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">Restituer un objet</h2>
 
-    <p class="text-sm text-gray-600 mb-6">Scannez ou saisissez le code-barre de l'objet emprunté ou réservé à restituer. Seuls les objets empruntés/réservés ne se trouvant pas dans une caisse sont affichés.</p>
+    <p class="text-sm text-gray-600 mb-6">Scannez ou saisissez le code-barre de l'objet emprunté ou réservé à restituer. Seuls les objets empruntés/réservés sont affichés.</p>
 
     <form id="form_restitution" class="space-y-4">
       <div>
