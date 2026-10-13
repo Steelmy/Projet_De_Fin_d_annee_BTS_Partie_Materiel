@@ -67,7 +67,7 @@ CREATE TABLE `commentaires` (
   `id` int(11) NOT NULL,
   `com_user` text NOT NULL,
   `com_admin` text NOT NULL,
-  `created_at` date NOT NULL DEFAULT current_timestamp()
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -373,8 +373,7 @@ ALTER TABLE `utilisateurs`
 -- Constraints for table `caisses`
 --
 ALTER TABLE `caisses`
-  ADD CONSTRAINT `fk_caisse_emprunteur` FOREIGN KEY (`Emprunteur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_caisse_emprunteur_new` FOREIGN KEY (`Emprunteur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `fk_caisse_emprunteur` FOREIGN KEY (`Emprunteur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `historique`
