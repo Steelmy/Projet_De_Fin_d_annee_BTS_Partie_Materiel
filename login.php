@@ -95,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: background 0.3s;
         }
         button:hover { background: #9d8a5f; }
+        .hint { color: #64748b; font-size: 14px; margin: 10px 0 0; }
+        .hint + input { margin-top: 4px; }
         .error { 
             color: #ef4444; 
             background: #fee2e2;
@@ -121,7 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 
         <form method="POST">
+            <p class="hint">Identifiant : admin</p>
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+            <p class="hint">Mot de passe : base105</p>
             <input type="password" name="password" placeholder="Mot de passe" required>
             <button type="submit">Se connecter</button>
         </form>
