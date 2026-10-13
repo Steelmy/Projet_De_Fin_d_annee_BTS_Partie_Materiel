@@ -12,4 +12,5 @@ node_modules
 
 # Secrets et logs
 .env
+.env.docker
 logs/
