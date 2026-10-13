@@ -2,8 +2,8 @@
 /**
  * Bootstrap de base pour les endpoints API.
  *
- * Initialise headers JSON, vérifie la session admin (via le projet voisin
- * `IHM_admin/auth_check.php`), charge `.env`, instancie `$conn`.
+ * Initialise headers JSON, vérifie la session admin (via
+ * `auth_check.php`), charge `.env`, instancie `$conn`.
  *
  * Variables exposées au fichier appelant :
  *   - `$conn` : connexion PDO active.
@@ -12,7 +12,7 @@
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/IHM_admin/auth_check.php';
+require_once __DIR__ . '/auth_check.php';
 
 require_once __DIR__ . '/EnvLoader.php';
 require_once __DIR__ . '/Database.php';

@@ -2,7 +2,7 @@
  * sessionGuard.js — Détection de l'expiration de la session admin PHP.
  *
  * 1) Wrappe `window.fetch` : si une réponse a suivi une redirection vers
- *    `admin.php` (page de login servie par auth_check.php), affiche un
+ *    `login.php` (page de login servie par auth_check.php), affiche un
  *    avertissement via showAlert puis redirige le navigateur.
  * 2) Heartbeat : un poll toutes les 15 s sur `php/checkSession.php`
  *    (endpoint passif qui NE prolonge PAS la session) permet de détecter
@@ -48,7 +48,7 @@
       throw new Error("Session expirée");
     }
 
-    if (response.redirected && response.url.includes("admin.php")) {
+    if (response.redirected && response.url.includes("login.php")) {
       await triggerExpiration(response.url);
       throw new Error("Session expirée");
     }
@@ -59,7 +59,7 @@
   /**
    * Heartbeat passif : interroge `auth_check.php` toutes les 15 s.
    * L'en-tête X-Session-Guard empêche la mise à jour de l'activité.
-   * En cas d'expiration, auth_check.php redirige vers `admin.php`,
+   * En cas d'expiration, auth_check.php redirige vers `login.php`,
    * ce qui est détecté par l'intercepteur ci-dessus.
    */
   const HEARTBEAT_MS = 15000;

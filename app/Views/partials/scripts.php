@@ -99,7 +99,7 @@
 
 <!-- JavaScript applicatif -->
 <script src="javascript/customModal.js?v=1"></script>
-<script src="javascript/sessionGuard.js?v=2"></script>
+<script src="javascript/sessionGuard.js?v=3"></script>
 <script src="javascript/sortUtils.js"></script>
 <script src="javascript/barcodeGenerator.js?v=3"></script>
 <script src="javascript/universalAutocomplete.js?v=2"></script>
