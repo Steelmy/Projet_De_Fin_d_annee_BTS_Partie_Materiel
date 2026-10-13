@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+node_modules
+bdd
+docs
+.phpdoc
+phpDocumentor.phar
+*.md
+*.pdf
+.DS_Store
