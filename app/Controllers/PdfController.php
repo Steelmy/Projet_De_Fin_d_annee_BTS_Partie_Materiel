@@ -4,7 +4,7 @@
  * Contrôleur de génération de PDF d'inventaire (export FPDF).
  *
  * Note : ce contrôleur ne renvoie pas de JSON, il déclenche un téléchargement PDF.
- * Les chaînes affichées sont passées via `utf8_decode` car FPDF travaille en latin-1.
+ * Les chaînes affichées sont passées via `toPdfText()` car FPDF travaille en Windows-1252.
  */
 class PdfController
 {
@@ -41,9 +41,9 @@ class PdfController
             $maxPageWidth = 210 * 0.98;
 
             $pdf->SetFont('Arial', 'B', 16);
-            $pdf->Cell(0, 10, utf8_decode('Inventaire du Matériel'), 0, 1, 'C');
+            $pdf->Cell(0, 10, self::toPdfText('Inventaire du Matériel'), 0, 1, 'C');
             $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(0, 10, utf8_decode('Généré le: ' . date('d/m/Y à H:i')), 0, 1, 'C');
+            $pdf->Cell(0, 10, self::toPdfText('Généré le: ' . date('d/m/Y à H:i')), 0, 1, 'C');
 
             $activeFilters = array_filter($filters, fn($v) => $v !== '');
             if (!empty($activeFilters)) {
@@ -58,7 +58,7 @@ class PdfController
                     $parts[] = $labels[$key] . ' : ' . $value;
                 }
                 $pdf->SetFont('Arial', 'I', 9);
-                $pdf->Cell(0, 6, utf8_decode('Filtres appliqués — ' . implode(' | ', $parts)), 0, 1, 'C');
+                $pdf->Cell(0, 6, self::toPdfText('Filtres appliqués — ' . implode(' | ', $parts)), 0, 1, 'C');
             }
 
             $pdf->Ln(5);
@@ -69,7 +69,7 @@ class PdfController
             $pdf->SetX(10);
             $pdf->Ln(10);
             $pdf->SetFont('Arial', 'I', 8);
-            $pdf->Cell(0, 5, utf8_decode('Total: ' . count($materiels) . ' matériel(s)'), 0, 1, 'R');
+            $pdf->Cell(0, 5, self::toPdfText('Total: ' . count($materiels) . ' matériel(s)'), 0, 1, 'R');
 
             $pdf->Output('D', 'Inventaire_Materiel_' . date('Y-m-d') . '.pdf');
         } catch (PDOException $e) {
@@ -152,7 +152,7 @@ class PdfController
     private function renderMainTable(PDF_MC_Table $pdf, array $materiels, float $maxPageWidth): void
     {
         $pdf->SetFont('Arial', 'B', 9);
-        $headers = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État'), 'Utilisateur'];
+        $headers = ['Code-barre', 'Type', 'Sous-type', self::toPdfText('Nom'), self::toPdfText('État'), 'Utilisateur'];
         $cols = count($headers);
 
         $widths = [];
@@ -165,15 +165,15 @@ class PdfController
         foreach ($materiels as $materiel) {
             $utilisateur = '-';
             if ($materiel['Etat'] !== 'disponible' && $materiel['Prénom']) {
-                $utilisateur = utf8_decode($materiel['Prénom'] . ' ' . $materiel['Nom_utilisateur']);
+                $utilisateur = self::toPdfText($materiel['Prénom'] . ' ' . $materiel['Nom_utilisateur']);
             }
 
             $row = [
-                utf8_decode($materiel['Code_bar']),
-                utf8_decode($materiel['Type']),
-                utf8_decode($materiel['Sous_type']),
-                utf8_decode($materiel['Nom']),
-                utf8_decode($materiel['Etat']),
+                self::toPdfText($materiel['Code_bar']),
+                self::toPdfText($materiel['Type']),
+                self::toPdfText($materiel['Sous_type']),
+                self::toPdfText($materiel['Nom']),
+                self::toPdfText($materiel['Etat']),
                 $utilisateur
             ];
             $tableData[] = $row;
@@ -260,14 +260,14 @@ class PdfController
                 $pdf->SetX(10);
                 $pdf->Ln(10);
                 $pdf->SetFont('Arial', 'B', 12);
-                $pdf->Cell(0, 10, utf8_decode($caisseTitle), 0, 1, 'L');
+                $pdf->Cell(0, 10, self::toPdfText($caisseTitle), 0, 1, 'L');
                 $pdf->SetFont('Arial', 'I', 9);
-                $pdf->Cell(0, 8, utf8_decode('Aucun objet dans cette caisse.'), 0, 1, 'L');
+                $pdf->Cell(0, 8, self::toPdfText('Aucun objet dans cette caisse.'), 0, 1, 'L');
                 continue;
             }
 
             $pdf->SetFont('Arial', 'B', 9);
-            $cHeaders = ['Code-barre', 'Type', 'Sous-type', utf8_decode('Nom'), utf8_decode('État')];
+            $cHeaders = ['Code-barre', 'Type', 'Sous-type', self::toPdfText('Nom'), self::toPdfText('État')];
             $cCols = count($cHeaders);
             $cWidths = [];
             for ($i = 0; $i < $cCols; $i++) {
@@ -278,11 +278,11 @@ class PdfController
             $cTableData = [];
             foreach ($objets as $objet) {
                 $row = [
-                    utf8_decode($objet['Code_bar']),
-                    utf8_decode($objet['Type']),
-                    utf8_decode($objet['Sous_type']),
-                    utf8_decode($objet['Nom']),
-                    utf8_decode($objet['Etat'])
+                    self::toPdfText($objet['Code_bar']),
+                    self::toPdfText($objet['Type']),
+                    self::toPdfText($objet['Sous_type']),
+                    self::toPdfText($objet['Nom']),
+                    self::toPdfText($objet['Etat'])
                 ];
                 $cTableData[] = $row;
                 for ($i = 0; $i < $cCols; $i++) {
@@ -309,7 +309,7 @@ class PdfController
             $pdf->SetX(10);
             $pdf->Ln(10);
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(0, 10, utf8_decode($caisseTitle), 0, 1, 'L');
+            $pdf->Cell(0, 10, self::toPdfText($caisseTitle), 0, 1, 'L');
 
             $cStartX = (210 - $cTotalWidth) / 2;
             $pdf->SetLeftMargin($cStartX);
@@ -336,6 +336,20 @@ class PdfController
                 $fillCaisse = !$fillCaisse;
             }
         }
+    }
+
+    /**
+     * Convertit un texte UTF-8 vers l'encodage des polices FPDF (Windows-1252).
+     * Remplace `utf8_decode()`, dépréciée depuis PHP 8.2 ; les caractères absents
+     * de Windows-1252 sont translittérés plutôt que supprimés.
+     *
+     * @param string|null $text Texte UTF-8 (null accepté pour les colonnes vides).
+     * @return string Texte en Windows-1252.
+     */
+    private static function toPdfText(?string $text): string
+    {
+        $converted = iconv('UTF-8', 'Windows-1252//TRANSLIT', (string) $text);
+        return $converted === false ? '' : $converted;
     }
 
     /**
