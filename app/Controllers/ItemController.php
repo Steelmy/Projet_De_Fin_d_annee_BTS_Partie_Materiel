@@ -10,6 +10,9 @@ require_once __DIR__ . '/../Models/Item.php';
  */
 class ItemController
 {
+    /** Nombre maximal d'objets créés par un seul ajout (à garder aligné avec `max` du champ `nombre_materiel`). */
+    private const MAX_ITEMS_PER_ADD = 30;
+
     /** @var Item Modèle d'accès aux objets. */
     private Item $model;
 
@@ -104,6 +107,10 @@ class ItemController
 
             if (empty($type) || empty($nom) || $nombre <= 0) {
                 ApiResponse::error('Tous les champs sont requis et le nombre doit être supérieur à 0');
+            }
+
+            if ($nombre > self::MAX_ITEMS_PER_ADD) {
+                ApiResponse::error('Impossible d\'ajouter plus de ' . self::MAX_ITEMS_PER_ADD . ' matériels à la fois');
             }
 
             $resultats = [];

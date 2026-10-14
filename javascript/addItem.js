@@ -6,13 +6,34 @@
 const typeInputAjout = document.getElementById("type_materiel_ajout");
 const nomInputAjout = document.getElementById("nom_materiel_ajout");
 const formAjout = document.getElementById("form_ajout");
+const nombreInputAjout = document.getElementById("nombre_materiel");
+
+/** Quantité maximale par ajout, lue sur l'attribut `max` du champ (vérifiée aussi côté serveur). */
+const MAX_NOMBRE_AJOUT = parseInt(nombreInputAjout.max, 10) || 30;
+
+// L'attribut `max` n'empêche pas la saisie au clavier : on ramène la valeur dans [1, max].
+nombreInputAjout.addEventListener("input", () => {
+  const digits = nombreInputAjout.value.replace(/\D/g, "");
+  if (digits === "") return;
+  const valeur = parseInt(digits, 10);
+  if (valeur > MAX_NOMBRE_AJOUT) {
+    nombreInputAjout.value = MAX_NOMBRE_AJOUT;
+  } else if (digits !== nombreInputAjout.value) {
+    nombreInputAjout.value = valeur;
+  }
+});
+
+nombreInputAjout.addEventListener("blur", () => {
+  const valeur = parseInt(nombreInputAjout.value, 10);
+  if (!valeur || valeur < 1) nombreInputAjout.value = 1;
+});
 
 formAjout.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const type = typeInputAjout.value.trim();
   const nom = nomInputAjout.value.trim();
-  const nombre = parseInt(document.getElementById("nombre_materiel").value);
+  const nombre = parseInt(nombreInputAjout.value, 10);
 
   if (!type) {
     await showAlert("Veuillez entrer un type de matériel", "warning");
@@ -26,6 +47,11 @@ formAjout.addEventListener("submit", async (e) => {
 
   if (!nombre || nombre <= 0) {
     await showAlert("Veuillez entrer un nombre valide", "warning");
+    return;
+  }
+
+  if (nombre > MAX_NOMBRE_AJOUT) {
+    await showAlert(`Impossible d'ajouter plus de ${MAX_NOMBRE_AJOUT} matériels à la fois`, "warning");
     return;
   }
 
@@ -67,7 +93,7 @@ formAjout.addEventListener("submit", async (e) => {
       typeInputAjout.value = "";
       if (sousTypeInput) sousTypeInput.value = "";
       nomInputAjout.value = "";
-      document.getElementById("nombre_materiel").value = "1";
+      nombreInputAjout.value = "1";
 
       if (sousTypeInput) sousTypeInput.disabled = true;
       if (nomInputAjout) nomInputAjout.disabled = true;

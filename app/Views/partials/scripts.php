@@ -108,13 +108,13 @@
 <!-- <script src="javascript/addBox.js?v=2"></script> -->
 <!-- <script src="javascript/deleteBox.js"></script> -->
 <!-- <script src="javascript/updateBox.js?v=2"></script> -->
-<script src="javascript/textFieldLoader.js?v=2"></script>
+<script src="javascript/textFieldLoader.js?v=3"></script>
 <script src="javascript/deleteItem.js"></script>
 <script src="javascript/restituteItem.js?v=1"></script>
 <script src="javascript/filterConsultation.js?v=2"></script>
 <script src="javascript/commentNotifications.js?v=3"></script>
 <script src="javascript/downloadPdf.js?v=2"></script>
-<script src="javascript/addItem.js?v=3"></script>
+<script src="javascript/addItem.js?v=4"></script>
 <script src="javascript/formActions.js?v=2"></script>
 <!-- <script src="javascript/boxFormToggle.js?v=1"></script> -->
 <script src="javascript/dynamicSelects.js"></script>

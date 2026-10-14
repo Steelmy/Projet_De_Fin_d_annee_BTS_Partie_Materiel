@@ -45,6 +45,7 @@
     id="nombre_materiel"
     value="1"
     min="1"
+    max="30"
     class="w-20 px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
     placeholder="Qté"
   />

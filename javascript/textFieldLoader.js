@@ -59,19 +59,22 @@ async function remplirFormulaireModification(codeBarre) {
 }
 window.remplirFormulaireModification = remplirFormulaireModification;
 
-idInput.addEventListener("change", async () => {
-  const code = idInput.value.trim();
-  if (code) {
-    await remplirFormulaireModification(code);
-  }
-});
-
-idInput.addEventListener("keydown", async (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
+// Le formulaire de modification n'est plus présent dans la page (mode retiré).
+if (idInput) {
+  idInput.addEventListener("change", async () => {
     const code = idInput.value.trim();
     if (code) {
       await remplirFormulaireModification(code);
     }
-  }
-});
+  });
+
+  idInput.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const code = idInput.value.trim();
+      if (code) {
+        await remplirFormulaireModification(code);
+      }
+    }
+  });
+}
