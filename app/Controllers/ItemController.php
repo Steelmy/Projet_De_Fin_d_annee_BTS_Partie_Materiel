@@ -27,18 +27,52 @@ class ItemController
     }
 
     /**
-     * Liste tous les matériels avec leurs métadonnées.
+     * Liste une page de matériels avec leurs métadonnées.
+     * Entrée GET : `page`, `per_page` (15 par défaut, 100 max), `sort`, `direction` (asc|desc),
+     * filtres `code_barre` (partiel), `type`, `sous_type`, `nom` (exacts).
+     * Sortie : `data` (lignes de la page), `total` (lignes filtrées), `total_all` (toutes les lignes),
+     * `page` (ramenée sur la dernière page existante), `per_page`.
      *
      * @return void Réponse JSON via ApiResponse.
      */
     public function index(): void
     {
         try {
-            $materiels = $this->model->getAll();
+            [$page, $perPage] = Pagination::fromRequest(15, 100);
+
+            $filters = [];
+            foreach (['code_barre', 'type', 'sous_type', 'nom'] as $key) {
+                $filters[$key] = isset($_GET[$key]) ? trim((string) $_GET[$key]) : '';
+            }
+            $sort = isset($_GET['sort']) ? (string) $_GET['sort'] : '';
+            $direction = ($_GET['direction'] ?? '') === 'desc' ? 'desc' : 'asc';
+
+            $total = $this->model->countFiltered($filters);
+            $page = Pagination::clampPage($page, $total, $perPage);
+            $hasFilters = array_filter($filters, fn($v) => $v !== '') !== [];
+
             ApiResponse::success([
-                'data' => $materiels,
-                'total' => count($materiels)
+                'data' => $this->model->getPage($filters, $sort, $direction, $perPage, ($page - 1) * $perPage),
+                'total' => $total,
+                'total_all' => $hasFilters ? $this->model->countFiltered([]) : $total,
+                'page' => $page,
+                'per_page' => $perPage,
             ]);
+        } catch (PDOException $e) {
+            ApiResponse::exception($e);
+        }
+    }
+
+    /**
+     * Liste les objets commentés (id, id_com, Code_bar, Type, Nom, com_user, com_admin)
+     * pour les pastilles « nouveau commentaire ».
+     *
+     * @return void Réponse JSON via ApiResponse.
+     */
+    public function commented(): void
+    {
+        try {
+            ApiResponse::success(['data' => $this->model->getCommented()]);
         } catch (PDOException $e) {
             ApiResponse::exception($e);
         }

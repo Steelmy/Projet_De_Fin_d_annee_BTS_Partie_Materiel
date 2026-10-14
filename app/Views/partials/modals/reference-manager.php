@@ -76,6 +76,11 @@
                 </tbody>
             </table>
         </div>
+        <div class="flex justify-between items-center text-slate-500 text-sm">
+            <button type="button" id="ref-btn-prev" onclick="changeReferencesPage(-1)" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" disabled>&larr; Précédent</button>
+            <span id="ref-page-info" class="font-medium">Page 1 / 1</span>
+            <button type="button" id="ref-btn-next" onclick="changeReferencesPage(1)" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" disabled>Suivant &rarr;</button>
+        </div>
         <div id="ref-list-message" class="text-sm font-medium mt-2 hidden whitespace-pre-wrap"></div>
 
         <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">

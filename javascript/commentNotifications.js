@@ -20,6 +20,32 @@
   const STORAGE_KEY = "commentSeen:v1";
 
   /**
+   * Objets commentés (id, id_com, Code_bar, Type, Nom, com_user, com_admin),
+   * chargés via `php/getCommentedItems.php` indépendamment de la page du tableau.
+   *
+   * @type {Array<object>}
+   */
+  let commentedItems = [];
+
+  /**
+   * Recharge la liste des objets commentés puis redessine les pastilles.
+   *
+   * @returns {Promise<void>}
+   */
+  async function reload() {
+    try {
+      const response = await fetch("php/getCommentedItems.php");
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        commentedItems = data.data;
+      }
+    } catch (error) {
+      console.error("Erreur chargement des commentaires:", error);
+    }
+    applyBadges();
+  }
+
+  /**
    * Lit la map { commentId: fingerprint } depuis localStorage.
    *
    * @returns {Record<string, string>}
@@ -120,14 +146,13 @@
   }
 
   /**
-   * Renvoie la liste des items de l'inventaire courant qui possèdent un
+   * Renvoie la liste des objets (toutes pages confondues) qui possèdent un
    * commentaire considéré comme nouveau.
    *
    * @returns {Array<object>}
    */
   function getNewComments() {
-    const inv = window.allInventory || [];
-    return inv.filter(isNew);
+    return commentedItems.filter(isNew);
   }
 
   /**
@@ -137,9 +162,8 @@
    * @returns {void}
    */
   function applyBadges() {
-    const inv = window.allInventory || [];
     const fpByCommentId = {};
-    inv.forEach((it) => {
+    commentedItems.forEach((it) => {
       if (it.id_com) fpByCommentId[String(it.id_com)] = itemFingerprint(it);
     });
     const seen = getSeenMap();
@@ -301,7 +325,10 @@
     }
   }
 
+  document.addEventListener("DOMContentLoaded", reload);
+
   window.commentNotifications = {
+    reload,
     isNew,
     markSeen,
     markSeenByContent,

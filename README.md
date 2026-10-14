@@ -145,13 +145,14 @@ Pour prévenir toute faille par injection SQL, l'application utilise systématiq
 
 | Méthode | Endpoint                                 | Description                  |
 | ------- | ---------------------------------------- | ---------------------------- |
-| GET     | `php/getAllItems.php`                    | Liste tous les matériels     |
+| GET     | `php/getAllItems.php`                    | Page de matériels (`page`, `per_page`, `sort`, `direction`, filtres `code_barre`/`type`/`sous_type`/`nom`) |
+| GET     | `php/getCommentedItems.php`              | Matériels commentés (pastilles) |
 | GET     | `php/getItemDetails.php?code_barre=X`    | Détails d'un matériel        |
 | POST    | `php/addItem.php`                        | Ajouter du matériel          |
 | POST    | `php/updateItem.php`                     | Modifier un matériel         |
 | POST    | `php/deleteItem.php`                     | Supprimer un matériel        |
 | POST    | `php/restituteItem.php`                  | Restituer un matériel        |
-| GET     | `php/getReferencesList.php`              | Liste des références         |
+| GET     | `php/getReferencesList.php`              | Page de références (`page`, `per_page`) |
 | GET     | `php/getReferenceTree.php`               | Arborescence des références  |
 | POST    | `php/addReference.php`                   | Ajouter une référence        |
 | POST    | `php/updateReference.php`                | Modifier une référence       |

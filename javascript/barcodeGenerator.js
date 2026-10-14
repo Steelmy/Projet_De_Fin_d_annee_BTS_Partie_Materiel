@@ -1,7 +1,8 @@
 /**
  * barcodeGenerator.js — Modale de génération/réimpression de codes-barres EAN-13.
  *
- * Présente l'inventaire complet sous forme de tableau filtrable et paginé.
+ * Présente l'inventaire sous forme de tableau filtrable et paginé côté serveur
+ * (seule la page affichée est demandée à `php/getAllItems.php`).
  * L'utilisateur coche les objets à imprimer ; les SVG sont générés via JsBarcode
  * et envoyés à l'imprimante via une iframe.
  */
@@ -22,8 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let codesToPrint = new Set();
   let barcodeIndex = 0;
 
-  /** @type {Array<object>} Inventaire complet chargé pour le tableau. */
-  let allInventoryBarcode = [];
+  /** @type {number} Numéro de la dernière requête lancée (les réponses plus anciennes sont ignorées). */
+  let barcodeRequestId = 0;
   let barcodeCurrentPage = 1;
   const barcodeItemsPerPage = 10;
   let barcodeSortColumn = null;
@@ -48,16 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
     barcodeIndex = 0;
     if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
 
-    // Affichage immédiat depuis l'inventaire déjà chargé par filterConsultation.js,
-    // puis rafraîchissement depuis le serveur.
-    if (Array.isArray(window.allInventory) && window.allInventory.length) {
-      allInventoryBarcode = window.allInventory;
-    }
-    barcodeCurrentPage = 1;
-    applyBarcodeFilters();
-
     chargerFiltreTypes();
-    loadAllInventoryBarcode();
+    applyBarcodeFilters();
   });
 
   if (closeModal) {
@@ -80,20 +73,46 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * Charge l'inventaire complet pour le tableau du sélecteur.
+   * Demande au serveur la page courante (filtres type/sous-type/nom + tri) et l'affiche.
+   * Si plusieurs requêtes se chevauchent, seule la plus récente est affichée.
    *
    * @returns {Promise<void>}
    */
-  async function loadAllInventoryBarcode() {
+  async function loadBarcodePage() {
+    const requestId = ++barcodeRequestId;
+    const container = document.getElementById("barcode_table_container");
+    if (container && !container.querySelector("table")) {
+      container.innerHTML = '<p class="p-4 text-center text-gray-400 italic">Chargement…</p>';
+    }
+
+    const params = new URLSearchParams({
+      page: barcodeCurrentPage,
+      per_page: barcodeItemsPerPage,
+      type: filterType.value.trim(),
+      sous_type: filterSousType.value.trim(),
+      nom: filterNom.value.trim(),
+    });
+    if (barcodeSortColumn) {
+      params.set("sort", barcodeSortColumn);
+      params.set("direction", barcodeSortDirection);
+    }
+
     try {
-      const response = await fetch("php/getAllItems.php");
+      const response = await fetch(`php/getAllItems.php?${params}`);
       const data = await response.json();
-      if (data.success && data.data) {
-        allInventoryBarcode = data.data;
-        applyBarcodeFilters();
+      if (requestId !== barcodeRequestId) return;
+
+      if (data.success && Array.isArray(data.data)) {
+        barcodeCurrentPage = data.page;
+        renderBarcodeTable(data.data, data.total, Math.ceil(data.total / data.per_page) || 1);
+      } else if (container) {
+        container.innerHTML = '<p class="p-4 text-center text-red-500">Erreur lors du chargement de l\'inventaire.</p>';
       }
     } catch (error) {
       console.error("Erreur chargement inventaire pour codes-barres:", error);
+      if (container && requestId === barcodeRequestId) {
+        container.innerHTML = '<p class="p-4 text-center text-red-500">Erreur de connexion au serveur.</p>';
+      }
     }
   }
 
@@ -217,8 +236,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
 
-    barcodeCurrentPage = 1;
-    applyBarcodeFilters();
+    // Pas de requête quand la remise à zéro vient de la fermeture de la modale.
+    if (!modal.classList.contains("hidden")) applyBarcodeFilters();
   }
 
   if (btnClear) {
@@ -226,58 +245,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * Applique les filtres de type/sous-type/nom + tri courant
-   * et déclenche le rendu du tableau.
+   * Applique les filtres de type/sous-type/nom : revient en page 1 et recharge depuis le serveur.
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   function applyBarcodeFilters() {
-    const typeValue = filterType.value.trim();
-    const sousTypeValue = filterSousType.value.trim();
-    const nomValue = filterNom.value.trim();
-
-    let filtered = [...allInventoryBarcode];
-
-    if (typeValue) filtered = filtered.filter((item) => item.Type === typeValue);
-    if (sousTypeValue) filtered = filtered.filter((item) => item.Sous_type === sousTypeValue);
-    if (nomValue) filtered = filtered.filter((item) => item.Nom === nomValue);
-
-    if (barcodeSortColumn) {
-      if (window.localeSortComparator) {
-        filtered.sort((a, b) => window.localeSortComparator(a, b, barcodeSortColumn, barcodeSortDirection));
-      } else {
-        filtered.sort((a, b) => {
-          let valA = a[barcodeSortColumn] || "";
-          let valB = b[barcodeSortColumn] || "";
-          if (valA < valB) return barcodeSortDirection === "asc" ? -1 : 1;
-          if (valA > valB) return barcodeSortDirection === "asc" ? 1 : -1;
-          return 0;
-        });
-      }
-    }
-
-    renderBarcodeTable(filtered);
+    barcodeCurrentPage = 1;
+    return loadBarcodePage();
   }
 
   /**
-   * Construit le tableau (avec checkboxes + pagination) pour la liste filtrée.
+   * Construit le tableau (avec checkboxes + pagination) pour la page reçue du serveur.
+   * La case d'en-tête sélectionne les lignes de la page affichée.
    *
-   * @param {Array<object>} filtered - Items à afficher (toutes pages confondues).
+   * @param {Array<object>} paginatedItems - Lignes de la page courante.
+   * @param {number} totalItems - Nombre d'objets correspondant aux filtres.
+   * @param {number} totalPages - Nombre de pages.
    * @returns {void}
    */
-  function renderBarcodeTable(filtered) {
+  function renderBarcodeTable(paginatedItems, totalItems, totalPages) {
     const container = document.getElementById("barcode_table_container");
     if (!container) return;
-
-    const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / barcodeItemsPerPage) || 1;
-
-    if (barcodeCurrentPage > totalPages) barcodeCurrentPage = totalPages;
-    if (barcodeCurrentPage < 1) barcodeCurrentPage = 1;
-
-    const startIndex = (barcodeCurrentPage - 1) * barcodeItemsPerPage;
-    const endIndex = startIndex + barcodeItemsPerPage;
-    const paginatedItems = filtered.slice(startIndex, endIndex);
 
     const getSortIcon = (col) => {
       if (barcodeSortColumn === col) {
@@ -357,12 +345,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectAll = document.getElementById("bc_select_all");
     if (selectAll) {
-      const allSelected = filtered.length > 0 && filtered.every((objet) => barcodeSelectedItems.has(objet.id));
+      const allSelected = paginatedItems.length > 0 && paginatedItems.every((objet) => barcodeSelectedItems.has(objet.id));
       selectAll.checked = allSelected;
 
       selectAll.addEventListener("change", (e) => {
         const isChecked = e.target.checked;
-        filtered.forEach((objet) => {
+        paginatedItems.forEach((objet) => {
           if (isChecked) {
             if (!barcodeSelectedItems.has(objet.id)) {
               barcodeSelectedItems.set(objet.id, objet);
@@ -397,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePrintZoneVisibility();
 
         if (selectAll) {
-          selectAll.checked = filtered.length > 0 && filtered.every((obj) => barcodeSelectedItems.has(obj.id));
+          selectAll.checked = paginatedItems.length > 0 && paginatedItems.every((obj) => barcodeSelectedItems.has(obj.id));
         }
       });
     });
@@ -410,8 +398,8 @@ document.addEventListener("DOMContentLoaded", () => {
    * @returns {void}
    */
   window.changeBarcodePage = function (delta) {
-    barcodeCurrentPage += delta;
-    applyBarcodeFilters();
+    barcodeCurrentPage = Math.max(1, barcodeCurrentPage + delta);
+    loadBarcodePage();
   };
 
   /**
@@ -427,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
       barcodeSortColumn = column;
       barcodeSortDirection = "asc";
     }
-    barcodeCurrentPage = 1;
     applyBarcodeFilters();
   };
 

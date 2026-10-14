@@ -2,12 +2,24 @@
  * filterConsultation.js — Filtres + tri + pagination de la vue de consultation,
  * et bascule entre la vue tableau et la vue groupée par caisse.
  *
- * Charge tout l'inventaire en mémoire au démarrage et applique les filtres
- * en local (pas de requête au serveur à chaque saisie).
+ * Pagination côté serveur : seule la page affichée est demandée à
+ * `php/getAllItems.php`, avec les filtres et le tri appliqués en SQL.
  */
 
-/** @type {Array<object>} Inventaire complet chargé une fois. */
-let allInventory = [];
+/** @type {Array<object>} Lignes de la page actuellement affichée. */
+let currentPageItems = [];
+
+/** @type {number} Numéro de la dernière requête lancée (les réponses plus anciennes sont ignorées). */
+let inventoryRequestId = 0;
+
+/** @type {number|undefined} Minuterie de temporisation de la saisie du code-barre. */
+let codeBarreDebounce;
+
+/** @type {number|undefined} Minuterie regroupant les `change` émis en cascade par dynamicSelects.js. */
+let filtersChangeTimer;
+
+/** @type {string|null} Filtres de la dernière requête lancée (voir `currentFiltersKey`). */
+let lastFiltersKey = null;
 
 /** @type {boolean} true quand la vue groupée par caisses est active. */
 let isCaissesViewActive = false;
@@ -34,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("✅ Initialisation filtres consultation");
 
-  loadAllInventory();
+  loadInventoryPage();
 
   const toggleCaisseCheckbox = document.getElementById(
     "toggle_caisse_consultation",
@@ -50,25 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  typeConsultation.addEventListener("change", () => {
-    applyFilters();
-  });
+  typeConsultation.addEventListener("change", scheduleFiltersChange);
+  sousTypeConsultation.addEventListener("change", scheduleFiltersChange);
+  nomConsultation.addEventListener("change", scheduleFiltersChange);
 
-  sousTypeConsultation.addEventListener("change", () => {
-    applyFilters();
-  });
-
-  nomConsultation.addEventListener("change", () => {
-    applyFilters();
-  });
-
+  // Une requête par pause de frappe plutôt qu'une par caractère.
   codeBarreConsultation.addEventListener("input", () => {
-    applyFilters();
+    clearTimeout(codeBarreDebounce);
+    codeBarreDebounce = setTimeout(applyFilters, 300);
   });
 
   codeBarreConsultation.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      clearTimeout(codeBarreDebounce);
       applyFilters();
     }
   });
@@ -115,27 +122,83 @@ async function updateConsultationFields(code) {
 }
 
 /**
- * Charge tout l'inventaire depuis le serveur et déclenche un premier rendu.
+ * Clé décrivant les valeurs courantes des quatre filtres.
+ *
+ * @returns {string}
+ */
+function currentFiltersKey() {
+  return JSON.stringify([
+    codeBarreConsultation.value.trim(),
+    typeConsultation.value.trim(),
+    sousTypeConsultation.value.trim(),
+    nomConsultation.value.trim(),
+  ]);
+}
+
+/**
+ * Réagit à un `change` sur Type/Sous-type/Nom. dynamicSelects.js en émet plusieurs
+ * d'affilée (cascade, repeuplement des types) : on attend la fin de la cascade et
+ * on ne recharge que si les filtres ont réellement changé.
+ *
+ * @returns {void}
+ */
+function scheduleFiltersChange() {
+  clearTimeout(filtersChangeTimer);
+  filtersChangeTimer = setTimeout(() => {
+    if (currentFiltersKey() !== lastFiltersKey) applyFilters();
+  }, 0);
+}
+
+/**
+ * Demande au serveur la page courante (filtres + tri + pagination) et l'affiche.
+ * Si plusieurs requêtes se chevauchent, seule la plus récente est affichée.
  *
  * @returns {Promise<void>}
  */
-async function loadAllInventory() {
-  console.log("📦 Chargement inventaire...");
+async function loadInventoryPage() {
+  const requestId = ++inventoryRequestId;
+  lastFiltersKey = currentFiltersKey();
+
+  const params = new URLSearchParams({
+    page: currentPage,
+    per_page: itemsPerPage,
+    code_barre: codeBarreConsultation.value.trim(),
+    type: typeConsultation.value.trim(),
+    sous_type: sousTypeConsultation.value.trim(),
+    nom: nomConsultation.value.trim(),
+  });
+  if (currentSortColumn) {
+    params.set("sort", currentSortColumn);
+    params.set("direction", currentSortDirection);
+  }
 
   try {
-    const response = await fetch("php/getAllItems.php");
+    const response = await fetch(`php/getAllItems.php?${params}`);
     const data = await response.json();
+    if (requestId !== inventoryRequestId) return;
 
-    console.log("📊 Réponse PHP:", data);
-
-    if (data.success && data.data) {
-      allInventory = data.data;
-      window.allInventory = allInventory;
-      console.log("✅ Inventaire chargé:", allInventory.length, "objets");
-      applyFilters();
-    } else {
-      console.error("❌ Pas de données");
+    if (!data.success || !Array.isArray(data.data)) {
+      console.error("❌ Erreur chargement inventaire:", data.message);
+      return;
     }
+
+    currentPageItems = data.data;
+    currentPage = data.page;
+    const totalPages = Math.ceil(data.total / data.per_page) || 1;
+
+    updateInventoryTable(currentPageItems);
+    updateSortIcons();
+
+    const btnPrev = document.getElementById("btn_prev_page");
+    const btnNext = document.getElementById("btn_next_page");
+    const pageInfo = document.getElementById("page_info");
+    if (btnPrev && btnNext && pageInfo) {
+      pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+      btnPrev.disabled = currentPage === 1;
+      btnNext.disabled = currentPage === totalPages;
+    }
+
+    updateResultsCounter(data.total, data.total_all);
   } catch (error) {
     console.error("❌ Erreur chargement:", error);
   }
@@ -278,7 +341,7 @@ function restoreNormalView() {
   if (inventoryDiv) inventoryDiv.style.display = "block";
   if (caissesView) caissesView.style.display = "none";
 
-  applyFilters();
+  loadInventoryPage();
 }
 
 let currentPage = 1;
@@ -287,48 +350,21 @@ let currentSortColumn = null;
 let currentSortDirection = "asc";
 
 /**
- * Filtre `allInventory` selon les champs courants, applique le tri,
- * pagine et envoie la page courante au tableau d'inventaire.
+ * Applique les filtres courants : revient en page 1 et recharge depuis le serveur.
+ *
+ * @returns {Promise<void>}
+ */
+function applyFilters() {
+  currentPage = 1;
+  return loadInventoryPage();
+}
+
+/**
+ * Met à jour les icônes de tri des en-têtes selon la colonne et le sens actifs.
  *
  * @returns {void}
  */
-function applyFilters() {
-  const typeValue = typeConsultation.value.trim();
-  const sousTypeValue = sousTypeConsultation.value.trim();
-  const nomValue = nomConsultation.value.trim();
-  const codeBarreValue = codeBarreConsultation.value.trim();
-
-  let filtered = [...allInventory];
-
-  if (codeBarreValue) {
-    filtered = filtered.filter((item) =>
-      item.Code_bar.toLowerCase().includes(codeBarreValue.toLowerCase()),
-    );
-  }
-
-  if (typeValue) {
-    filtered = filtered.filter((item) => item.Type === typeValue);
-  }
-
-  if (sousTypeValue) {
-    filtered = filtered.filter((item) => item.Sous_type === sousTypeValue);
-  }
-
-  if (nomValue) {
-    filtered = filtered.filter((item) => item.Nom === nomValue);
-  }
-
-  if (currentSortColumn) {
-    filtered.sort((a, b) =>
-      window.localeSortComparator(
-        a,
-        b,
-        currentSortColumn,
-        currentSortDirection,
-      ),
-    );
-  }
-
+function updateSortIcons() {
   const sortColumns = ["Type", "Sous_type", "Nom", "Etat", "Utilisateur", "Nom_caisse", "created_at"];
   sortColumns.forEach((col) => {
     const iconSpan = document.getElementById(`sort_icon_${col}`);
@@ -342,33 +378,6 @@ function applyFilters() {
       }
     }
   });
-
-  console.log("✅ Résultats filtrés:", filtered.length);
-
-  const totalItems = filtered.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-  if (currentPage > totalPages) {
-    currentPage = totalPages;
-  }
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedItems = filtered.slice(startIndex, endIndex);
-
-  updateInventoryTable(paginatedItems);
-
-  const btnPrev = document.getElementById("btn_prev_page");
-  const btnNext = document.getElementById("btn_next_page");
-  const pageInfo = document.getElementById("page_info");
-
-  if (btnPrev && btnNext && pageInfo) {
-    pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
-    btnPrev.disabled = currentPage === 1;
-    btnNext.disabled = currentPage === totalPages;
-  }
-
-  updateResultsCounter(filtered.length, allInventory.length);
 }
 
 /**
@@ -378,8 +387,8 @@ function applyFilters() {
  * @returns {void}
  */
 window.changePage = function (delta) {
-  currentPage += delta;
-  applyFilters();
+  currentPage = Math.max(1, currentPage + delta);
+  loadInventoryPage();
 };
 
 /**
@@ -479,8 +488,8 @@ function updateInventoryTable(data) {
 /**
  * Met à jour le badge "X sur Y" du nombre de résultats affichés.
  *
- * @param {number} filtered - Nombre d'items après filtrage.
- * @param {number} total - Nombre total d'items chargés.
+ * @param {number} filtered - Nombre d'objets correspondant aux filtres.
+ * @param {number} total - Nombre total d'objets en base.
  * @returns {void}
  */
 function updateResultsCounter(filtered, total) {
@@ -509,47 +518,46 @@ function resetFiltersConsultation() {
   currentSortColumn = null;
   currentSortDirection = "asc";
 
+  // Le change remet les selects en cascade à zéro ; le rechargement est fait ici
+  // (le tri a pu changer même si les filtres étaient déjà vides).
   typeConsultation.dispatchEvent(new Event("change"));
+  clearTimeout(filtersChangeTimer);
+  clearTimeout(codeBarreDebounce);
+  applyFilters();
 }
 
 /**
  * Pré-remplit le filtre Type quand on sélectionne un Nom seul,
- * en cherchant un objet inventaire qui porte ce nom.
+ * en cherchant ce nom dans l'arbre des références (`window.referenceTree`).
  *
  * @param {string} nomValue - Nom de référence sélectionné.
- * @returns {Promise<void>}
+ * @returns {void}
  */
-async function autoFillTypeFromNom(nomValue) {
-  if (!nomValue || !allInventory.length) return;
+function autoFillTypeFromNom(nomValue) {
+  const tree = window.referenceTree || {};
+  const type = Object.keys(tree).find((t) =>
+    Object.values(tree[t]).some((noms) => noms.includes(nomValue)),
+  );
 
-  const objet = allInventory.find((item) => item.Nom === nomValue);
-
-  if (objet && objet.Type) {
-    console.log("🔄 Remplissage auto Type depuis Nom:", objet.Type);
-    typeConsultation.value = objet.Type;
-
-    if (window.nomAutocompleteConsult) {
-      window.nomAutocompleteConsult.dataFetcher = async () => {
-        const response = await fetch(
-          `php/get_noms.php?type=${encodeURIComponent(objet.Type)}`,
-        );
-        const data = await response.json();
-        return data.success ? data.noms : [];
-      };
-      await window.nomAutocompleteConsult.loadData();
-    }
+  if (nomValue && type) {
+    console.log("🔄 Remplissage auto Type depuis Nom:", type);
+    typeConsultation.value = type;
   }
 }
 
 window.resetFiltersConsultation = resetFiltersConsultation;
 
 /**
- * Recharge l'inventaire depuis le serveur et rafraîchit la vue active.
+ * Recharge la page courante depuis le serveur, les pastilles de commentaires
+ * et la vue caisses si elle est active.
  *
  * @returns {Promise<void>}
  */
 window.refreshInventory = async function () {
-  await loadAllInventory();
+  if (window.commentNotifications) {
+    await window.commentNotifications.reload();
+  }
+  await loadInventoryPage();
   if (isCaissesViewActive) {
     await displayCaissesView();
   }

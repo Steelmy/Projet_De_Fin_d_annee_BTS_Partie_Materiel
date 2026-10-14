@@ -170,21 +170,43 @@ class Reference
     }
 
     /**
-     * Liste plate de toutes les références (id, Type, Sous_type, Nom).
+     * Page de la liste plate des références (id, Type, Sous_type, Nom), triée Type > Sous-type > Nom.
      *
+     * @param int $limit Nombre de lignes de la page.
+     * @param int $offset Position de la première ligne.
      * @return array<int, array{id:int, Type:string, Sous_type:string, Nom:string}>
      */
-    public function getAllFlat(): array
+    public function getFlatPage(int $limit, int $offset): array
     {
         $stmt = $this->conn->prepare("
             SELECT nr.id as id, t.nom_type AS Type, st.nom_sous_type AS Sous_type, nr.nom_reference AS Nom
             FROM noms_references nr
             JOIN sous_types st ON nr.id_sous_type = st.id
             JOIN types t ON st.id_type = t.id
-            ORDER BY t.nom_type ASC, st.nom_sous_type ASC, nr.nom_reference ASC
+            ORDER BY t.nom_type ASC, st.nom_sous_type ASC, nr.nom_reference ASC, nr.id ASC
+            LIMIT :limit OFFSET :offset
         ");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Nombre total de références (mêmes jointures que `getFlatPage()`).
+     *
+     * @return int
+     */
+    public function countFlat(): int
+    {
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*)
+            FROM noms_references nr
+            JOIN sous_types st ON nr.id_sous_type = st.id
+            JOIN types t ON st.id_type = t.id
+        ");
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
     }
 
     /**

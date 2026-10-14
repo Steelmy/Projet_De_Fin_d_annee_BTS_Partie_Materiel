@@ -20,12 +20,53 @@ class Item
     }
 
     /**
-     * Liste tous les objets avec leurs métadonnées (type/sous-type/nom, utilisateur, caisse).
+     * Colonnes triables du tableau d'inventaire (clé envoyée par le front → expression SQL).
+     * Liste blanche : la clé n'est jamais injectée telle quelle dans la requête.
+     */
+    private const SORT_COLUMNS = [
+        'Code_bar'    => 'o.Code_bar',
+        'Type'        => 't.nom_type',
+        'Sous_type'   => 'st.nom_sous_type',
+        'Nom'         => 'nr.nom_reference',
+        'Etat'        => 'o.Etat',
+        'Utilisateur' => "TRIM(CONCAT(COALESCE(u.Prénom, ''), ' ', COALESCE(u.Nom, '')))",
+        'Nom_caisse'  => 'c.Nom',
+        'created_at'  => 'o.created_at',
+    ];
+
+    /** Jointures communes aux requêtes de liste et de comptage. */
+    private const LIST_JOINS = "
+            LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
+            LEFT JOIN sous_types st ON nr.id_sous_type = st.id
+            LEFT JOIN types t ON st.id_type = t.id
+            LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
+            LEFT JOIN caisses c ON o.Caisse_id = c.id
+    ";
+
+    /**
+     * Liste une page d'objets avec leurs métadonnées (type/sous-type/nom, utilisateur, caisse, commentaire).
+     * Les filtres et le tri sont appliqués en SQL ; seules `$limit` lignes sont renvoyées.
      *
+     * @param array{code_barre?:string, type?:string, sous_type?:string, nom?:string} $filters
+     *        code_barre en recherche partielle, type/sous_type/nom en égalité stricte.
+     * @param string $sort Clé de `SORT_COLUMNS` ; vide ou inconnue = tri par défaut Type > Sous-type > Nom.
+     * @param string $direction `asc` ou `desc` ; les valeurs vides sont placées en fin en `asc`, en tête en `desc`.
+     * @param int $limit Nombre de lignes de la page.
+     * @param int $offset Position de la première ligne.
      * @return array<int, array<string, mixed>>
      */
-    public function getAll(): array
+    public function getPage(array $filters, string $sort, string $direction, int $limit, int $offset): array
     {
+        [$where, $params] = $this->buildFilters($filters);
+
+        if (isset(self::SORT_COLUMNS[$sort])) {
+            $dir = $direction === 'desc' ? 'DESC' : 'ASC';
+            $expr = self::SORT_COLUMNS[$sort];
+            $orderBy = "($expr IS NULL OR $expr = '') $dir, $expr $dir, o.id ASC";
+        } else {
+            $orderBy = 't.nom_type, st.nom_sous_type, nr.nom_reference, o.id';
+        }
+
         $stmt = $this->conn->prepare("
             SELECT
                 o.id, o.Code_bar, o.Etat, o.id_com,
@@ -35,13 +76,84 @@ class Item
                 o.created_at,
                 cm.com_user, cm.com_admin
             FROM objets o
+            " . self::LIST_JOINS . "
+            LEFT JOIN commentaires cm ON o.id_com = cm.id
+            $where
+            ORDER BY $orderBy
+            LIMIT :limit OFFSET :offset
+        ");
+        foreach ($params as $name => $value) {
+            $stmt->bindValue($name, $value);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Compte les objets correspondant aux filtres (mêmes règles que `getPage()`).
+     *
+     * @param array{code_barre?:string, type?:string, sous_type?:string, nom?:string} $filters
+     * @return int
+     */
+    public function countFiltered(array $filters): int
+    {
+        [$where, $params] = $this->buildFilters($filters);
+
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM objets o " . self::LIST_JOINS . " $where");
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Construit la clause WHERE des filtres de consultation.
+     *
+     * @param array{code_barre?:string, type?:string, sous_type?:string, nom?:string} $filters
+     * @return array{0:string, 1:array<string, string>} `[clause WHERE (ou ''), paramètres nommés]`.
+     */
+    private function buildFilters(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['code_barre'])) {
+            $where[] = 'o.Code_bar LIKE :code_barre';
+            $params[':code_barre'] = '%' . $filters['code_barre'] . '%';
+        }
+        if (!empty($filters['type'])) {
+            $where[] = 't.nom_type = :type';
+            $params[':type'] = $filters['type'];
+        }
+        if (!empty($filters['sous_type'])) {
+            $where[] = 'st.nom_sous_type = :sous_type';
+            $params[':sous_type'] = $filters['sous_type'];
+        }
+        if (!empty($filters['nom'])) {
+            $where[] = 'nr.nom_reference = :nom';
+            $params[':nom'] = $filters['nom'];
+        }
+
+        return [$where ? 'WHERE ' . implode(' AND ', $where) : '', $params];
+    }
+
+    /**
+     * Liste les objets qui portent un commentaire, avec ses deux textes
+     * (alimente les pastilles « nouveau commentaire », indépendamment de la page affichée).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getCommented(): array
+    {
+        $stmt = $this->conn->prepare("
+            SELECT o.id, o.id_com, o.Code_bar, t.nom_type AS Type, nr.nom_reference AS Nom,
+                   cm.com_user, cm.com_admin
+            FROM objets o
+            JOIN commentaires cm ON o.id_com = cm.id
             LEFT JOIN noms_references nr ON o.id_nom_reference = nr.id
             LEFT JOIN sous_types st ON nr.id_sous_type = st.id
             LEFT JOIN types t ON st.id_type = t.id
-            LEFT JOIN utilisateurs u ON o.Emprunteur_id = u.id
-            LEFT JOIN caisses c ON o.Caisse_id = c.id
-            LEFT JOIN commentaires cm ON o.id_com = cm.id
-            ORDER BY t.nom_type, st.nom_sous_type, nr.nom_reference
+            ORDER BY o.id
         ");
         $stmt->execute();
         return $stmt->fetchAll();

@@ -17,6 +17,7 @@ require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/EnvLoader.php';
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/ApiResponse.php';
+require_once __DIR__ . '/Pagination.php';
 
 $envPath = dirname(__DIR__, 2) . '/.env';
 if (file_exists($envPath)) {

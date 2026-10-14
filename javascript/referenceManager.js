@@ -322,6 +322,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkAll = document.getElementById('ref-check-all');
     const btnDelete = document.getElementById('btn-delete-refs');
     const selectedCountSpan = document.getElementById('ref-selected-count');
+
+    /** Pagination côté serveur de la liste des références. */
+    const REFERENCES_PER_PAGE = 10;
+    let referencesPage = 1;
     const listMessage = document.getElementById('ref-list-message');
 
     /**
@@ -360,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /**
-     * Charge la liste plate des références depuis le serveur et la rend.
+     * Charge la page courante de la liste des références depuis le serveur et la rend.
      *
      * @returns {Promise<void>}
      */
@@ -372,11 +376,14 @@ document.addEventListener('DOMContentLoaded', () => {
         hideListMessage();
 
         try {
-            const response = await fetch('php/getReferencesList.php');
+            const params = new URLSearchParams({ page: referencesPage, per_page: REFERENCES_PER_PAGE });
+            const response = await fetch(`php/getReferencesList.php?${params}`);
             const data = await response.json();
 
             if (data.success && data.references) {
+                referencesPage = data.page;
                 renderReferencesTable(data.references);
+                updateReferencesPagination(Math.ceil(data.total / data.per_page) || 1);
             } else {
                 tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500">${data.error || 'Erreur lors du chargement.'}</td></tr>`;
             }
@@ -384,6 +391,34 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erreur:', error);
             tableBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-500">Erreur de connexion serveur.</td></tr>';
         }
+    };
+
+    /**
+     * Met à jour les boutons Précédent/Suivant et l'indicateur de page de la liste.
+     *
+     * @param {number} totalPages - Nombre de pages.
+     * @returns {void}
+     */
+    function updateReferencesPagination(totalPages) {
+        const btnPrev = document.getElementById('ref-btn-prev');
+        const btnNext = document.getElementById('ref-btn-next');
+        const pageInfo = document.getElementById('ref-page-info');
+        if (!btnPrev || !btnNext || !pageInfo) return;
+
+        pageInfo.textContent = `Page ${referencesPage} / ${totalPages}`;
+        btnPrev.disabled = referencesPage <= 1;
+        btnNext.disabled = referencesPage >= totalPages;
+    }
+
+    /**
+     * Change la page de la liste des références (la sélection en cours est perdue).
+     *
+     * @param {number} delta - +1 pour suivante, -1 pour précédente.
+     * @returns {void}
+     */
+    window.changeReferencesPage = function(delta) {
+        referencesPage = Math.max(1, referencesPage + delta);
+        window.loadReferencesList();
     };
 
     /**

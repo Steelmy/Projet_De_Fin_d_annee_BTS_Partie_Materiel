@@ -106,15 +106,25 @@ class ReferenceController
     }
 
     /**
-     * Renvoie la liste plate des références (id, Type, Sous_type, Nom).
+     * Renvoie une page de la liste plate des références (id, Type, Sous_type, Nom).
+     * Entrée GET : `page`, `per_page` (10 par défaut, 100 max).
+     * Sortie : `references`, `total`, `page` (ramenée sur la dernière page existante), `per_page`.
      *
      * @return void Réponse JSON via ApiResponse.
      */
     public function getAll(): void
     {
         try {
-            $references = $this->model->getAllFlat();
-            ApiResponse::success(['references' => $references]);
+            [$page, $perPage] = Pagination::fromRequest(10, 100);
+            $total = $this->model->countFlat();
+            $page = Pagination::clampPage($page, $total, $perPage);
+
+            ApiResponse::success([
+                'references' => $this->model->getFlatPage($perPage, ($page - 1) * $perPage),
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+            ]);
         } catch (PDOException $e) {
             ApiResponse::exception($e);
         }
