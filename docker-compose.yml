@@ -36,6 +36,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      # HTTP/3 (QUIC) : Caddy l'annonce aux navigateurs, le port UDP doit donc être publié
+      - "443:443/udp"
     environment:
       DOMAIN: ${DOMAIN}
     volumes:

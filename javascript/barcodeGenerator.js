@@ -48,6 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
     barcodeIndex = 0;
     if (barcodeCount) barcodeCount.textContent = "0 code(s) à imprimer";
 
+    // Affichage immédiat depuis l'inventaire déjà chargé par filterConsultation.js,
+    // puis rafraîchissement depuis le serveur.
+    if (Array.isArray(window.allInventory) && window.allInventory.length) {
+      allInventoryBarcode = window.allInventory;
+    }
+    barcodeCurrentPage = 1;
+    applyBarcodeFilters();
+
     chargerFiltreTypes();
     loadAllInventoryBarcode();
   });

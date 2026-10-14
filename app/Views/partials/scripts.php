@@ -101,7 +101,7 @@
 <script src="javascript/customModal.js?v=1"></script>
 <script src="javascript/sessionGuard.js?v=3"></script>
 <script src="javascript/sortUtils.js"></script>
-<script src="javascript/barcodeGenerator.js?v=3"></script>
+<script src="javascript/barcodeGenerator.js?v=4"></script>
 <script src="javascript/universalAutocomplete.js?v=2"></script>
 <script src="javascript/universalAutocompleteBarcode.js?v=5"></script>
 <script src="javascript/initAutocompletes.js?v=2"></script>
