@@ -18,6 +18,24 @@ services:
       timeout: 5s
       retries: 10
 
+  # Remet la base de démonstration à son état d'origine aux heures de RESET_TIMES.
+  # Remise à zéro manuelle : docker compose exec reset sh /reset-db.sh now
+  reset:
+    image: mariadb:11.8
+    restart: unless-stopped
+    entrypoint: ["sh", "/reset-db.sh"]
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_ROOT_PASS: ${DB_ROOT_PASS}
+      RESET_TIMES: ${RESET_TIMES:-04:00 13:00}
+      TZ: Europe/Paris
+    volumes:
+      - ./docker/reset-db.sh:/reset-db.sh:ro
+      - "./bdd/inventaire_physique (8).sql:/dump.sql:ro"
+    depends_on:
+      db:
+        condition: service_healthy
+
   web:
     build: .
     restart: unless-stopped
@@ -26,6 +44,8 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
+      # Affiché sur la page de connexion pour prévenir les visiteurs
+      RESET_TIMES: ${RESET_TIMES:-04:00 13:00}
     depends_on:
       db:
         condition: service_healthy

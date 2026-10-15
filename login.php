@@ -11,6 +11,9 @@ if (file_exists($envPath)) {
 $error = "";
 
 // Juste après le début du PHP dans admin_login.php
+// Heures de remise à zéro de la base (service « reset » de docker-compose), affichées aux visiteurs.
+$resetTimes = preg_split('/\s+/', trim(EnvLoader::get('RESET_TIMES')), -1, PREG_SPLIT_NO_EMPTY);
+
 $message = "";
 if (isset($_GET['msg']) && $_GET['msg'] == 'deconnecte') {
     $message = "Vous avez été déconnecté avec succès.";
@@ -97,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button:hover { background: #9d8a5f; }
         .hint { color: #64748b; font-size: 14px; margin: 10px 0 0; }
         .hint + input { margin-top: 4px; }
+        .reset-notice { text-align: center; margin-top: 18px; font-size: 13px; }
         .error { 
             color: #ef4444; 
             background: #fee2e2;
@@ -129,6 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" placeholder="Mot de passe" required>
             <button type="submit">Se connecter</button>
         </form>
+
+        <?php if ($resetTimes): ?>
+            <p class="hint reset-notice">
+                Base de démonstration : toutes les modifications sont effacées chaque jour à
+                <?php echo htmlspecialchars(implode(' et ', $resetTimes)); ?>.
+            </p>
+        <?php endif; ?>
     </div>
 </body>
 </html>
