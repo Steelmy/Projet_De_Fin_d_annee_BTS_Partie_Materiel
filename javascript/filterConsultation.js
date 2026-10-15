@@ -305,11 +305,11 @@ async function displayCaissesView() {
           tr.className =
             "border-b border-gray-100 last:border-0";
           tr.innerHTML = `
-            <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Code_bar || "-"}</td>
-            <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Type || "-"}</td>
-            <td class="p-3 text-center text-sm border-r border-gray-100">${objet.Sous_type || "-"}</td>
-            <td class="p-3 text-center text-sm border-r border-gray-100 text-gray-600">${objet.Nom || "-"}</td>
-            <td class="p-3 text-center text-sm ${etatStyle}">${objet.Etat || "disponible"}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100">${escapeHtml(objet.Code_bar || "-")}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100">${escapeHtml(objet.Type || "-")}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100">${escapeHtml(objet.Sous_type || "-")}</td>
+            <td class="p-3 text-center text-sm border-r border-gray-100 text-gray-600">${escapeHtml(objet.Nom || "-")}</td>
+            <td class="p-3 text-center text-sm ${etatStyle}">${escapeHtml(objet.Etat || "disponible")}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -457,12 +457,12 @@ function updateInventoryTable(data) {
     tr.className =
       "border-b border-custom-border last:border-0 bg-white";
     tr.innerHTML = `
-      <td class="p-4.5 text-center text-sm align-middle">${item.Code_bar}</td>
-      <td class="p-4.5 text-center text-sm align-middle">${item.Type}</td>
-      <td class="p-4.5 text-center text-sm align-middle">${item.Sous_type || "-"}</td>
-      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.Nom}</td>
-      <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${item.Etat}</td>
-      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${utilisateur}</td>
+      <td class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Code_bar)}</td>
+      <td class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Type)}</td>
+      <td class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Sous_type || "-")}</td>
+      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${escapeHtml(item.Nom)}</td>
+      <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${escapeHtml(item.Etat)}</td>
+      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${escapeHtml(utilisateur)}</td>
       <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : "-"}</td>
       <td class="p-4.5 text-center text-sm align-middle">
         <button

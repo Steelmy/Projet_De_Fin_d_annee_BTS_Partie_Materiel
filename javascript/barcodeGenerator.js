@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       paginatedItems.forEach((objet) => {
         const isSelected = barcodeSelectedItems.has(objet.id);
-        const objetJson = JSON.stringify(objet).replace(/'/g, "&apos;");
+        const objetJson = escapeHtml(JSON.stringify(objet));
         html += `
           <tr class="cursor-pointer" onclick="document.getElementById('bc_cb_${objet.id}').click()">
             <td class="p-3 text-center border-r border-gray-100" onclick="event.stopPropagation()">
@@ -315,10 +315,10 @@ document.addEventListener("DOMContentLoaded", () => {
                      data-objet='${objetJson}'
                      ${isSelected ? "checked" : ""} />
             </td>
-            <td class="p-3 text-center border-r border-gray-100">${objet.Code_bar}</td>
-            <td class="p-3 text-center border-r border-gray-100">${objet.Type}</td>
-            <td class="p-3 text-center border-r border-gray-100">${objet.Sous_type || "-"}</td>
-            <td class="p-3 text-center border-r border-gray-100 text-gray-600">${objet.Nom}</td>
+            <td class="p-3 text-center border-r border-gray-100">${escapeHtml(objet.Code_bar)}</td>
+            <td class="p-3 text-center border-r border-gray-100">${escapeHtml(objet.Type)}</td>
+            <td class="p-3 text-center border-r border-gray-100">${escapeHtml(objet.Sous_type || "-")}</td>
+            <td class="p-3 text-center border-r border-gray-100 text-gray-600">${escapeHtml(objet.Nom)}</td>
             <td class="p-3 text-center text-gray-600">${objet.created_at ? new Date(objet.created_at).toLocaleDateString('fr-FR') : "-"}</td>
           </tr>
         `;
@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".bc-checkbox").forEach((cb) => {
       cb.addEventListener("change", (e) => {
-        const objet = JSON.parse(e.target.dataset.objet.replace(/&apos;/g, "'"));
+        const objet = JSON.parse(e.target.dataset.objet);
         if (e.target.checked) {
           barcodeSelectedItems.set(objet.id, objet);
           toggleBarcodeInPrintZone(objet, true);

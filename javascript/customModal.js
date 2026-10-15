@@ -220,4 +220,7 @@
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
+
+  // Partagée : toute donnée venant de la BDD doit passer par là avant un innerHTML.
+  window.escapeHtml = escapeHtml;
 })();

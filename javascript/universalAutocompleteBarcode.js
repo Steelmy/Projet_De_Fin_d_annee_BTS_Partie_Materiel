@@ -183,7 +183,7 @@ class UniversalAutocompleteBarcode {
     items.forEach((item) => {
       const div = document.createElement("div");
       div.className = "autocomplete-suggestion";
-      div.innerHTML = `<strong class="font-bold">${item.Code_bar}</strong> <span class="text-[0.8em] text-[#666]">(${item.Type} - ${item.Nom})</span>`;
+      div.innerHTML = `<strong class="font-bold">${escapeHtml(item.Code_bar)}</strong> <span class="text-[0.8em] text-[#666]">(${escapeHtml(item.Type)} - ${escapeHtml(item.Nom)})</span>`;
 
       div.addEventListener("click", (e) => {
         e.stopPropagation();

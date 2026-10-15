@@ -289,7 +289,7 @@
           return `
             <div class="border border-gray-200 rounded-lg p-3 mb-3 last:mb-0 flex items-start gap-3">
               <div class="flex-1 min-w-0">
-                <div class="text-xs text-gray-500 mb-1">${it.Code_bar} — ${it.Type || ""} / ${it.Nom || ""}</div>
+                <div class="text-xs text-gray-500 mb-1">${escapeHtml(it.Code_bar)} — ${escapeHtml(it.Type)} / ${escapeHtml(it.Nom)}</div>
                 <div class="text-sm text-gray-700 whitespace-pre-wrap break-words">${preview}${more}</div>
               </div>
               <button class="px-3 py-1.5 bg-custom-brandLight text-white rounded-lg text-xs font-semibold shrink-0"
