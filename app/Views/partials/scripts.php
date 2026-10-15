@@ -114,7 +114,7 @@
 <script src="javascript/filterConsultation.js?v=4"></script>
 <script src="javascript/commentNotifications.js?v=5"></script>
 <script src="javascript/downloadPdf.js?v=2"></script>
-<script src="javascript/addItem.js?v=4"></script>
+<script src="javascript/addItem.js?v=5"></script>
 <script src="javascript/formActions.js?v=2"></script>
 <!-- <script src="javascript/boxFormToggle.js?v=1"></script> -->
 <script src="javascript/dynamicSelects.js"></script>

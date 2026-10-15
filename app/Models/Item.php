@@ -300,11 +300,17 @@ class Item
         }
 
         // Insertion avec code-barres temporaire : l'EAN-13 final dépend de l'auto-increment
+        // Code_bar est UNIQUE et l'EAN-13 dépend de l'id pas encore connu : on insère d'abord un code
+        // provisoire propre à cette insertion (une valeur commune ferait échouer deux ajouts simultanés).
         $stmt = $this->conn->prepare("
             INSERT INTO objets (id_nom_reference, Nom, Etat, Emprunteur_id, Code_bar)
-            VALUES (:id_nom_reference, :nom, 'disponible', NULL, 'TEMP')
+            VALUES (:id_nom_reference, :nom, 'disponible', NULL, :code_provisoire)
         ");
-        $stmt->execute([':id_nom_reference' => $nomRefId, ':nom' => $nom]);
+        $stmt->execute([
+            ':id_nom_reference' => $nomRefId,
+            ':nom' => $nom,
+            ':code_provisoire' => 'TMP-' . bin2hex(random_bytes(8)),
+        ]);
         $objetId = (int) $this->conn->lastInsertId();
 
         $codeEAN = $this->generateEAN13((int)$typeId, (int)$sousTypeId, (int)$nomRefId, $objetId);

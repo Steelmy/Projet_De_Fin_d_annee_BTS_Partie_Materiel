@@ -51,7 +51,7 @@
   />
   <button
     type="submit"
-    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input"
+    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input disabled:opacity-50 disabled:cursor-not-allowed"
   >
     Ajouter
   </button>

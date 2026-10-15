@@ -11,6 +11,10 @@ const nombreInputAjout = document.getElementById("nombre_materiel");
 /** Quantité maximale par ajout, lue sur l'attribut `max` du champ (vérifiée aussi côté serveur). */
 const MAX_NOMBRE_AJOUT = parseInt(nombreInputAjout.max, 10) || 30;
 
+/** Bouton « Ajouter » et verrou anti double-soumission (double-clic, Entrée répétée). */
+const submitBtnAjout = formAjout.querySelector('button[type="submit"]');
+let ajoutEnCours = false;
+
 // L'attribut `max` n'empêche pas la saisie au clavier : on ramène la valeur dans [1, max].
 nombreInputAjout.addEventListener("input", () => {
   const digits = nombreInputAjout.value.replace(/\D/g, "");
@@ -30,6 +34,7 @@ nombreInputAjout.addEventListener("blur", () => {
 
 formAjout.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (ajoutEnCours) return;
 
   const type = typeInputAjout.value.trim();
   const nom = nomInputAjout.value.trim();
@@ -54,6 +59,9 @@ formAjout.addEventListener("submit", async (e) => {
     await showAlert(`Impossible d'ajouter plus de ${MAX_NOMBRE_AJOUT} matériels à la fois`, "warning");
     return;
   }
+
+  ajoutEnCours = true;
+  if (submitBtnAjout) submitBtnAjout.disabled = true;
 
   try {
     const formData = new FormData();
@@ -111,6 +119,9 @@ formAjout.addEventListener("submit", async (e) => {
   } catch (error) {
     console.error("Erreur lors de l'ajout:", error);
     await showAlert("Erreur lors de l'ajout du matériel", "error");
+  } finally {
+    ajoutEnCours = false;
+    if (submitBtnAjout) submitBtnAjout.disabled = false;
   }
 });
 

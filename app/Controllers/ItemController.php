@@ -16,7 +16,8 @@ class ItemController
     /** @var Item Modèle d'accès aux objets. */
     private Item $model;
 
-
+    /** @var PDO Connexion PDO active (utilisée pour les transactions). */
+    private PDO $conn;
 
     /**
      * @param PDO $conn Connexion PDO active.
@@ -24,6 +25,7 @@ class ItemController
     public function __construct(PDO $conn)
     {
         $this->model = new Item($conn);
+        $this->conn = $conn;
     }
 
     /**
@@ -147,15 +149,21 @@ class ItemController
                 ApiResponse::error('Impossible d\'ajouter plus de ' . self::MAX_ITEMS_PER_ADD . ' matériels à la fois');
             }
 
-            $resultats = [];
-            for ($i = 0; $i < $nombre; $i++) {
-                $resultats[] = $this->model->create($type, $sousType, $nom);
+            // Tout ou rien : si une insertion échoue, aucun objet (ni référence créée en cascade) n'est conservé.
+            $this->conn->beginTransaction();
+            try {
+                $resultats = [];
+                for ($i = 0; $i < $nombre; $i++) {
+                    $resultats[] = $this->model->create($type, $sousType, $nom);
+                }
+                $this->conn->commit();
+            } catch (PDOException $e) {
+                $this->conn->rollBack();
+                throw $e;
             }
 
             $idsAjoutes = array_column($resultats, 'id');
             $codesGeneres = array_column($resultats, 'code_bar');
-
-
 
             ApiResponse::success([
                 'ids_ajoutes' => $idsAjoutes,
