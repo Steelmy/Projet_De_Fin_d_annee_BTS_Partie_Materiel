@@ -43,6 +43,7 @@
       <textarea
         id="comment-admin-textarea"
         rows="4"
+        maxlength="2000"
         placeholder="Saisissez votre commentaire..."
         class="w-full px-4 py-3 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15 resize-y"
       ></textarea>

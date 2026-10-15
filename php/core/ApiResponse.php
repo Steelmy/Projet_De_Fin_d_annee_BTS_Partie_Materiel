@@ -49,18 +49,20 @@ class ApiResponse
 
     /**
      * Envoie une réponse 500 pour exception non gérée.
+     * Le détail (requête, colonne, contrainte) part dans les logs du serveur
+     * (`docker compose logs web`) ; le client ne reçoit qu'un message générique.
      *
      * @param Throwable $e Exception à signaler.
      * @return never
      */
     public static function exception(Throwable $e): void
     {
-
+        error_log('Erreur API : ' . $e->getMessage() . ' (' . $e->getFile() . ':' . $e->getLine() . ')');
 
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'message' => 'Erreur de base de données: ' . $e->getMessage()
+            'message' => 'Erreur de base de données, veuillez réessayer.'
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }

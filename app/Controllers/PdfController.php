@@ -73,7 +73,7 @@ class PdfController
 
             $pdf->Output('D', 'Inventaire_Materiel_' . date('Y-m-d') . '.pdf');
         } catch (PDOException $e) {
-            die('Erreur: ' . $e->getMessage());
+            ApiResponse::exception($e);
         }
     }
 

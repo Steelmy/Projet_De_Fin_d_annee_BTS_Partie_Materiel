@@ -68,6 +68,8 @@ class ReferenceController
                 $sousType = mb_convert_case($sousType, MB_CASE_TITLE, "UTF-8");
             }
             $nom = mb_convert_case($nom, MB_CASE_TITLE, "UTF-8");
+            // Après la mise en forme, qui peut allonger le texte (« ß » devient « Ss »).
+            Validation::maxLength(['Type' => $type, 'Sous-type' => $sousType, 'Nom' => $nom], Validation::NAME_MAX_LENGTH);
 
             $this->conn->beginTransaction();
 
@@ -198,6 +200,8 @@ class ReferenceController
                 $sousType = mb_convert_case($sousType, MB_CASE_TITLE, "UTF-8");
             }
             $nom = mb_convert_case($nom, MB_CASE_TITLE, "UTF-8");
+            // Après la mise en forme, qui peut allonger le texte (« ß » devient « Ss »).
+            Validation::maxLength(['Type' => $type, 'Sous-type' => $sousType, 'Nom' => $nom], Validation::NAME_MAX_LENGTH);
 
             $this->conn->beginTransaction();
 

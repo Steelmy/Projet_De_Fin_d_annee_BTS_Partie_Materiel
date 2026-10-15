@@ -149,6 +149,8 @@ class ItemController
                 ApiResponse::error('Impossible d\'ajouter plus de ' . self::MAX_ITEMS_PER_ADD . ' matériels à la fois');
             }
 
+            Validation::maxLength(['Type' => $type, 'Sous-type' => $sousType, 'Nom' => $nom], Validation::NAME_MAX_LENGTH);
+
             // Tout ou rien : si une insertion échoue, aucun objet (ni référence créée en cascade) n'est conservé.
             $this->conn->beginTransaction();
             try {

@@ -61,6 +61,7 @@ class CommentController
             if (empty($comAdmin)) {
                 ApiResponse::error('Le commentaire admin ne peut pas être vide');
             }
+            Validation::maxLength(['Commentaire' => $comAdmin], Validation::COMMENT_MAX_LENGTH);
 
             if ($commentId > 0) {
                 $this->model->updateAdminComment($commentId, $comAdmin);
