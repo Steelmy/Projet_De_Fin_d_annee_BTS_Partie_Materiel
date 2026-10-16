@@ -63,8 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
         }
         .login-card { 
@@ -75,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             max-width: 380px; 
         }
+        @media (max-width: 480px) { .login-card { padding: 28px 22px; } }
         h2 { color: #b6a071; text-align: center; margin-top: 0; }
         input { 
             width: 100%; 

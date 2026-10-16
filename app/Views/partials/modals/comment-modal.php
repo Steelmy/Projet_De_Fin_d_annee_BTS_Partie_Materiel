@@ -7,7 +7,7 @@
     onclick="closeCommentModal()"
   ></div>
   <div
-    class="bg-white p-8 border border-[#888] w-[90%] max-w-[550px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
+    class="bg-white p-5 sm:p-8 border border-[#888] w-full sm:w-[90%] max-w-[550px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
     style="max-height: 90vh;"
   >
     <span
@@ -15,7 +15,7 @@
       onclick="closeCommentModal()"
       >&times;</span
     >
-    <h2 id="comment-modal-title" class="text-2xl font-bold mb-5 flex items-center gap-2"></h2>
+    <h2 id="comment-modal-title" class="text-xl sm:text-2xl font-bold mb-5 flex items-center gap-2"></h2>
 
     <!-- Section commentaire élève -->
     <div id="comment-user-section" class="mb-5 hidden">

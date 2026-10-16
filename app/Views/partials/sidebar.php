@@ -8,3 +8,11 @@
         <a href="logout.php" class="logout_btn">Déconnexion</a>
     </ul>
 </nav>
+<!-- Fond assombri derrière le menu ouvert sur téléphone/tablette : un appui le referme -->
+<div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+<script>
+  // Sur petit écran, le menu recouvre la page : il démarre fermé (avant le premier affichage, sans animation).
+  if (window.matchMedia("(max-width: 1024px)").matches) {
+    document.getElementById("sidebar").classList.add("collapsed");
+  }
+</script>

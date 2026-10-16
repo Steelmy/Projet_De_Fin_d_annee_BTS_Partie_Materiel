@@ -101,7 +101,7 @@
 <script src="javascript/customModal.js?v=2"></script>
 <script src="javascript/sessionGuard.js?v=3"></script>
 <script src="javascript/sortUtils.js"></script>
-<script src="javascript/barcodeGenerator.js?v=6"></script>
+<script src="javascript/barcodeGenerator.js?v=7"></script>
 <script src="javascript/universalAutocomplete.js?v=2"></script>
 <script src="javascript/universalAutocompleteBarcode.js?v=6"></script>
 <script src="javascript/initAutocompletes.js?v=2"></script>
@@ -111,7 +111,7 @@
 <script src="javascript/textFieldLoader.js?v=3"></script>
 <script src="javascript/deleteItem.js"></script>
 <script src="javascript/restituteItem.js?v=1"></script>
-<script src="javascript/filterConsultation.js?v=4"></script>
+<script src="javascript/filterConsultation.js?v=5"></script>
 <script src="javascript/commentNotifications.js?v=5"></script>
 <script src="javascript/downloadPdf.js?v=2"></script>
 <script src="javascript/addItem.js?v=5"></script>

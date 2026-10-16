@@ -6,7 +6,7 @@
     class="absolute inset-0 bg-black/50 modal-backdrop"
   ></div>
   <div
-    class="bg-white p-5 border border-[#888] w-[80%] overflow-y-auto custom-scrollbar shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
+    class="bg-white p-4 sm:p-5 border border-[#888] w-full sm:w-[80%] overflow-y-auto custom-scrollbar shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-center"
     style="max-height: 90vh;"
   >
     <span
@@ -14,7 +14,7 @@
       id="close-barcode-modal"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-4">Impression de codes-barres</h2>
+    <h2 class="text-xl sm:text-2xl font-bold mb-4">Impression de codes-barres</h2>
 
     <!-- Filtres -->
     <div class="flex flex-wrap items-center justify-center gap-3 my-4">
@@ -49,7 +49,7 @@
 
     <div
       id="barcode_table_container"
-      class="mt-4 text-left"
+      class="mt-4 text-left overflow-x-auto"
     ></div>
 
     <p id="barcode-count" class="text-sm text-gray-500 my-4">0 code(s) à imprimer</p>

@@ -1,4 +1,4 @@
-<div class="bg-white rounded-[12px] p-[25px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] overflow-x-auto w-full">
+<div class="bg-white rounded-[12px] p-4 sm:p-[25px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] overflow-x-auto w-full">
   <div class="flex items-center gap-1.5 mb-4">
 <!--
     <input

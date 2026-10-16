@@ -457,14 +457,14 @@ function updateInventoryTable(data) {
     tr.className =
       "border-b border-custom-border last:border-0 bg-white";
     tr.innerHTML = `
-      <td class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Code_bar)}</td>
-      <td class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Type)}</td>
-      <td class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Sous_type || "-")}</td>
-      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${escapeHtml(item.Nom)}</td>
-      <td class="p-4.5 text-center text-sm align-middle ${etatColor}">${escapeHtml(item.Etat)}</td>
-      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${escapeHtml(utilisateur)}</td>
-      <td class="p-4.5 text-center text-sm align-middle text-gray-600">${item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : "-"}</td>
-      <td class="p-4.5 text-center text-sm align-middle">
+      <td data-label="Code-barre" class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Code_bar)}</td>
+      <td data-label="Type" class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Type)}</td>
+      <td data-label="Sous-type" class="p-4.5 text-center text-sm align-middle">${escapeHtml(item.Sous_type || "-")}</td>
+      <td data-label="Nom" class="p-4.5 text-center text-sm align-middle text-gray-600">${escapeHtml(item.Nom)}</td>
+      <td data-label="État" class="p-4.5 text-center text-sm align-middle ${etatColor}">${escapeHtml(item.Etat)}</td>
+      <td data-label="Utilisateur" class="p-4.5 text-center text-sm align-middle text-gray-600">${escapeHtml(utilisateur)}</td>
+      <td data-label="Créé le" class="p-4.5 text-center text-sm align-middle text-gray-600">${item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : "-"}</td>
+      <td class="p-4.5 text-center text-sm align-middle td-comment">
         <button
           onclick="openCommentModal(${item.id}, ${item.id_com ? 'true' : 'false'})"
           data-comment-btn="1"

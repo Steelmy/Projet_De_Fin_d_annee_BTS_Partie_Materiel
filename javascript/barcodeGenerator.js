@@ -328,13 +328,13 @@ document.addEventListener("DOMContentLoaded", () => {
     html += `</tbody></table>`;
 
     html += `
-      <div class="p-3 flex justify-between items-center text-slate-500 text-sm border border-t-0 border-gray-200 mt-0 bg-gray-50 rounded-b-lg shadow-input">
-        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
+      <div class="p-3 flex flex-wrap gap-2 justify-between items-center text-slate-500 text-sm border border-t-0 border-gray-200 mt-0 bg-gray-50 rounded-b-lg shadow-input">
+        <button type="button" class="whitespace-nowrap px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
                 onclick="window.changeBarcodePage(-1)" ${barcodeCurrentPage === 1 ? "disabled" : ""}>
           &larr; Précédent
         </button>
-        <span class="font-medium">Page ${barcodeCurrentPage} / ${totalPages} <span class="text-xs ml-2">(Total: ${totalItems})</span></span>
-        <button type="button" class="px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
+        <span class="font-medium text-center">Page ${barcodeCurrentPage} / ${totalPages} <span class="hidden sm:inline text-xs ml-2 whitespace-nowrap">(Total: ${totalItems})</span></span>
+        <button type="button" class="whitespace-nowrap px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
                 onclick="window.changeBarcodePage(1)" ${barcodeCurrentPage === totalPages ? "disabled" : ""}>
           Suivant &rarr;
         </button>

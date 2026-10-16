@@ -7,7 +7,7 @@
     onclick="toggleRestitutionModal(false)"
   ></div>
   <div
-    class="bg-white p-8 border border-[#888] w-[90%] max-w-[550px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
+    class="bg-white p-5 sm:p-8 border border-[#888] w-full sm:w-[90%] max-w-[550px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
     style="max-height: 90vh;"
   >
     <span
@@ -15,7 +15,7 @@
       onclick="toggleRestitutionModal(false)"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">Restituer un objet</h2>
+    <h2 class="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2">Restituer un objet</h2>
 
     <p class="text-sm text-gray-600 mb-6">Scannez ou saisissez le code-barre de l'objet emprunté ou réservé à restituer. Seuls les objets empruntés/réservés sont affichés.</p>
 

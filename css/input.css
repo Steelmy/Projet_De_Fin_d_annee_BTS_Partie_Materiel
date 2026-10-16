@@ -306,3 +306,99 @@ select,
     color: white;
   }
 }
+
+/* ===== Affichage téléphone/tablette =====
+   Hors @layer : ces règles doivent l'emporter sur les utilitaires Tailwind posés dans les vues et le JS. */
+
+/* Fond assombri derrière le menu ouvert (sidebar.php) ; le menu ne recouvre la page que sous 1024px */
+.sidebar-backdrop {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .sidebar:not(.collapsed) + .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+  }
+  /* Sinon l'ombre du menu fermé déborde sur le bord gauche de la page */
+  .sidebar.collapsed {
+    box-shadow: none;
+  }
+}
+
+/* Téléphone : un champ de formulaire par ligne (sinon les libellés des listes sont tronqués),
+   et les tableaux des modales défilent horizontalement sans couper les mots */
+@media (max-width: 480px) {
+  .box-input-wrapper {
+    flex-basis: 100%;
+  }
+  #barcode_table_container table,
+  #ref-table-body {
+    white-space: nowrap;
+  }
+  .table-footer-center {
+    gap: 0.75rem;
+  }
+  .table-footer-center > * {
+    white-space: nowrap;
+  }
+}
+
+/* Tableau d'inventaire en cartes : une carte par objet, libellé (data-label) à gauche, valeur à droite.
+   Le tri par colonne n'est pas proposé dans ce mode (en-têtes masqués). Jusqu'à 900px : téléphones et tablettes en portrait. */
+@media (max-width: 900px) {
+  #inventory_table thead {
+    display: none;
+  }
+  #inventory_table,
+  #inventory_tbody,
+  #inventory_tbody > tr,
+  #inventory_tbody > tr > td {
+    display: block;
+    width: 100%;
+  }
+  #inventory_table {
+    margin-top: 0;
+  }
+  #inventory_tbody > tr {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 6px 0;
+  }
+  #inventory_tbody > tr > td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 14px;
+    border-bottom: none;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  #inventory_tbody > tr > td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: #6b7280;
+    font-weight: 500;
+    text-align: left;
+  }
+  /* Le code-barre sert de titre à la carte */
+  #inventory_tbody > tr > td:first-child {
+    font-weight: 700;
+    font-size: 15px;
+    color: #1f2937;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  #inventory_tbody > tr > td:first-child::before {
+    content: none;
+  }
+  #inventory_tbody > tr > td.td-comment {
+    justify-content: flex-end;
+    padding-top: 8px;
+  }
+}

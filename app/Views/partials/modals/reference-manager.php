@@ -7,7 +7,7 @@
     onclick="toggleReferenceModal(false)"
   ></div>
   <div
-    class="bg-white p-8 border border-[#888] w-[90%] max-w-[600px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
+    class="bg-white p-5 sm:p-8 border border-[#888] w-full sm:w-[90%] max-w-[600px] shadow-[0_4px_8px_0_rgba(0,0,0,0.2),0_6px_20px_0_rgba(0,0,0,0.19)] relative z-10 rounded-xl text-left overflow-y-auto custom-scrollbar"
     style="max-height: 90vh;"
   >
     <span
@@ -15,10 +15,10 @@
       onclick="toggleReferenceModal(false)"
       >&times;</span
     >
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">Gestion des Références</h2>
+    <h2 class="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2">Gestion des Références</h2>
 
     <!-- Tabs -->
-    <div class="flex gap-4 mb-6 border-b border-gray-200 font-medium">
+    <div class="flex gap-4 mb-6 overflow-x-auto whitespace-nowrap border-b border-gray-200 font-medium text-sm sm:text-base">
         <button type="button" onclick="switchReferenceTab('add')" id="tab-ref-add" class="pb-2 border-b-2 border-custom-brandLight text-custom-brandLight">Ajouter une référence</button>
         <button type="button" onclick="switchReferenceTab('list')" id="tab-ref-list" class="pb-2 text-gray-500">Liste des références</button>
     </div>
@@ -48,7 +48,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Nom (Modèle) <span class="text-red-500">*</span></label>
               <input type="text" id="ref_nom" maxlength="100" required placeholder="Ex: Plat, Cruciforme..." class="w-full px-4 py-2 border-2 border-custom-border rounded-lg text-sm bg-white focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15" />
           </div>
-          <div class="pt-4 flex justify-between border-t border-gray-100">
+          <div class="pt-4 flex flex-wrap gap-3 justify-between border-t border-gray-100">
               <button type="button" onclick="resetReferenceForm()" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg">Réinitialiser</button>
               <div class="flex gap-3">
                   <button type="button" onclick="toggleReferenceModal(false)" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg">Annuler</button>
@@ -61,7 +61,7 @@
 
     <!-- View: Liste -->
     <div id="ref-view-list" class="space-y-4 hidden">
-        <div class="overflow-y-auto custom-scrollbar border border-gray-200 rounded-lg max-h-[300px]">
+        <div class="overflow-auto custom-scrollbar border border-gray-200 rounded-lg max-h-[300px]">
             <table class="w-full text-left text-sm whitespace-nowrap">
                 <thead class="bg-gray-100 text-gray-700 sticky top-0 z-10 shadow-sm">
                     <tr>
@@ -83,9 +83,9 @@
         </div>
         <div id="ref-list-message" class="text-sm font-medium mt-2 hidden whitespace-pre-wrap"></div>
 
-        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
+        <div class="flex flex-wrap gap-3 justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
             <span class="text-sm text-gray-600 font-medium whitespace-nowrap"><span id="ref-selected-count">0</span> référence(s) sélectionnée(s)</span>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
                 <button type="button" id="btn-edit-ref" onclick="editSelectedReference()" class="px-3 py-2 text-sm font-semibold rounded-lg shadow-sm text-white cursor-not-allowed hidden" style="background-color: #6b7280;" disabled>Modifier la référence</button>
                 <button type="button" id="btn-delete-refs" onclick="deleteSelectedReferences()" class="px-3 py-2 text-sm font-semibold rounded-lg shadow-sm text-white cursor-not-allowed" style="background-color: #6b7280;" disabled>Supprimer la sélection</button>
             </div>

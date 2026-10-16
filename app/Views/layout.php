@@ -13,7 +13,7 @@ $viewDir = __DIR__ . '/partials';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestion du matériel</title>
-    <link rel="stylesheet" href="css/output.css" />
+    <link rel="stylesheet" href="css/output.css?v=2" />
   </head>
   <body
     class="font-sans bg-[#f3f4f6] min-h-screen leading-relaxed text-[#333]"
@@ -21,15 +21,15 @@ $viewDir = __DIR__ . '/partials';
     <?php include $viewDir . '/sidebar.php'; ?>
 
     <div id="mainContent" class="main-content min-h-screen">
-      <div class="p-[20px] w-full">
+      <div class="p-3 sm:p-[20px] w-full">
         <?php include $viewDir . '/header.php'; ?>
 
-        <div class="bg-white rounded-[12px] p-[25px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] flex flex-wrap gap-[20px] items-center mb-[20px]">
+        <div class="bg-white rounded-[12px] p-4 sm:p-[25px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] flex flex-wrap gap-[20px] items-center mb-[20px]">
           <div
             id="main_horizontal_wrapper"
             class="flex flex-wrap items-center w-full gap-[15px]"
           >
-            <div class="min-w-[200px]">
+            <div class="w-full sm:w-auto sm:min-w-[200px]">
               <select
                 id="modeSelector"
                 class="w-full px-4 py-3 border border-[#ddd] rounded-lg text-[14px] font-bold text-[#333] bg-white focus:outline-none focus:border-[#b8a274] cursor-pointer"
@@ -40,7 +40,7 @@ $viewDir = __DIR__ . '/partials';
               </select>
             </div>
 
-            <div id="actionForms" class="flex-1 pl-3">
+            <div id="actionForms" class="flex-1 sm:pl-3">
               <?php include $viewDir . '/forms/add-item.php'; ?>
               <?php include $viewDir . '/forms/delete-item.php'; ?>
 
