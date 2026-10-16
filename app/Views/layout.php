@@ -13,7 +13,7 @@ $viewDir = __DIR__ . '/partials';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestion du matériel</title>
-    <link rel="stylesheet" href="css/output.css?v=2" />
+    <link rel="stylesheet" href="css/output.css?v=3" />
   </head>
   <body
     class="font-sans bg-[#f3f4f6] min-h-screen leading-relaxed text-[#333]"

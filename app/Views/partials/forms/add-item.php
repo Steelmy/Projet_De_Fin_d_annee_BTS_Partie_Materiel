@@ -46,18 +46,18 @@
     value="1"
     min="1"
     max="30"
-    class="w-20 px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
+    class="w-16 sm:w-20 px-4 py-3 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight focus:ring-4 focus:ring-custom-brandLight/15"
     placeholder="Qté"
   />
   <button
     type="submit"
-    class="px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input disabled:opacity-50 disabled:cursor-not-allowed"
+    class="flex-1 sm:flex-none min-w-0 px-3 sm:px-6 py-3 border-2 border-custom-brandLight bg-custom-brandLight text-white rounded-full font-semibold text-sm shadow-input disabled:opacity-50 disabled:cursor-not-allowed"
   >
     Ajouter
   </button>
   <button
     type="button"
-    class="btn-reset px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input"
+    class="btn-reset flex-1 sm:flex-none min-w-0 px-3 sm:px-6 py-3 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input"
     data-form="form_ajout"
   >
     Réinitialiser

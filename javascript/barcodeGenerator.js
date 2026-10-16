@@ -274,7 +274,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return '<span class="opacity-50">↕</span>';
     };
 
+    // Seul le tableau défile horizontalement : la pagination en dessous garde la largeur de la modale.
     let html = `
+      <div class="overflow-x-auto rounded-t-lg">
       <table class="w-full border-collapse bg-white shadow-input rounded-lg overflow-hidden text-sm">
         <thead class="bg-linear-to-br from-custom-brandLight to-custom-brandDark text-white select-none">
           <tr>
@@ -325,16 +327,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    html += `</tbody></table>`;
+    html += `</tbody></table></div>`;
 
     html += `
-      <div class="p-3 flex flex-wrap gap-2 justify-between items-center text-slate-500 text-sm border border-t-0 border-gray-200 mt-0 bg-gray-50 rounded-b-lg shadow-input">
-        <button type="button" class="whitespace-nowrap px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
+      <div class="p-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-slate-500 text-sm border border-t-0 border-gray-200 mt-0 bg-gray-50 rounded-b-lg shadow-input">
+        <button type="button" class="justify-self-start whitespace-nowrap px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
                 onclick="window.changeBarcodePage(-1)" ${barcodeCurrentPage === 1 ? "disabled" : ""}>
           &larr; Précédent
         </button>
-        <span class="font-medium text-center">Page ${barcodeCurrentPage} / ${totalPages} <span class="hidden sm:inline text-xs ml-2 whitespace-nowrap">(Total: ${totalItems})</span></span>
-        <button type="button" class="whitespace-nowrap px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
+        <span class="font-medium text-center whitespace-nowrap">Page ${barcodeCurrentPage} / ${totalPages} <span class="hidden sm:inline text-xs ml-2">(Total: ${totalItems})</span></span>
+        <button type="button" class="justify-self-end whitespace-nowrap px-3 py-1 bg-white border border-[#ccc] rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
                 onclick="window.changeBarcodePage(1)" ${barcodeCurrentPage === totalPages ? "disabled" : ""}>
           Suivant &rarr;
         </button>

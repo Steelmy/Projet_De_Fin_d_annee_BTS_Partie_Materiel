@@ -16,32 +16,34 @@
     >
     <h2 class="text-xl sm:text-2xl font-bold mb-4">Impression de codes-barres</h2>
 
-    <!-- Filtres -->
-    <div class="flex flex-wrap items-center justify-center gap-3 my-4">
-      <select
-        id="barcode-filter-type"
-        class="px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight "
-      >
-        <option value="">Tous les types</option>
-      </select>
-      <select
-        id="barcode-filter-sous-type"
-        disabled
-        class="px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight  disabled:bg-gray-100 disabled:text-gray-400"
-      >
-        <option value="">Tous les sous-types</option>
-      </select>
-      <select
-        id="barcode-filter-nom"
-        disabled
-        class="px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight  disabled:bg-gray-100 disabled:text-gray-400"
-      >
-        <option value="">Tous les noms</option>
-      </select>
+    <!-- Filtres alignés à gauche, bouton « Vider » à droite, centré verticalement -->
+    <div class="flex items-center gap-3 my-4">
+      <div class="flex flex-1 flex-wrap justify-start gap-3 min-w-0">
+        <select
+          id="barcode-filter-type"
+          class="w-full sm:w-auto px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight "
+        >
+          <option value="">Tous les types</option>
+        </select>
+        <select
+          id="barcode-filter-sous-type"
+          disabled
+          class="w-full sm:w-auto px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight  disabled:bg-gray-100 disabled:text-gray-400"
+        >
+          <option value="">Tous les sous-types</option>
+        </select>
+        <select
+          id="barcode-filter-nom"
+          disabled
+          class="w-full sm:w-auto px-4 py-2 border-2 border-custom-border rounded-full text-sm bg-white shadow-input focus:outline-none focus:border-custom-brandLight  disabled:bg-gray-100 disabled:text-gray-400"
+        >
+          <option value="">Tous les noms</option>
+        </select>
+      </div>
       <button
         id="btn-clear-print-zone"
         type="button"
-        class="px-5 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input "
+        class="shrink-0 px-5 py-2 border-2 border-custom-border bg-white text-gray-800 rounded-full font-semibold text-sm shadow-input "
       >
         Vider
       </button>
@@ -49,7 +51,7 @@
 
     <div
       id="barcode_table_container"
-      class="mt-4 text-left overflow-x-auto"
+      class="mt-4 text-left"
     ></div>
 
     <p id="barcode-count" class="text-sm text-gray-500 my-4">0 code(s) à imprimer</p>
